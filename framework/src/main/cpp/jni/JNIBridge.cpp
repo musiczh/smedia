@@ -21,6 +21,11 @@ namespace smedia {
             jmethodID methodId = JNISignature::getMethodId<long>(clazz,"longValue");
             auto* value = new long(JNICaller<long>::callObjectMethod(object,methodId));
             res = Data::create(value);
+        }else if (JClassManager::isInstanceOf(object,Boolean)) {
+            jclass clazz = JClassManager::getJavaClass(JClassManager::getJClassName(Boolean));
+            jmethodID methodId = JNISignature::getMethodId<bool>(clazz,"booleanValue");
+            auto* value = new bool(JNICaller<bool>::callObjectMethod(object,methodId));
+            res = Data::create(value);
         }else if (JClassManager::isInstanceOf(object,String)) {
             auto s_ = reinterpret_cast<jstring>(object);
             auto* value = new std::string(jStringToCString(s_));

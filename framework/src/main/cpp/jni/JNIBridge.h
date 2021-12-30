@@ -35,7 +35,7 @@ namespace smedia {
      * 由于参数是可变的，所以这里不能够使用函数，因为函数不能部分特例化
      * 同时针对不同的返回值类型需要有不同的处理，这里采用特例化来分开处理
      *
-     * 默认的返回值是JNIObject，特例化了几个常用基本数据类型:int、float、long、string、void、JNIObject，其他默认为JNIObject
+     * 默认的返回值是JNIObject，特例化了几个常用基本数据类型:int、float、long、string、void、bool、JNIObject，其他默认为JNIObject
      * @tparam Args 函数参数模板，第一个泛型指定为返回值类型，若指定的类型不在特例化范围内，则默认返回值类型为JNIObject
      */
     template<typename... Args>
@@ -114,6 +114,21 @@ namespace smedia {
         };
         static int getObjectField(jobject object,jfieldID fieldId,Args... args){
             return JNIService::getEnv()->GetIntField(object,fieldId,args...);
+        };
+    };
+
+    template<typename... Args>
+    class JNICaller<bool,Args...> {
+    public:
+        // jni返回的是uint_8,在c++中和char、bool长度一致，可以直接赋值给bool
+        static bool callStaticMethod(jclass clazz,jmethodID methodId,Args... args){
+            return JNIService::getEnv()->CallStaticBooleanMethod(clazz,methodId,args...);
+        };
+        static bool callObjectMethod(jobject object,jmethodID methodId,Args... args){
+            return JNIService::getEnv()->CallBooleanMethod(object,methodId,args...);
+        };
+        static bool getObjectField(jobject object,jfieldID fieldId,Args... args){
+            return JNIService::getEnv()->GetBooleanField(object,fieldId,args...);
         };
     };
 
