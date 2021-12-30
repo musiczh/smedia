@@ -1,0 +1,35 @@
+{
+  "executors": [
+    {
+      "options": {
+        "threadNum" : 1
+      }
+    }
+  ],
+  "nodes": [
+    {
+      "functor":"OESTexReaderFunctor",
+      "name": "oesSource",
+      "outputs": [
+        "VIDEO:v1"
+      ]
+    },
+    {
+      "functor": "HighLightShadowFunctor",
+      "name": "deNoiseNode",
+      "inputs": [
+        "VIDEO:v1"
+      ],
+      "outputs": [
+        "VIDEO:v5"
+      ]
+    },
+    {
+      "functor":"RenderFunctor",
+      "name":"renderNode",
+      "inputs" : [
+        "VIDEO:v5"
+      ]
+    }
+  ]
+}

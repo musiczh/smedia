@@ -1,0 +1,182 @@
+//
+// Created by wansu on 2021/11/23.
+//
+
+#include "JsonGraphLoader.h"
+
+namespace smedia {
+    void JsonGraphLoader::parseJson(const std::string &jsonGraph) {
+        graphBuilder.reset();
+        auto jsonObject = nlohmann::json::parse(jsonGraph);
+        parseExecutor(jsonObject);
+        parseNode(jsonObject);
+    }
+
+    std::unique_ptr<GraphConfig> JsonGraphLoader::getGraphConfig() {
+        return graphBuilder.buildGraph();
+    }
+
+    void JsonGraphLoader::parseExecutor(nlohmann::json &jsonObject) {
+        if (!jsonObject.contains("executors")) {
+            LOG_INFO << "the json does not contain executors";
+            return ;
+        }
+        auto& jsonExecutors = jsonObject["executors"];
+        for (auto& executorJson : jsonExecutors) {
+            // 默认配置
+            ExecutorConfig executorConfig {"ThreadPoolExecutor",
+                                           "default"};
+            if (executorJson.contains("name")) {
+                executorConfig.name = executorJson["name"].get<std::string>();
+            }
+            if (executorJson.contains("executor")) {
+                executorConfig.executor = executorJson["executor"].get<std::string>();
+            }
+            if (executorJson.contains("options")) {
+                auto executorOptionJson = executorJson["options"];
+                int threadNum = 1;
+                if (executorOptionJson.contains("threadNum")) {
+                    threadNum = executorOptionJson["threadNum"].get<int>();
+                }
+                executorConfig.options["threadNum"] = Data::create(new int(threadNum));
+            }
+            graphBuilder.addExecutor(executorConfig);
+        }
+    }
+
+    void JsonGraphLoader::parseNode(nlohmann::json &jsonObject) {
+        if (!jsonObject.contains("nodes")) {
+            LOG_INFO << "the json does not contain nodes";
+            return ;
+        }
+        auto& jsonNodes = jsonObject["nodes"];
+        for (auto& nodeJson : jsonNodes) {
+            NodeConfig nodeConfig{};
+            nodeConfig.executor = "default";
+            nodeConfig.functor = nodeJson["functor"].get<std::string>();
+            if (nodeJson.contains("name")) {
+                nodeConfig.name = nodeJson["name"].get<std::string>();
+            }
+            if (nodeJson.contains("executor")) {
+                nodeConfig.executor = nodeJson["executor"].get<std::string>();
+            }
+
+            parseNodeInputs(nodeJson,nodeConfig);
+            parseNodeOutput(nodeJson,nodeConfig);
+            parseNodeOptions(nodeJson,nodeConfig);
+
+            graphBuilder.addNode(nodeConfig);
+        }
+    }
+
+    void JsonGraphLoader::parseNodeOptions(nlohmann::json &nodeJson,NodeConfig& nodeConfig) {
+        if (!nodeJson.contains("options") || !nodeJson["options"].is_object()) {
+            LOG_INFO << nodeConfig.name << "no options";
+            return;
+        }
+
+        auto& nodeOptionsJson = nodeJson["options"];
+        for (auto ptr = nodeOptionsJson.begin();ptr != nodeOptionsJson.end();ptr++) {
+            const std::string & key = ptr.key();
+            Data data;
+
+            auto& value = ptr.value();
+            switch (value.type()) {
+                case nlohmann::detail::value_t::null:
+                    break;
+                case nlohmann::detail::value_t::number_unsigned:
+                case nlohmann::json::value_t::number_integer : {
+                    data = Data::create(new int(value.get<int>()));
+                    break;
+                }
+                case nlohmann::detail::value_t::boolean: {
+                    data = Data::create(new bool(value.get<bool>()));
+                    break;
+                }
+                case nlohmann::detail::value_t::number_float: {
+                    data = Data::create(new float (value.get<float>()));
+                    break;
+                }
+                case nlohmann::detail::value_t::string: {
+                    data = Data::create(new std::string(value.get<std::string>()));
+                    break;
+                }
+                case nlohmann::detail::value_t::array:
+                case nlohmann::detail::value_t::object:
+                case nlohmann::detail::value_t::discarded:
+                    break;
+            }
+            if (!data.isEmpty()) {
+                nodeConfig.options[key] = data;
+            }
+        }
+    }
+
+    void JsonGraphLoader::parseNodeInputs(nlohmann::json &nodeJson,NodeConfig& nodeConfig) {
+        parseTagIndexName(nodeConfig.inputs,"inputs",nodeJson,nodeConfig.name);
+    }
+
+    void JsonGraphLoader::parseNodeOutput(nlohmann::json &nodeJson,NodeConfig& nodeConfig) {
+        parseTagIndexName(nodeConfig.outputs,"outputs",nodeJson,nodeConfig.name);
+    }
+
+    void JsonGraphLoader::StrSplit(std::vector<std::string> &vecs, const std::string &str, const char *cset) {
+        std::size_t sp = 0, np;
+
+        //过滤掉前面的分割字符
+        while(sp < str.size() && strchr(cset, str[sp])) ++sp;
+        np = str.find_first_of(cset, sp);
+        while (np != std::string::npos) {
+            std::size_t len = np - sp;
+            vecs.push_back(str.substr(sp, len));
+
+            sp = np;
+            while(sp < str.size() && strchr(cset, str[sp])) ++sp;
+            np = str.find_first_of(cset, sp);
+        }
+
+        if (sp < str.size())
+            vecs.push_back(str.substr(sp));
+    }
+
+    void JsonGraphLoader::parseTagIndexName(std::vector<PortTag> &v,
+                                            const std::string &tag,
+                                            nlohmann::json& nodeJson,
+                                            std::string& nodeName) {
+        if (!nodeJson.contains(tag) || nodeJson[tag].empty()) {
+            LOG_INFO << nodeName << " no " << tag ;
+            return;
+        }
+        // 配置input和output以及options
+        auto& nodeInputJson = nodeJson[tag];
+        for (auto& inputJson : nodeInputJson) {
+            const std::string & inputString = inputJson.get<std::string>();
+            std::vector<std::string> splitStrings;
+            StrSplit(splitStrings,inputString,":");
+
+            int index = -1;
+            std::string _tag;
+            std::string name;
+            switch (splitStrings.size()) {
+                case 1: {
+                    _tag = splitStrings[0];
+                    break;
+                }
+                case 2: {
+                    _tag = splitStrings[0];
+                    name = splitStrings[1];
+                    break;
+                }
+                case 3: {
+                    _tag = splitStrings[0];
+                    index = std::stoi(splitStrings[1]);
+                    name = splitStrings[2];
+                }
+            }
+            v.push_back({_tag, name, index});
+        }
+    }
+
+
+}
+
