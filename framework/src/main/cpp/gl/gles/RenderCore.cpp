@@ -133,7 +133,9 @@ namespace smedia {
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         glBindTexture(textureType,0);
-        glBindFramebuffer(GL_FRAMEBUFFER,0);
+        if (fbo != 0) {
+            glBindFramebuffer(GL_FRAMEBUFFER,0);
+        }
         checkGLError("draw finish");
         checkEGLError("draw finish egl");
     }
@@ -165,6 +167,11 @@ namespace smedia {
     void RenderCore::deleteFBO(unsigned int fboId) {
         GLuint array[] = {fboId};
         glDeleteFramebuffers(1,array);
+    }
+
+    void RenderCore::bindFrameBuffer(unsigned int fboId) {
+        glBindFramebuffer(GL_FRAMEBUFFER,fboId);
+        checkGLError("bind fbo");
     }
 }
 

@@ -24,8 +24,17 @@ namespace smedia {
         void deleteFBO(unsigned int fboId);
         unsigned int createFrameBuffer();
         void bindTextureInFrameBuffer(unsigned int frameBuffer,unsigned int textureId);
+        void bindFrameBuffer(unsigned int fboId);
 
+        /**
+         * 绘制一帧数组，若指定fbo则会自动绑定解绑fbo
+         * @param textureType 纹理类型
+         * @param textureId 纹理id
+         * @param program 渲染管线
+         * @param fbo fboid
+         */
         void draw(int textureType,unsigned int textureId,Program* program,unsigned int fbo = 0);
+
 
     public:
         unsigned int VAO;
