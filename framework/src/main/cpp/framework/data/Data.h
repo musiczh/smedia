@@ -22,6 +22,8 @@ namespace smedia {
 
     public:
         template<class T> bool getData(T& t);
+        template<class T> bool isTypeOf();
+        template<class T> T* getData();
         bool isEmpty();
 
     private:
@@ -62,6 +64,7 @@ namespace smedia {
 
         // 这里不需要做类型判断了，在父类的as方法能成功转换就保证了类型正确
         const T& getData();
+        T* getDataPtr();
         ~DataHolder() override;
     private:
         T* m_data;
@@ -101,6 +104,21 @@ namespace smedia {
     }
 
     template<class T>
+    bool Data::isTypeOf() {
+        auto * ptr = m_dataHolderPtr->as<T>();
+        return ptr != nullptr;
+    }
+
+    template<class T>
+    T *Data::getData() {
+        DataHolder<T> * ptr = m_dataHolderPtr->as<T>();
+        if (ptr == nullptr) {
+            return nullptr;
+        }
+        return ptr->getDataPtr();
+    }
+
+    template<class T>
     DataHolder<T> *DataHolderBase::as() {
         if (typeid(T).hash_code() == getTypeId()) {
             return static_cast<DataHolder<T>*>(this);
@@ -126,6 +144,11 @@ namespace smedia {
     template<typename T>
     const T &DataHolder<T>::getData() {
         return *m_data;
+    }
+
+    template<typename T>
+    T *DataHolder<T>::getDataPtr() {
+        return m_data;
     }
 
     template<typename T>
