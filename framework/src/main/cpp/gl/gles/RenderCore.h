@@ -25,6 +25,7 @@ namespace smedia {
         unsigned int createFrameBuffer();
         void bindTextureInFrameBuffer(unsigned int frameBuffer,unsigned int textureId);
         void bindFrameBuffer(unsigned int fboId);
+        uint8_t *getCurrentRGBAData(int width,int height);
 
         /**
          * 绘制一帧数组，若指定fbo则会自动绑定解绑fbo

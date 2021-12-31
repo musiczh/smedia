@@ -173,6 +173,13 @@ namespace smedia {
         glBindFramebuffer(GL_FRAMEBUFFER,fboId);
         checkGLError("bind fbo");
     }
+
+    uint8_t *RenderCore::getCurrentRGBAData(int width, int height) {
+        auto *buffer = new uint8_t [width*height*4];
+        glPixelStorei(GL_PACK_ALIGNMENT,4);
+        glReadPixels(0,0,width,height,GL_RGBA,GL_UNSIGNED_BYTE,buffer);
+        return buffer;
+    }
 }
 
 
