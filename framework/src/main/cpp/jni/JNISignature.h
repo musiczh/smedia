@@ -111,27 +111,27 @@ namespace smedia {
      */
     struct JNISignature {
         template<typename T,typename ...Args>
-        static jmethodID getMethodId(jclass clazz,const char* methodName) {
+        static jmethodID getMethodId(jclass clazz,const std::string& methodName) {
             std::string s = MethodSignature<T,Args...>::value();
-            return JNIService::getEnv()->GetMethodID(clazz,methodName,s.c_str());
+            return JNIService::getEnv()->GetMethodID(clazz,methodName.c_str(),s.c_str());
         }
 
         template<typename T,typename ...Args>
-        static jmethodID getStaticMethodId(jclass clazz,const char* methodName) {
+        static jmethodID getStaticMethodId(jclass clazz,const std::string& methodName) {
             std::string s = MethodSignature<T,Args...>::value();
-            return JNIService::getEnv()->GetStaticMethodID(clazz,methodName,s.c_str());
+            return JNIService::getEnv()->GetStaticMethodID(clazz,methodName.c_str(),s.c_str());
         }
 
         template<typename T>
-        static jfieldID getObjectFiledId(jclass clazz,const char *filedName) {
+        static jfieldID getObjectFiledId(jclass clazz,const std::string&filedName) {
             std::string filedSignature = SignatureParam<T>::value();
-            return JNIService::getEnv()->GetFieldID(clazz,filedName,filedSignature.c_str());
+            return JNIService::getEnv()->GetFieldID(clazz,filedName.c_str(),filedSignature.c_str());
         }
 
         template<typename T>
-        static jfieldID getStaticFiledId(jclass clazz,const char *filedName) {
+        static jfieldID getStaticFiledId(jclass clazz,const std::string& filedName) {
             std::string filedSignature = SignatureParam<T>::value();
-            return JNIService::getEnv()->GetStaticFieldID(clazz,filedName,filedSignature.c_str());
+            return JNIService::getEnv()->GetStaticFieldID(clazz,filedName.c_str(),filedSignature.c_str());
         }
     };
 }

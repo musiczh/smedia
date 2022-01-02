@@ -7,24 +7,16 @@ namespace smedia {
     Data JNIData::jObjectToData(jobject object) {
         Data res;
         if (JClassManager::isInstanceOf(object,Float)) {
-            jclass clazz = JClassManager::getJavaClass(JClassManager::getJClassName(Float));
-            jmethodID methodId = JNISignature::getMethodId<float>(clazz,"floatValue");
-            auto* value = new float(JNICaller<float>::callObjectMethod(object,methodId));
+            auto* value = new float(JNIInvoker<float>::InvokeObjectMethod(object,"floatValue"));
             res = Data::create(value);
         }else if (JClassManager::isInstanceOf(object,Integer)) {
-            jclass clazz = JClassManager::getJavaClass(JClassManager::getJClassName(Integer));
-            jmethodID methodId = JNISignature::getMethodId<int>(clazz,"intValue");
-            int* value = new int(JNICaller<int>::callObjectMethod(object,methodId));
+            auto* value = new int(JNIInvoker<int>::InvokeObjectMethod(object,"intValue"));
             res = Data::create(value);
         }else if (JClassManager::isInstanceOf(object,Long)) {
-            jclass clazz = JClassManager::getJavaClass(JClassManager::getJClassName(Long));
-            jmethodID methodId = JNISignature::getMethodId<long>(clazz,"longValue");
-            auto* value = new long(JNICaller<long>::callObjectMethod(object,methodId));
+            auto* value = new long(JNIInvoker<long>::InvokeObjectMethod(object,"longValue"));
             res = Data::create(value);
         }else if (JClassManager::isInstanceOf(object,Boolean)) {
-            jclass clazz = JClassManager::getJavaClass(JClassManager::getJClassName(Boolean));
-            jmethodID methodId = JNISignature::getMethodId<bool>(clazz,"booleanValue");
-            auto* value = new bool(JNICaller<bool>::callObjectMethod(object,methodId));
+            auto* value = new bool(JNIInvoker<bool>::InvokeObjectMethod(object,"booleanValue"));
             res = Data::create(value);
         }else if (JClassManager::isInstanceOf(object,String)) {
             auto s_ = reinterpret_cast<jstring>(object);

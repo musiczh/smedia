@@ -43,7 +43,8 @@ void initJNIUtils(JNIEnv* env) {
     // 初始化jni类加载,由于classLoader不在实例化的的类型中，这里需要额外单独处理
     jclass clazz = env->FindClass("com/example/frameword/framework/ClassLoaderLib");
     jmethodID methodId = env->GetStaticMethodID(clazz,"onNativeGetClassLoader","()Ljava/lang/ClassLoader;");
-    JNIObject jniObject = JNICaller<JNIObject>::callStaticMethod(clazz,methodId);
+    jobject res = JNIService::getEnv()->CallStaticObjectMethod(clazz,methodId);
+    JNIObject jniObject(res);
     // 需要预加载的类
     std::vector<std::string> v;
     JClassManager::initJavaClass(jniObject.getJObject(), v);
