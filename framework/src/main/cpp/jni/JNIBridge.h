@@ -12,9 +12,12 @@
 #include "vector"
 
 /**
- * 主要做c++层调用java层方法，以及jni属性转化为c++属性
+ * 主要做c++层调用java层方法: JNIInvoker
+ * jni属性转化为c++属性: JNIData
+ * java数组对象转化为vector: JArrayToVector
  */
 namespace smedia {
+    //------------------JNIData---------------------
     class JNIData {
     public:
         /**
@@ -30,7 +33,28 @@ namespace smedia {
         static jstring GetJNIString(const std::string& s);
 
         static std::vector<float> jFloatArrayToVector(jfloatArray floatArray);
+
     };
+
+    //--------------JArrayToVector---------------------
+    template<typename T>
+    struct JArrayToVector {
+    };
+
+    template<>
+    struct JArrayToVector<float> {
+        static std::vector<float> convert(jfloatArray floatArray){
+            if (!floatArray) {
+                return std::vector<float>();
+            }
+            JNIEnv* jniEnv = JNIService::getEnv();
+            jsize size = jniEnv->GetArrayLength(floatArray);
+            std::vector<float> result(size);
+            jniEnv->GetFloatArrayRegion(floatArray, 0, size, (jfloat*)&result[0]);
+            return result;
+        };
+    };
+
 
     //--------------------------JNIInvoker---------------------------------
 
@@ -63,7 +87,7 @@ namespace smedia {
         }
         static void InvokeStaticMethod(const std::string& className, const std::string& methodName,Args... args) {
             jclass clazz = JClassManager::getJavaClass(className);
-            jmethodID methodId = JNISignature::getMethodId<JNIObject,Args...>(clazz,methodName);
+            jmethodID methodId = JNISignature::getStaticMethodId<JNIObject,Args...>(clazz,methodName);
             JNIService::getEnv()->CallStaticVoidMethod(clazz,methodId,SignatureParam<Args>::convert(args)...);
         }
     };
@@ -77,7 +101,7 @@ namespace smedia {
         }
         static JNIObject InvokeStaticMethod(const std::string& className, const std::string& methodName,Args... args) {
             jclass clazz = JClassManager::getJavaClass(className);
-            jmethodID methodId = JNISignature::getMethodId<JNIObject,Args...>(clazz,methodName);
+            jmethodID methodId = JNISignature::getStaticMethodId<JNIObject,Args...>(clazz,methodName);
             jobject objectRes = JNIService::getEnv()->CallStaticObjectMethod(clazz,methodId,SignatureParam<Args>::convert(args)...);
             return JNIObject(objectRes);
         }
@@ -104,7 +128,7 @@ namespace smedia {
         }
         static long InvokeStaticMethod(const std::string& className, const std::string& methodName,Args... args) {
             jclass clazz = JClassManager::getJavaClass(className);
-            jmethodID methodId = JNISignature::getMethodId<long,Args...>(clazz,methodName);
+            jmethodID methodId = JNISignature::getStaticMethodId<long,Args...>(clazz,methodName);
             jlong objectRes = JNIService::getEnv()->CallStaticLongMethod(clazz,methodId,SignatureParam<Args>::convert(args)...);
             return objectRes;
         }
@@ -131,7 +155,7 @@ namespace smedia {
         }
         static int InvokeStaticMethod(const std::string& className, const std::string& methodName,Args... args) {
             jclass clazz = JClassManager::getJavaClass(className);
-            jmethodID methodId = JNISignature::getMethodId<int,Args...>(clazz,methodName);
+            jmethodID methodId = JNISignature::getStaticMethodId<int,Args...>(clazz,methodName);
             jint objectRes = JNIService::getEnv()->CallStaticIntMethod(clazz,methodId,SignatureParam<Args>::convert(args)...);
             return objectRes;
         }
@@ -158,7 +182,7 @@ namespace smedia {
         }
         static bool InvokeStaticMethod(const std::string& className, const std::string& methodName,Args... args) {
             jclass clazz = JClassManager::getJavaClass(className);
-            jmethodID methodId = JNISignature::getMethodId<bool,Args...>(clazz,methodName);
+            jmethodID methodId = JNISignature::getStaticMethodId<bool,Args...>(clazz,methodName);
             jboolean objectRes = JNIService::getEnv()->CallStaticBooleanMethod(clazz,methodId,SignatureParam<Args>::convert(args)...);
             return objectRes;
         }
@@ -187,7 +211,7 @@ namespace smedia {
         }
         static std::string InvokeStaticMethod(const std::string& className, const std::string& methodName,Args... args) {
             jclass clazz = JClassManager::getJavaClass(className);
-            jmethodID methodId = JNISignature::getMethodId<std::string,Args...>(clazz,methodName);
+            jmethodID methodId = JNISignature::getStaticMethodId<std::string,Args...>(clazz,methodName);
             jobject objectRes = JNIService::getEnv()->CallStaticObjectMethod(clazz,methodId,SignatureParam<Args>::convert(args)...);
             jstring stringRes = reinterpret_cast<jstring>(objectRes);
             return JNIData::jStringToCString(stringRes);
@@ -217,7 +241,7 @@ namespace smedia {
         }
         static float InvokeStaticMethod(const std::string& className, const std::string& methodName,Args... args) {
             jclass clazz = JClassManager::getJavaClass(className);
-            jmethodID methodId = JNISignature::getMethodId<float,Args...>(clazz,methodName);
+            jmethodID methodId = JNISignature::getStaticMethodId<float,Args...>(clazz,methodName);
             jfloat objectRes = JNIService::getEnv()->CallStaticFloatMethod(clazz,methodId,SignatureParam<Args>::convert(args)...);
             return objectRes;
         }
@@ -244,7 +268,7 @@ namespace smedia {
         }
         static double InvokeStaticMethod(const std::string& className, const std::string& methodName,Args... args) {
             jclass clazz = JClassManager::getJavaClass(className);
-            jmethodID methodId = JNISignature::getMethodId<double,Args...>(clazz,methodName);
+            jmethodID methodId = JNISignature::getStaticMethodId<double,Args...>(clazz,methodName);
             jdouble objectRes = JNIService::getEnv()->CallStaticDoubleMethod(clazz,methodId,SignatureParam<Args>::convert(args)...);
             return objectRes;
         }

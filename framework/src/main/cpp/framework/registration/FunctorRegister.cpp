@@ -47,6 +47,9 @@ namespace smedia {
         REGISTER_FUNCTOR_LAZY(SharpenFunctor)
         REGISTER_FUNCTOR_LAZY(WhiteBalanceFunctor)
         REGISTER_FUNCTOR_LAZY(HighLightShadowFunctor)
-
+        REGISTER_FUNCTOR_LAZY(CallbackFunctor)
+        REGISTER_FUNCTOR_LAZY(DispatchFunctor)
+        REGISTER_FUNCTOR_LAZY(ImageLoader)
+        REGISTER_FUNCTOR_LAZY(GLImageReaderFunctor)
     }
 }

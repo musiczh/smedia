@@ -48,6 +48,8 @@ add_library(framework SHARED
         ${SOURCE_GL}
         ${SOURCE_JNI}
         ${SOURCE_UTIL}
+        functors/DispatchFunctor.cpp
+        functors/ImageLoader.cpp
 )
 
 target_link_libraries(framework android EGL GLESv3 jnigraphics ${log-lib})

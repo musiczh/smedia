@@ -101,12 +101,11 @@ namespace smedia {
             }
 
             auto* glFrame = new GLFrame{};
-            jclass clazz = JClassManager::getJavaClass("com/example/frameword/framework/NativeGLFrame");
-            glFrame->width = JNICaller<int>::getObjectField(object.getJObject(),JNISignature::getObjectFiledId<int>(clazz,"width"));
-            glFrame->height = JNICaller<int>::getObjectField(object.getJObject(),JNISignature::getObjectFiledId<int>(clazz,"height"));
-            glFrame->textureId = JNICaller<int>::getObjectField(object.getJObject(),JNISignature::getObjectFiledId<int>(clazz,"textureId"));
-            JNIObject object1 = JNICaller<JNIObject>::callObjectMethod(object.getJObject(),JNISignature::getMethodId<JNIObject>(clazz,"onNativeGetUVMatrix"));
-            glFrame->orientation = JNICaller<int>::getObjectField(object.getJObject(),JNISignature::getObjectFiledId<int>(clazz,"orientation"));
+            glFrame->width = JNIInvoker<int>::GetObjectFiled(object.getJObject(),"width");
+            glFrame->height = JNIInvoker<int>::GetObjectFiled(object.getJObject(),"height");
+            glFrame->textureId = JNIInvoker<int>::GetObjectFiled(object.getJObject(),"textureId");
+            JNIObject object1 = JNIInvoker<JNIObject>::InvokeObjectMethod(object.getJObject(),"onNativeGetUVMatrix");
+            glFrame->orientation = JNIInvoker<int>::GetObjectFiled(object.getJObject(),"orientation");
             std::vector<float> v = JNIData::jFloatArrayToVector(reinterpret_cast<jfloatArray>(object1.getJObject()));
             for (int i=0;i<16;i++) {
                 glFrame->UVMatrix[i] = v[i];

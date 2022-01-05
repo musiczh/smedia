@@ -48,6 +48,9 @@ namespace smedia {
         std::unique_ptr<Program> mRenderProgram;
         InputHandler mInputHandler;
         FunctorContext* mFunctorContext;
+
+        // 是否自动输出纹理到VIDEO tag，默认输出
+        bool ifSendFrame;
     };
 }
 

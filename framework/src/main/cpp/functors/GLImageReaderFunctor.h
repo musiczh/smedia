@@ -9,6 +9,12 @@
 #include "IFunctor.h"
 #include "InputHandler.h"
 #include "IGLRenderFunctor.h"
+
+/**
+ * enable决定输出的数据类型
+ * ratio决定输出的图形的比例，-1表示原始数据比例
+ * todo 目前仅支持读取到RGBA，后续再进行拓展
+ */
 namespace smedia {
     class GLImageReaderFunctor : public IGLRenderFunctor{
     public:
@@ -23,7 +29,8 @@ namespace smedia {
         ~GLImageReaderFunctor() override = default;
 
     private:
-        bool mEnableRGBA;
+        volatile bool mEnableRGBA;
+        volatile float mRatio;
     };
 }
 

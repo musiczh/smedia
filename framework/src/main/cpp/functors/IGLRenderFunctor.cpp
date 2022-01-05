@@ -7,6 +7,7 @@ namespace smedia {
 
     void IGLRenderFunctor::initialize(FunctorContext *context) {
         mFunctorContext = context;
+        ifSendFrame = true;
         if (!mFunctorContext->getGlobalService("GLContext").getData(mGLContext)) {
             LOG_ERROR << "glContext in functorContext is null";
             return;
@@ -28,20 +29,23 @@ namespace smedia {
         } );
 
         mInputHandler.registerHandler("VIDEO",[this](const InputData& inputData)->bool{
-            GLFrame frame{};
+            GLFrame *ptr = nullptr;
             Data data = inputData.data;
-            if (data.isEmpty() || !data.getData(frame)) {
+            if (data.isEmpty() || !data.isTypeOf<GLFrame>() || !(ptr = data.getData<GLFrame>())) {
                 LOG_ERROR << "execute no input";
                 return false;
             }
+            GLFrame frame = *ptr;
             // 创建fbo的颜色附着，若已经创建了则为无操作，否则会创建对应的新的纹理附着
             mGLBufferFrame->createTextureAttach(frame.width,frame.height);
             glViewport(0,0,frame.width,frame.height);
             // 最后调用draw方法
             onDraw(mGLBufferFrame.get(),frame);
-            auto* newFrame = new GLFrame(frame);
-            newFrame->textureId = mGLBufferFrame->getTextureId();
-            mFunctorContext->setOutput(Data::create(newFrame),"VIDEO");
+            if (ifSendFrame) {
+                auto* newFrame = new GLFrame(frame);
+                newFrame->textureId = mGLBufferFrame->getTextureId();
+                mFunctorContext->setOutput(Data::create(newFrame),"VIDEO");
+            }
             return true;
         });
         onInit(mInputHandler);
