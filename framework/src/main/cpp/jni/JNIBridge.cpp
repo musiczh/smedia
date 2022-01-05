@@ -54,4 +54,9 @@ namespace smedia {
         jniEnv->GetFloatArrayRegion(floatArray, 0, size, (jfloat*)&result[0]);
         return result;
     }
+
+    jstring JNIData::GetJNIString(const std::string& s) {
+        jstring res = JNIService::getEnv()->NewStringUTF(s.c_str());
+        return res;
+    }
 }

@@ -9,7 +9,7 @@
 #include "JNIService.h"
 /**
  * 保存jobject的封装类，使用share指针来让所有对象被析构之后，删除jobject的全局引用，避免忘记删除导致的内存泄露
- *
+ * c++中所有的jobject都采用此类，包括模板
  */
 namespace smedia {
     class JNIObject {
