@@ -31,6 +31,10 @@ namespace smedia {
         auto functorContext = make_unique<FunctorContext>(m_inputEdges,m_outputEdges,
                                                           m_nodeContext->edgesMap,
                                                           m_nodeContext->globalService);
+        // 在json中配置的option存储起来，在functor init完成之后会设置给对应的functor
+        for (auto& ptr : config.options) {
+            m_runtimeOptions[ptr.first] = ptr.second;
+        }
 
         m_functorContext = std::move(functorContext);
         m_Functor = std::move(functor);
