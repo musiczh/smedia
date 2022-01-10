@@ -5,6 +5,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.view.Surface;
 import android.view.TextureView;
 import android.widget.FrameLayout;
@@ -41,6 +43,9 @@ public class BeautyActivity extends AppCompatActivity {
         mGraph.run();
 
         SurfaceTexture inputST = mRender.createInputTexture();
+        HandlerThread thread = new HandlerThread("setOnFrameAvailableListener");
+        thread.start();
+        Handler handler = new Handler(thread.getLooper());
         inputST.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
             @Override
             public void onFrameAvailable(SurfaceTexture surfaceTexture) {
@@ -53,7 +58,7 @@ public class BeautyActivity extends AppCompatActivity {
                 nativeGLFrame.orientation = mPreviewInfo.orientation;
                 mGraph.setOption("oesNode","DATA",nativeGLFrame);
             }
-        });
+        },handler);
 
         mCameraCapture.openCamera(this, CameraConfig.createBuilder()
                 .facing(CameraConfig.FACING_FRONT)
