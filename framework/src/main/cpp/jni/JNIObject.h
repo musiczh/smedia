@@ -22,6 +22,9 @@ namespace smedia {
     private:
         std::shared_ptr<_jobject> objectPtr;
     };
+
+    // 再加一层共享指针的原因是，可以放心进行拷贝、赋值等，而无需担忧某些函数没有被重写造成的潜在问题
+    using JNIObjectRef = std::shared_ptr<JNIObject>;
 }
 
 

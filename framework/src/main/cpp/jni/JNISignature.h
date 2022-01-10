@@ -116,6 +116,14 @@ namespace smedia {
             return value.getJObject();
         }
     };
+    template<> struct SignatureParam<JNIObjectRef> {
+        static std::string value() {
+            return "Ljava/lang/Object;";
+        }
+        static jobject convert(JNIObjectRef value) {
+            return value->getJObject();
+        }
+    };
 
     /**
      * 获取方法签名，包括返回值签名和参数签名

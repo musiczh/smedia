@@ -119,6 +119,33 @@ namespace smedia {
         }
     };
     template<typename ...Args>
+    struct JNIInvoker<JNIObjectRef,Args...> {
+        static JNIObjectRef InvokeObjectMethod(jobject instance,const std::string& methodName,Args... args) {
+            jclass clazz = JNIService::getEnv()->GetObjectClass(instance);
+            jmethodID methodId = JNISignature::getMethodId<JNIObjectRef,Args...>(clazz,methodName);
+            jobject objectRes = JNIService::getEnv()->CallObjectMethod(instance,methodId,SignatureParam<Args>::convert(args)...);
+            return JNIObjectRef(new JNIObject(objectRes));
+        }
+        static JNIObjectRef InvokeStaticMethod(const std::string& className, const std::string& methodName,Args... args) {
+            jclass clazz = JClassManager::getJavaClass(className);
+            jmethodID methodId = JNISignature::getStaticMethodId<JNIObjectRef,Args...>(clazz,methodName);
+            jobject objectRes = JNIService::getEnv()->CallStaticObjectMethod(clazz,methodId,SignatureParam<Args>::convert(args)...);
+            return JNIObjectRef(new JNIObject(objectRes));
+        }
+        static JNIObjectRef GetObjectFiled(JNIObjectRef instance,const std::string& fieldName) {
+            jclass clazz = JNIService::getEnv()->GetObjectClass(instance->getJObject());
+            jfieldID fieldId = JNISignature::getObjectFiledId<JNIObjectRef>(clazz,fieldName);
+            jobject res = JNIService::getEnv()->GetObjectField(instance->getJObject(),fieldId);
+            return JNIObjectRef(new JNIObject(res));
+        }
+        static JNIObjectRef GetStaticFiled(const std::string& className,const std::string& fieldName) {
+            jclass clazz = JClassManager::getJavaClass(className);
+            jfieldID fieldId = JNISignature::getStaticFiledId<JNIObjectRef>(clazz,fieldName);
+            jobject res = JNIService::getEnv()->GetStaticObjectField(clazz,fieldId);
+            return JNIObjectRef(new JNIObject(res));
+        }
+    };
+    template<typename ...Args>
     struct JNIInvoker<long,Args...> {
         static long InvokeObjectMethod(jobject instance,const std::string& methodName,Args... args) {
             jclass clazz = JNIService::getEnv()->GetObjectClass(instance);
