@@ -1,0 +1,58 @@
+{
+  "executors": [
+    {
+      "options": {
+        "threadNum" : 1
+      }
+    }
+  ],
+  "nodes": [
+    {
+      "functor":"ImageSourceFunctor",
+      "name": "imageSourceNode",
+      "options": {
+        "glEnable": true
+      },
+      "outputs": [
+        "video:v1"
+      ]
+    },
+    {
+      "functor":"AdjustColorFunctor",
+      "name": "adjustNode",
+      "inputs" : [
+        "VIDEO:v1"
+      ],
+      "outputs": [
+        "VIDEO:v2"
+      ]
+    },
+    {
+      "functor":"GLImageReaderFunctor",
+      "name": "glImageReaderNode",
+      "inputs" : [
+        "VIDEO:v2"
+      ],
+      "outputs": [
+        "Data:v3"
+      ]
+    },
+    {
+      "functor": "ImageLoader",
+      "name": "imageLoaderNode",
+      "inputs": [
+        "Data:v3"
+      ],
+      "outputs": [
+        "Data:v4"
+      ]
+    },
+    {
+      "functor": "CallbackFunctor",
+      "name": "callbackNode",
+      "inputs": [
+        "Data:v4"
+      ]
+    }
+  ]
+}

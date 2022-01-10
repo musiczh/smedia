@@ -15,13 +15,51 @@
       ]
     },
     {
-      "functor": "HighLightShadowFunctor",
-      "name": "deNoiseNode",
+      "functor": "AdjustColorFunctor",
+      "name": "adjustNode",
       "inputs": [
         "VIDEO:v1"
       ],
       "outputs": [
-        "VIDEO:v5"
+        "VIDEO:v2"
+      ]
+    },
+    {
+      "functor": "DispatchFunctor",
+      "name": "dispatchNode",
+      "inputs": [
+        "Data:v2"
+      ],
+      "outputs": [
+        "Master:v5",
+        "Image:v3"
+      ]
+    },
+    {
+      "functor": "GLImageReaderFunctor",
+      "name": "glImageNode",
+      "inputs": [
+        "VIDEO:v3"
+      ],
+      "outputs": [
+        "Data:v4"
+      ]
+    },
+    {
+      "functor": "ImageLoader",
+      "name": "imageNode",
+      "inputs": [
+        "Data:v4"
+      ],
+      "outputs": [
+        "Data:v6"
+      ]
+    },
+    {
+      "functor": "CallbackFunctor",
+      "name": "callbackNode",
+      "inputs": [
+        "Data:v6"
       ]
     },
     {

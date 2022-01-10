@@ -4,6 +4,15 @@
 
     <application>
         <activity
+            android:name=".ProcessImageActivity"
+            android:exported="false" />
+        <activity
+            android:name=".BeautyActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CameraDemoActivity"
+            android:exported="false" />
+        <activity
             android:name=".SMediaDemoMainActivity"
             android:exported="false" />
     </application>

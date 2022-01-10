@@ -9,13 +9,17 @@ import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
 import android.opengl.Matrix;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.view.Surface;
 import android.view.TextureView;
+import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
+import android.widget.Toast;
 
 import com.example.camera.CameraService;
 import com.example.camera.api.CameraCapture;
@@ -27,9 +31,13 @@ import com.example.egldemo.gles.RenderCore;
 import com.example.egldemo.gles.ViewRender;
 import com.example.egldemo.util.LogUtil;
 import com.example.frameword.framework.Graph;
+import com.example.frameword.framework.NativeCallback;
 import com.example.frameword.framework.NativeGLFrame;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
@@ -55,6 +63,22 @@ public class EGLMainActivity extends AppCompatActivity {
         map.put("EGLSharedContext", viewRender.getEGLContext().getNativeHandle());
         graph.init(getJson("graph.json",this),map);
         graph.run();
+        graph.setOption("callbackNode", "callback", new NativeCallback() {
+            @Override
+            public boolean onNativeCallback(String nodeName, String keyName, Object value) {
+                Bitmap bmp = (Bitmap) value;
+                File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+                File file = new File(path,"eglDemo/pic.jpg");
+                file.getParentFile().mkdirs();
+                file.mkdir();
+                try {
+                    bmp.compress(Bitmap.CompressFormat.JPEG, 100, new FileOutputStream(file));
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                return true;
+            }
+        });
         TextureView textureView = new TextureView(this);
         textureView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
             @Override
@@ -62,8 +86,6 @@ public class EGLMainActivity extends AppCompatActivity {
                 graph.setOption("renderNode","nativeWindow",new Surface(surfaceTexture));
                 graph.setOption("renderNode","windowWidth",width);
                 graph.setOption("renderNode","windowHeight",height);
-                graph.setOption("oesSource","windowWidth",width);
-                graph.setOption("oesSource","windowHeight",height);
                 SurfaceTexture inputTexture = viewRender.createInputTexture();
                 HandlerThread thread = new HandlerThread("setOnFrameAvailableListener");
                 thread.start();
@@ -145,12 +167,10 @@ public class EGLMainActivity extends AppCompatActivity {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
             }
         });
 
@@ -171,6 +191,16 @@ public class EGLMainActivity extends AppCompatActivity {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
 
+            }
+        });
+
+        Button button = new Button(this);
+        button.setText("点我test");
+        linearLayout.addView(button, FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                graph.setOption("dispatchNode","imageSignal",true);
             }
         });
     }

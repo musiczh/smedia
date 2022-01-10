@@ -8,8 +8,10 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 
+import com.example.demo.BeautyActivity;
+import com.example.demo.CameraDemoActivity;
+import com.example.demo.ProcessImageActivity;
 import com.example.egldemo.EGLMainActivity;
 import com.example.smedia.databinding.ActivityMainBinding;
 
@@ -23,6 +25,10 @@ public class MainActivity extends AppCompatActivity {
     private void initMap() {
         map = new HashMap<>();
         map.put("eglDemo", EGLMainActivity.class);
+        map.put("相机功能", CameraDemoActivity.class);
+        map.put("相机美颜", BeautyActivity.class);
+        map.put("图片处理", ProcessImageActivity.class);
+
     }
 
     @Override

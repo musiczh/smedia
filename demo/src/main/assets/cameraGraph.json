@@ -1,0 +1,26 @@
+{
+  "executors": [
+    {
+      "options": {
+        "threadNum": 1
+      }
+    }
+  ],
+  "nodes": [
+    {
+      "functor": "OESTexReaderFunctor",
+      "name": "oesNode",
+      "outputs": [
+        "VIDEO:v1"
+      ]
+    },
+    {
+      "functor": "RenderFunctor",
+      "name": "renderNode",
+      "inputs": [
+        "VIDEO:v1"
+      ]
+
+    }
+  ]
+}
