@@ -8,5 +8,6 @@ public interface CameraCapture {
     public void setCameraListener(CameraListener listener);
     public void setSurfaceTexture(SurfaceTexture surfaceTexture);
     public void switchCamera();
+    public void toggleFlash();
     public void release();
 }

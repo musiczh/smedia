@@ -21,27 +21,32 @@ public class CameraCapture1 implements CameraCapture {
     private Context mContext;
     private Camera mCamera;
     private Camera.CameraInfo mCameraInfo = new Camera.CameraInfo();
-    private CameraListener mListener;
     private SurfaceTexture mSurfaceTexture;
-    private CameraConfig mCameraConfig;
+    private CameraConfig mCameraConfig = new CameraConfig();
     private final Logger mLogger = Logger.create("CameraCapture1");
+
+    private int mPreviewWidth;
+    private int mPreviewHeight;
+    private int mOrientation;
 
     @Override
     public void openCamera(Context context, CameraConfig config) {
         long startTime = SystemClock.elapsedRealtime();
-
-        if (config == null) {
-            config = new CameraConfig();
+        if (config != null) {
+            mCameraConfig = config;
         }
-        mCameraConfig = config;
-
         mContext = context;
+
         int cameraCount = Camera.getNumberOfCameras();
         Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
         for (int i=0;i<cameraCount;i++) {
             Camera.getCameraInfo(i,cameraInfo);
-            if (cameraInfo.facing == config.facing) {
+            if (cameraInfo.facing == mCameraConfig.facing) {
                 break;
+            }
+            if (i == cameraCount-1) {
+                mLogger.e("can not open camera,facing = "+mCameraConfig.facing);
+                return;
             }
         }
         mCameraInfo = cameraInfo;
@@ -51,37 +56,26 @@ public class CameraCapture1 implements CameraCapture {
             mLogger.d("release camera in open");
         }
         mCamera = Camera.open(cameraInfo.facing);
+        mCamera.setErrorCallback((i, camera) -> System.out.println("camera error huan i="+i));
 
-        int cal = calculateOrientation();
-        mCamera.setDisplayOrientation(cal);
-
-        Camera.Parameters parameters = mCamera.getParameters();
-        Camera.Size size = parameters.getSupportedPreviewSizes().get(0);
-        mCamera.setErrorCallback(new android.hardware.Camera.ErrorCallback() {
-            @Override
-            public void onError(int i, android.hardware.Camera camera) {
-                System.out.println("camera error huan i="+i);
-            }
-        });
-        int width = size.width;
-        int height = size.height;
-        parameters.setPreviewSize(width,height);
-
-        List<String> focusModes = parameters.getSupportedFocusModes();
-        for (String mode : focusModes) {
-            if (mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) {
-                parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
-            }
-        }
-
-        mCamera.setParameters(parameters);
+        initCameraParameters();
 
         try {
-            mCamera.setPreviewTexture(mSurfaceTexture);
+            if (mCameraConfig.surfaceTexture != null) {
+                mCamera.setPreviewTexture(mCameraConfig.surfaceTexture);
+            }else if (mCameraConfig.surfaceHolder != null) {
+                mCamera.setPreviewDisplay(mCameraConfig.surfaceHolder);
+            }else {
+                mCamera.setPreviewTexture(mSurfaceTexture);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        mListener.onPreviewStart(new PreviewInfo(width,height,mCameraInfo.orientation));
+
+        if (mCameraConfig.cameraListener != null) {
+            mCameraConfig.cameraListener.onPreviewStart(new PreviewInfo(mPreviewWidth,mPreviewHeight,
+                    mOrientation));
+        }
         mCamera.startPreview();
 
         mLogger.d("camera start success,cost="+(SystemClock.elapsedRealtime()-startTime));
@@ -89,7 +83,7 @@ public class CameraCapture1 implements CameraCapture {
 
     @Override
     public void setCameraListener(CameraListener listener) {
-        mListener = listener;
+        mCameraConfig.cameraListener = listener;
     }
 
     @Override
@@ -107,7 +101,26 @@ public class CameraCapture1 implements CameraCapture {
         openCamera(mContext,mCameraConfig);
     }
 
-    int calculateOrientation() {
+    @Override
+    public void toggleFlash() {
+        Camera.Parameters parameters = mCamera.getParameters();
+        if (parameters.getFlashMode().equals(Camera.Parameters.FLASH_MODE_TORCH)) {
+            parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+        }else{
+            parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+        }
+        mCamera.setParameters(parameters);
+    }
+
+    @Override
+    public void release() {
+        if (mCamera != null) {
+            mCamera.stopPreview();
+            mCamera.release();
+        }
+    }
+
+    private int calculateOrientation() {
         WindowManager windowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         int def = Surface.ROTATION_90;
         if (windowManager != null && windowManager.getDefaultDisplay() != null) {
@@ -123,15 +136,32 @@ public class CameraCapture1 implements CameraCapture {
         if (mCameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK){
             return (mCameraInfo.orientation-activityOrientation+360)%360;
         }else {
-            return (mCameraInfo.orientation+activityOrientation)%360;
+            return (360-(mCameraInfo.orientation+activityOrientation)%360)%360;
         }
     }
 
-    @Override
-    public void release() {
-        if (mCamera != null) {
-            mCamera.stopPreview();
-            mCamera.release();
+    private void initCameraParameters() {
+        // 设置旋转角度
+        mOrientation = calculateOrientation();
+        mCamera.setDisplayOrientation(mOrientation);
+
+        // 预览尺寸
+        Camera.Parameters parameters = mCamera.getParameters();
+        Camera.Size size = parameters.getSupportedPreviewSizes().get(0);
+        mPreviewWidth = size.width;
+        mPreviewHeight = size.height;
+        parameters.setPreviewSize(mPreviewWidth,mPreviewHeight);
+
+        // 对焦模式
+        List<String> focusModes = parameters.getSupportedFocusModes();
+        for (String mode : focusModes) {
+            if (mode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) {
+                parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+            }
         }
+
+        mCamera.setParameters(parameters);
+
     }
+
 }
