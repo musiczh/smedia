@@ -13,7 +13,7 @@ namespace smedia {
                                               "uniform float beautyStrength;"
                                               "\n"
                                               "void main(){\n"
-                                              "    vec2 textureCoordinate = vec2(1.0-otPos.x,1.0-otPos.y);"
+                                              "    vec2 textureCoordinate = vec2(otPos.x,otPos.y);"
                                               "    vec4 textureColor;\n"
                                               "    vec3 centralColor;\n"
                                               "    float sampleColor;\n"

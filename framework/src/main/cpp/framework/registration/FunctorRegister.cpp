@@ -51,5 +51,6 @@ namespace smedia {
         REGISTER_FUNCTOR_LAZY(DispatchFunctor)
         REGISTER_FUNCTOR_LAZY(ImageLoader)
         REGISTER_FUNCTOR_LAZY(GLImageReaderFunctor)
+        REGISTER_FUNCTOR_LAZY(ImageSourceFunctor)
     }
 }
