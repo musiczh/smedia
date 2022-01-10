@@ -11,6 +11,7 @@
 #include "GLContext.h"
 #include "GLFrame.h"
 #include "IGLRenderFunctor.h"
+
 namespace smedia {
     class BeautyFunctor : public IGLRenderFunctor {
     public:

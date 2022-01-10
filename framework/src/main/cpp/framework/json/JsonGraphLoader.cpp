@@ -85,7 +85,7 @@ namespace smedia {
                 case nlohmann::detail::value_t::null:
                     break;
                 case nlohmann::detail::value_t::number_unsigned:
-                case nlohmann::json::value_t::number_integer : {
+                case nlohmann::detail::value_t::number_integer : {
                     data = Data::create(new int(value.get<int>()));
                     break;
                 }

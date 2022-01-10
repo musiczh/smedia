@@ -57,7 +57,6 @@ namespace smedia {
         }else{
             frameRatio = frame.width/(frame.height*1.0f);
         }
-
         float ratio = frameRatio/windowRatio;
         float mCropMatrix[16] = {1,0,0,0,
                                  0,1,0,0,
@@ -91,7 +90,6 @@ namespace smedia {
     }
 
     void RenderFunctor::setOption(const std::string &key, Data value) {
-        long nativeWindowHandle = 0;
         GLContext glContext;
         Data contextData = mFunctorContext->getGlobalService(GL_CONTEXT);
         if (!contextData.getData(glContext)) {

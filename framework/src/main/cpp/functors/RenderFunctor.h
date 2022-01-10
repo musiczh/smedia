@@ -14,7 +14,9 @@
 #include "MatrixUtil.h"
 #include <math.h>
 /**
- * 接收2d纹理，并渲染到屏幕上，需要先设置NativeWindow
+ * 接收2d纹理，并渲染到屏幕上，需要先设置
+ * 1.NativeWindow:Surface
+ * 2.窗口宽高：决定了渲染尺寸的正确
  */
 namespace smedia {
     class RenderFunctor : public IFunctor {

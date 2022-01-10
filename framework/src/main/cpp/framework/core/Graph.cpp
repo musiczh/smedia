@@ -208,6 +208,7 @@ namespace smedia {
     void Graph::initGLService(GraphConfig &config) {
         // 初始化全局GLContext并初始化egl环境，接收来自外部设置的EGLContext作为shareContext
         // 后续functor可以通过functorContext来访问eglContext
+        // todo 这里后面的处理要处理和框架无关
         Data data;
         if (mGlobalService.find("EGLSharedContext") != mGlobalService.end()) {
             data = mGlobalService["EGLSharedContext"];

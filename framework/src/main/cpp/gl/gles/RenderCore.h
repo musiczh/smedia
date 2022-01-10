@@ -20,6 +20,7 @@ namespace smedia {
         unsigned int createOESTexture();
         unsigned int create2DTexture();
         unsigned int create2DTexture(int w,int h);
+        unsigned int create2DTexture(int w,int h,unsigned char* pixel);
         void deleteTexture(unsigned int textureId);
         void deleteFBO(unsigned int fboId);
         unsigned int createFrameBuffer();

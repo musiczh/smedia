@@ -117,6 +117,29 @@ namespace smedia {
         return texture;
     }
 
+    unsigned int RenderCore::create2DTexture(int w,int h,unsigned char* pixel) {
+        LOG_DEBUG<< "w=" << w << " h=" << h;
+        if (pixel == nullptr) {
+            LOG_ERROR << "pixel is null";
+            return 0;
+        }
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        unsigned int texture;
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,w,h,0,GL_RGBA,GL_UNSIGNED_BYTE, reinterpret_cast<void*>(pixel));
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        if (checkGLError("create2DTexture")) {
+            return -1;
+        }
+        LOG_DEBUG << "create texture success,id = " << texture;
+        return texture;
+    }
+
     void RenderCore::draw(int textureType, unsigned int textureId, Program *program,unsigned int fbo) {
         if (fbo != 0) {
             glBindFramebuffer(GL_FRAMEBUFFER,fbo);
@@ -180,6 +203,8 @@ namespace smedia {
         glReadPixels(0,0,width,height,GL_RGBA,GL_UNSIGNED_BYTE,buffer);
         return buffer;
     }
+
+
 }
 
 

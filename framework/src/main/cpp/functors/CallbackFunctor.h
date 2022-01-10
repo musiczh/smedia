@@ -9,6 +9,15 @@
 #include "JNIBridge.h"
 #include <map>
 #include <jni.h>
+
+/**
+ * 回调给上层的functor，可设置回调
+ * android只能接收JNIObject数据的输入，让java层去做转换
+ * - input:
+ *      - Data
+ * - options:
+ *      - callback,必须继承NativeCallback
+ */
 namespace smedia {
     class CallbackFunctor : public IFunctor{
     public:
