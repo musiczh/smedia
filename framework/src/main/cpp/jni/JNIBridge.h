@@ -97,25 +97,34 @@ namespace smedia {
             jclass clazz = JNIService::getEnv()->GetObjectClass(instance);
             jmethodID methodId = JNISignature::getMethodId<JNIObject,Args...>(clazz,methodName);
             jobject objectRes = JNIService::getEnv()->CallObjectMethod(instance,methodId,SignatureParam<Args>::convert(args)...);
-            return JNIObject(objectRes);
+            JNIObject object(objectRes);
+            // 删除局部引用，如果c++内部线程为自己创建，则在线程结束之前不会释放局部引用，导致内存暴涨，这里需要删除局部引用
+            JNIService::getEnv()->DeleteLocalRef(objectRes);
+            return object;
         }
         static JNIObject InvokeStaticMethod(const std::string& className, const std::string& methodName,Args... args) {
             jclass clazz = JClassManager::getJavaClass(className);
             jmethodID methodId = JNISignature::getStaticMethodId<JNIObject,Args...>(clazz,methodName);
             jobject objectRes = JNIService::getEnv()->CallStaticObjectMethod(clazz,methodId,SignatureParam<Args>::convert(args)...);
-            return JNIObject(objectRes);
+            JNIObject object(objectRes);
+            JNIService::getEnv()->DeleteLocalRef(objectRes);
+            return object;
         }
         static JNIObject GetObjectFiled(JNIObject instance,const std::string& fieldName) {
             jclass clazz = JNIService::getEnv()->GetObjectClass(instance.getJObject());
             jfieldID fieldId = JNISignature::getObjectFiledId<JNIObject>(clazz,fieldName);
-            jobject res = JNIService::getEnv()->GetObjectField(instance.getJObject(),fieldId);
-            return JNIObject(res);
+            jobject objectRes = JNIService::getEnv()->GetObjectField(instance.getJObject(),fieldId);
+            JNIObject object(objectRes);
+            JNIService::getEnv()->DeleteLocalRef(objectRes);
+            return object;
         }
         static JNIObject GetStaticFiled(const std::string& className,const std::string& fieldName) {
             jclass clazz = JClassManager::getJavaClass(className);
             jfieldID fieldId = JNISignature::getStaticFiledId<JNIObject>(clazz,fieldName);
-            jobject res = JNIService::getEnv()->GetStaticObjectField(clazz,fieldId);
-            return JNIObject(res);
+            jobject objectRes = JNIService::getEnv()->GetStaticObjectField(clazz,fieldId);
+            JNIObject object(objectRes);
+            JNIService::getEnv()->DeleteLocalRef(objectRes);
+            return object;
         }
     };
     template<typename ...Args>
@@ -124,25 +133,33 @@ namespace smedia {
             jclass clazz = JNIService::getEnv()->GetObjectClass(instance);
             jmethodID methodId = JNISignature::getMethodId<JNIObjectRef,Args...>(clazz,methodName);
             jobject objectRes = JNIService::getEnv()->CallObjectMethod(instance,methodId,SignatureParam<Args>::convert(args)...);
-            return JNIObjectRef(new JNIObject(objectRes));
+            JNIObjectRef res(new JNIObject(objectRes));
+            JNIService::getEnv()->DeleteLocalRef(objectRes);
+            return res;
         }
         static JNIObjectRef InvokeStaticMethod(const std::string& className, const std::string& methodName,Args... args) {
             jclass clazz = JClassManager::getJavaClass(className);
             jmethodID methodId = JNISignature::getStaticMethodId<JNIObjectRef,Args...>(clazz,methodName);
             jobject objectRes = JNIService::getEnv()->CallStaticObjectMethod(clazz,methodId,SignatureParam<Args>::convert(args)...);
-            return JNIObjectRef(new JNIObject(objectRes));
+            JNIObjectRef res(new JNIObject(objectRes));
+            JNIService::getEnv()->DeleteLocalRef(objectRes);
+            return res;
         }
         static JNIObjectRef GetObjectFiled(JNIObjectRef instance,const std::string& fieldName) {
             jclass clazz = JNIService::getEnv()->GetObjectClass(instance->getJObject());
             jfieldID fieldId = JNISignature::getObjectFiledId<JNIObjectRef>(clazz,fieldName);
-            jobject res = JNIService::getEnv()->GetObjectField(instance->getJObject(),fieldId);
-            return JNIObjectRef(new JNIObject(res));
+            jobject objectRes = JNIService::getEnv()->GetObjectField(instance->getJObject(),fieldId);
+            JNIObjectRef res(new JNIObject(objectRes));
+            JNIService::getEnv()->DeleteLocalRef(objectRes);
+            return res;
         }
         static JNIObjectRef GetStaticFiled(const std::string& className,const std::string& fieldName) {
             jclass clazz = JClassManager::getJavaClass(className);
             jfieldID fieldId = JNISignature::getStaticFiledId<JNIObjectRef>(clazz,fieldName);
-            jobject res = JNIService::getEnv()->GetStaticObjectField(clazz,fieldId);
-            return JNIObjectRef(new JNIObject(res));
+            jobject objectRes = JNIService::getEnv()->GetStaticObjectField(clazz,fieldId);
+            JNIObjectRef res(new JNIObject(objectRes));
+            JNIService::getEnv()->DeleteLocalRef(objectRes);
+            return res;
         }
     };
     template<typename ...Args>
