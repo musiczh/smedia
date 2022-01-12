@@ -32,6 +32,7 @@ public:
     bool initialize(GraphConfig& config,const OptionMap& options);
     bool run();
     bool stop();
+    bool release();
 
     void setOption(const std::string &nodeName,const OptionMap options);
 

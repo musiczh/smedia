@@ -150,7 +150,7 @@ namespace smedia {
         mProgram->setFloat("mulW",frame.width);
         mProgram->setFloat("mulH",frame.height);
         mProgram->setFloat("beautyStrength",mLevel);
-        mGLContext.getRenderCore()->draw(GL_TEXTURE_2D,frame.textureId,mProgram.get(),bufferFrame->getFBOId());
+        mGLContext.getRenderCore()->draw(GL_TEXTURE_2D,frame.glTextureRef->textureId,mProgram.get(),bufferFrame->getFBOId());
     }
 
     void BeautyFunctor::unInitialize(FunctorContext *context) {

@@ -96,6 +96,7 @@ JNIEXPORT void JNICALL
 Java_com_example_frameword_framework_Graph_releaseNativeGraph(JNIEnv *env, jobject thiz,
                                                               jlong native_graph_handle) {
     auto* graph = reinterpret_cast<Graph*>(native_graph_handle);
+    graph->release();
     delete graph;
     JClassManager::unInitJavaClass();
 }

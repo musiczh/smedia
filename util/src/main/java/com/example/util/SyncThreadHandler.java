@@ -44,6 +44,10 @@ public abstract class SyncThreadHandler {
      * @return 是否插入成功
      */
     public boolean sendMsg(Message msg,boolean isSync){
+        if (!mHandlerThread.isAlive()) {
+            mLogger.e("SyncThreadHandler thread is quit,can not send msg");
+            return false;
+        }
         boolean ret;
         // 如果looper已经退出，那么需要直接返回
         if (isSync) {

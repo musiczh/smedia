@@ -73,14 +73,19 @@ namespace smedia {
             mGlContext.getRenderCore()->bindTextureInFrameBuffer(mFBO,mTextureId);
             glViewport(0,0,frame.width,frame.height);
             mProgram->use();
-            mGlContext.getRenderCore()->draw(GL_TEXTURE_EXTERNAL_OES,frame.textureId,mProgram.get(),mFBO);
+            mGlContext.getRenderCore()->draw(GL_TEXTURE_EXTERNAL_OES,frame.glTextureRef->textureId,mProgram.get(),mFBO);
             return true;
         });
 
         auto* newFrame = new GLFrame(frame);
-        newFrame->textureId = mTextureId;
+        auto* glTexture = new GLTexture(&mGlContext,mTextureId,frame.width,frame.height);
+        newFrame->glTextureRef = std::shared_ptr<GLTexture>(glTexture);
         Data newData = Data::create(newFrame);
         mFunctorContext->setOutput(newData,"VIDEO");
+        // 下次需要重新创建纹理
+        mTextureId = 0;
+        // 不要释放oes纹理
+        frame.glTextureRef->textureId = 0;
         return true;
     }
 
@@ -103,9 +108,12 @@ namespace smedia {
             auto* glFrame = new GLFrame{};
             glFrame->width = JNIInvoker<int>::GetObjectFiled(object.getJObject(),"width");
             glFrame->height = JNIInvoker<int>::GetObjectFiled(object.getJObject(),"height");
-            glFrame->textureId = JNIInvoker<int>::GetObjectFiled(object.getJObject(),"textureId");
+            int textureId = JNIInvoker<int>::GetObjectFiled(object.getJObject(),"textureId");
+            auto* glTexture = new GLTexture(&mGlContext,textureId,glFrame->width,glFrame->height);
+            glFrame->glTextureRef = std::shared_ptr<GLTexture>(glTexture);
             JNIObject object1 = JNIInvoker<JNIObject>::InvokeObjectMethod(object.getJObject(),"onNativeGetUVMatrix");
             glFrame->orientation = JNIInvoker<int>::GetObjectFiled(object.getJObject(),"orientation");
+            glFrame->format = TEXTURE_OES;
             std::vector<float> v = JNIData::jFloatArrayToVector(reinterpret_cast<jfloatArray>(object1.getJObject()));
             for (int i=0;i<16;i++) {
                 glFrame->UVMatrix[i] = v[i];

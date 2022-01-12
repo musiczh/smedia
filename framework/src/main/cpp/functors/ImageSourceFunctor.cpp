@@ -73,8 +73,9 @@ namespace smedia {
             return false;
         }
         size_t bitmapSize = info.width * info.height * 4;
-        auto* pixelBuffer = new unsigned char[bitmapSize];
-        memcpy(pixelBuffer, bitmapBuffer, bitmapSize);
+        // 使用智能指针，防止忘记delete导致泄露
+        auto pixelBuffer = std::unique_ptr<unsigned char>(new unsigned char[bitmapSize]);
+        memcpy(pixelBuffer.get(), bitmapBuffer, bitmapSize);
 
         status = AndroidBitmap_unlockPixels(JNIService::getEnv(),
                                             bitmapObject);
@@ -85,22 +86,24 @@ namespace smedia {
         if (mGlEnable) {
             // 转化为GLFrame
             unsigned int textureId = 0;
-            mGLContext.runInRenderThread([&textureId,this,info,pixelBuffer]()->bool {
+            auto* pb = pixelBuffer.get();
+            mGLContext.runInRenderThread([&textureId,this,info,pb]()->bool {
                 textureId = mGLContext.getRenderCore()
-                        ->create2DTexture(info.width, info.height, pixelBuffer);
+                        ->create2DTexture(info.width, info.height, pb);
                 return true;
             });
 
             auto *glFrame = new GLFrame;
             glFrame->width = info.width;
             glFrame->height = info.height;
-            glFrame->textureId = textureId;
+            auto* glTexture = new GLTexture(&mGLContext,textureId,info.width,info.height);
+            glFrame->glTextureRef = std::shared_ptr<GLTexture>(glTexture);
             glFrame->format = TEXTURE_2D;
             mFunctorContext->setOutput(Data::create(glFrame),"video");
         }
         if (mImageEnable) {
             // 转化为ImageFrame
-            auto* frame = new ImageFrame(info.width, info.height, pixelBuffer, RGBA);
+            auto* frame = new ImageFrame(info.width, info.height, pixelBuffer.release(), RGBA);
             mFunctorContext->setOutput(Data::create(frame),"image");
         }
         return true;

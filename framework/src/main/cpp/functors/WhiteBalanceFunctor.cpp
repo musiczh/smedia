@@ -57,7 +57,7 @@ namespace smedia {
 		mRenderProgram->use();
 		mRenderProgram->setFloat("temperature",mTemperature);
 		mRenderProgram->setFloat("tint",mTint);
-		mGLContext.getRenderCore()->draw(GL_TEXTURE_2D,frame.textureId,mRenderProgram.get(),bufferFrame->getFBOId());
+		mGLContext.getRenderCore()->draw(GL_TEXTURE_2D,frame.glTextureRef->textureId,mRenderProgram.get(),bufferFrame->getFBOId());
     }
 
     void WhiteBalanceFunctor::unInitialize(FunctorContext *context) {

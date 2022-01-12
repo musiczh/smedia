@@ -49,7 +49,7 @@ namespace smedia {
         }
         mGLContext.getRenderCore()->bindFrameBuffer(bufferFrame->getFBOId());
         mRenderProgram->use();
-        mGLContext.getRenderCore()->draw(GL_TEXTURE_2D,frame.textureId,mRenderProgram.get(),0);
+        mGLContext.getRenderCore()->draw(GL_TEXTURE_2D,frame.glTextureRef->textureId,mRenderProgram.get(),0);
         // RGBA一个通道一个字节
         uint8_t * buffer = mGLContext.getRenderCore()->getCurrentRGBAData(frame.width,frame.height);
         mGLContext.getRenderCore()->bindFrameBuffer(0);

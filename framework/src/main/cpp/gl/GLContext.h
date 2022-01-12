@@ -23,7 +23,8 @@ namespace smedia {
         GLContext() = default;
         void init(EGLContext eglContext);
         void init(Data data);
-        ~GLContext() = default;
+        void release();
+        ~GLContext();
         bool runInRenderThread(std::function<bool()> task);
 
         EGLCore* getEglCore();

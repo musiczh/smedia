@@ -168,6 +168,9 @@ namespace smedia {
     }
 
     bool Graph::stop() {
+        if (m_state == TERMINATED) {
+            return true;
+        }
         // 先提交所有暂停阶段发送的任务
         m_executeManger->cancel();
         // 停止所有的node
@@ -217,6 +220,17 @@ namespace smedia {
         glContext->init(data);
         Data contextData = Data::create(glContext);
         mGlobalService["GLContext"] = contextData;
+    }
+
+    bool Graph::release() {
+        // 由于析构的先后顺序，当graph析构函数被调用时，其他的对象已经被析构，因此这里开辟一个release方法
+        // todo 后续需要开辟一个全局服务模块，并负责全局服务的初始化析构等操作
+        if (mGlobalService.find("GLContext") != mGlobalService.end()) {
+            Data data = mGlobalService["GLContext"];
+            auto* glContext = data.getData<GLContext>();
+            glContext->release();
+        }
+        return true;
     }
 
 

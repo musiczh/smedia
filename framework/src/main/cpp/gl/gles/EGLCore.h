@@ -24,7 +24,9 @@ namespace smedia {
     public:
         EGLCore();
 
+    public:
         bool initEGL(EGLContext shareContext);
+        void release();
 
         EGLSurface createWindowSurface(EGLNativeWindowType window);
 
@@ -40,7 +42,7 @@ namespace smedia {
         EGLDisplay mDisplay;
         EGLContext mEglContext;
         EGLSurface mCurrentSurface;
-        EGLConfig mEglConfig;
+        EGLConfig mEglConfig{nullptr};
     };
 
 }

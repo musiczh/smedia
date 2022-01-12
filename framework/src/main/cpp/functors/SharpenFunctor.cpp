@@ -62,7 +62,7 @@ namespace smedia {
         mProgram->setFloat("sharpen",mSharpen);
         mProgram->setFloat("width",frame.width);
         mProgram->setFloat("height",frame.height);
-        mGLContext.getRenderCore()->draw(GL_TEXTURE_2D,frame.textureId,mProgram.get(),bufferFrame->getFBOId());
+        mGLContext.getRenderCore()->draw(GL_TEXTURE_2D,frame.glTextureRef->textureId,mProgram.get(),bufferFrame->getFBOId());
     }
 
     void SharpenFunctor::unInitialize(FunctorContext *context) {

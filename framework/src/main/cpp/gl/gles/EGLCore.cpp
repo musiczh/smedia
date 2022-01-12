@@ -5,7 +5,7 @@
 #include "EGLCore.h"
 namespace smedia {
 
-    EGLCore::EGLCore() {
+    EGLCore::EGLCore():mCurrentSurface(EGL_NO_SURFACE),mDisplay(EGL_NO_DISPLAY),mEglContext(EGL_NO_CONTEXT) {
         LOG_INFO << "create EGLCore";
     }
 
@@ -109,6 +109,10 @@ namespace smedia {
             LOG_ERROR << "eglSurface == null,make context fail";
             return false;
         }
+        if (mCurrentSurface != EGL_NO_SURFACE) {
+            eglDestroySurface(mDisplay,mCurrentSurface);
+            mCurrentSurface = EGL_NO_SURFACE;
+        }
         if (!eglMakeCurrent(mDisplay, eglSurface, eglSurface, mEglContext)) {
             LOG_ERROR << "make current context error:" << eglGetError();
             return false;
@@ -126,6 +130,18 @@ namespace smedia {
     EGLInfo EGLCore::getEGLInfo() {
         return {mDisplay,mEglContext,mCurrentSurface,mEglConfig};
     }
+
+    void EGLCore::release() {
+        eglMakeCurrent(EGL_NO_DISPLAY,EGL_NO_SURFACE,EGL_NO_SURFACE,EGL_NO_CONTEXT);
+        eglDestroyContext(mDisplay,mEglContext);
+        eglDestroySurface(mDisplay,mCurrentSurface);
+        eglReleaseThread();
+        eglTerminate(mDisplay);
+        mDisplay = EGL_NO_DISPLAY;
+        mEglContext = EGL_NO_CONTEXT;
+        mCurrentSurface = EGL_NO_SURFACE;
+    }
+
 
 }
 

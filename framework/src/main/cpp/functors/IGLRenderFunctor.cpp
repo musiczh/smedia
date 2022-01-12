@@ -43,9 +43,20 @@ namespace smedia {
             onDraw(mGLBufferFrame.get(),frame);
             if (ifSendFrame) {
                 auto* newFrame = new GLFrame(frame);
-                newFrame->textureId = mGLBufferFrame->getTextureId();
+                auto* glTexture = new GLTexture(&mGLContext,mGLBufferFrame->getTextureId(),frame.width,frame.height);
+                newFrame->glTextureRef = std::shared_ptr<GLTexture>(glTexture);
                 mFunctorContext->setOutput(Data::create(newFrame),"VIDEO");
             }
+            mGLContext.runInRenderThread([this]()->bool{
+                unsigned int tex = mGLBufferFrame->getTextureId();
+                if (!ifSendFrame) {
+                    // todo 如果没有存储到glFrame中，则需要释放纹理
+                    mGLContext.getRenderCore()->deleteTexture(tex);
+                }
+                return true;
+            });
+
+
             return true;
         });
         onInit(mInputHandler);

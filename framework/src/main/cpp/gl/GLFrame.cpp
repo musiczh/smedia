@@ -3,6 +3,9 @@
 //
 
 #include "GLFrame.h"
+
+#include <utility>
+#include "Logger.h"
 namespace smedia {
 
 }

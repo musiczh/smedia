@@ -7,6 +7,8 @@ import android.graphics.SurfaceTexture;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
@@ -22,6 +24,7 @@ import com.example.demo.gles.ViewRender;
 import com.example.demo.util.SamplerSurfaceTextureListener;
 import com.example.frameword.framework.Graph;
 import com.example.frameword.framework.NativeGLFrame;
+import com.example.util.Logger;
 
 import java.util.HashMap;
 
@@ -29,6 +32,10 @@ public class CameraDemoActivity extends AppCompatActivity {
     private Graph mGraph;
     private CameraCapture mCameraCapture = CameraService.obtainCamera();
     private ViewRender mRender = new ViewRender();
+    private Handler mInputTexHandler;
+    // todo 这里必须在主线程操作c++,因为如果在子线程，当activity退出杀了子线程时，内部
+    // 会找不到env从而报错。这里后续需要优化JNIService来避免这个问题
+    private Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
 
     private int frameWidth;
     private int frameHeight;
@@ -52,6 +59,11 @@ public class CameraDemoActivity extends AppCompatActivity {
     private void initView() {
         FrameLayout mainLayout = findViewById(R.id.mainLayout);
 
+
+        HandlerThread thread = new HandlerThread("setOnFrameAvailableListener");
+        thread.start();
+        mInputTexHandler = new Handler(thread.getLooper());
+
         TextureView textureView = new TextureView(this);
         textureView.setSurfaceTextureListener(new SamplerSurfaceTextureListener(){
             @Override
@@ -62,22 +74,23 @@ public class CameraDemoActivity extends AppCompatActivity {
                 mGraph.setOption("renderNode","windowHeight",height);
 
                 SurfaceTexture cameraTexture = mRender.createInputTexture();
-                HandlerThread thread = new HandlerThread("setOnFrameAvailableListener");
-                thread.start();
-                Handler handler = new Handler(thread.getLooper());
+
                 cameraTexture.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
                     @Override
                     public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-                        mRender.updateTex();
-                        NativeGLFrame frame = new NativeGLFrame();
-                        frame.orientation = orientation;
-                        frame.width = frameWidth;
-                        frame.height = frameHeight;
-                        frame.textureId = mRender.getTexId();
-                        surfaceTexture.getTransformMatrix(frame.matrix);
-                        mGraph.setOption("oesNode","DATA",frame);
+                        // todo 切到主线程，但这里会有一点卡顿，因为消息执行需要先走完前面的消息内容
+                        mMainThreadHandler.post(()->{
+                            mRender.updateTex();
+                            NativeGLFrame frame = new NativeGLFrame();
+                            frame.orientation = orientation;
+                            frame.width = frameWidth;
+                            frame.height = frameHeight;
+                            frame.textureId = mRender.getTexId();
+                            surfaceTexture.getTransformMatrix(frame.matrix);
+                            mGraph.setOption("oesNode","DATA",frame);
+                        });
                     }
-                },handler);
+                },mInputTexHandler);
                 CameraConfig config = CameraConfig.createBuilder()
                         .facing(CameraConfig.FACING_BACKGROUND)
                         .setCameraListener(new CameraListener(){
@@ -118,7 +131,14 @@ public class CameraDemoActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         mCameraCapture.release();
+        // 必须要在render之前释放，否则相机还没完全停止，会继续发送帧，导致发送消息到一个dead线程，
+        // todo 此处需要增强syncHandler的健壮性
+        mInputTexHandler.getLooper().quit();
+        // 删除所有消息
+        mInputTexHandler.removeCallbacksAndMessages(null);
+        mMainThreadHandler.removeCallbacksAndMessages(null);
         mGraph.release();
         mRender.release();
+
     }
 }

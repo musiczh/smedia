@@ -6,10 +6,12 @@
 #define SMEDIA_GLFRAME_H
 #include "GLContext.h"
 #include "IFrame.h"
+#include "GLTexture.h"
 namespace smedia {
     class GLFrame : public IFrame {
     public:
-        unsigned int textureId;
+        // 纹理对象共享指针
+        GLTextureRef glTextureRef{};
     };
 }
 

@@ -60,6 +60,8 @@ namespace smedia {
         JNIObject bitmapObject = JNIInvoker<JNIObject,JNIObject,int,int>::InvokeStaticMethod("com/example/frameword/framework/JNIUtil",
                                                                                   "onNativeCreateBitmap",JNIObject(byteBufferObject),
                                                                                   imageFrame.width,imageFrame.height);
+        JNIService::getEnv()->DeleteLocalRef(byteBufferObject);
+
         return bitmapObject;
     }
 

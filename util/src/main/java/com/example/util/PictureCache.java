@@ -19,8 +19,12 @@ public class PictureCache {
     public static String saveBitmapExternal(Bitmap bitmap,String fileName) {
         File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
         File file = new File(path,fileName);
-        if (!file.mkdirs()) {
-            mLogger.d("saveBitmap mkdirs fail");
+        if (file.getParentFile() == null) {
+            mLogger.e("saveBitmapExternal get parent fail");
+            return null;
+        }
+        if (!file.getParentFile().exists() && !file.getParentFile().mkdirs()) {
+            mLogger.e("saveBitmapExternal mkdirs fail");
             return null;
         }
         try {

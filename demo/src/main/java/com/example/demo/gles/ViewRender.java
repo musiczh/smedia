@@ -5,6 +5,7 @@ import android.graphics.SurfaceTexture;
 import android.opengl.EGL14;
 import android.opengl.EGLContext;
 import android.opengl.EGLSurface;
+import android.opengl.GLES30;
 import android.os.Message;
 import android.view.Surface;
 
@@ -20,6 +21,9 @@ public class ViewRender  {
     private final static int FRAME_AVAILABLE = 3;
     private final static int MAKE_CURRENT_CONTEXT = 4;
     private final static int UPDATE = 5;
+    private final static int RELEASE = 6;
+
+    private volatile boolean mIsRelease = false;
     // 内部handler包含了一个独立线程，用与切换渲染线程
     private class EGLHandler extends SyncThreadHandler {
 
@@ -35,6 +39,7 @@ public class ViewRender  {
                 case FRAME_AVAILABLE:handleDraw();break;
                 case MAKE_CURRENT_CONTEXT:handleMakeCurrent();break;
                 case UPDATE:handleUpdateTexture();break;
+                case RELEASE:handleRelease();break;
                 default:break;
             }
         }
@@ -80,9 +85,9 @@ public class ViewRender  {
     }
 
     public void release() {
-        if (mEglHandler != null) {
-            mEglHandler.release();
-        }
+        mEglHandler.sendSyncEmptyMsg(RELEASE);
+        mEglHandler.release();
+        mIsRelease = true;
     }
 
     public int getTexId () {
@@ -98,6 +103,9 @@ public class ViewRender  {
     }
 
     public void updateTex() {
+        if (mIsRelease) {
+            return;
+        }
         mEglHandler.sendSyncEmptyMsg(UPDATE);
     }
 
@@ -125,6 +133,12 @@ public class ViewRender  {
 
         checkEglError("create input texture");
         LogUtil.log(" egl create input texture success");
+    }
+
+    private void handleRelease() {
+        int[] tex = new int[]{texId};
+        GLES30.glDeleteTextures(1,tex,0);
+        mEGLCore.release();
     }
 
     private void handleDraw(){

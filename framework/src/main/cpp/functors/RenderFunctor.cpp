@@ -82,7 +82,7 @@ namespace smedia {
             }
             mProgram->use();
             mProgram->setMat4("model",uvm);
-            renderCore->draw(GL_TEXTURE_2D,frame.textureId,mProgram.get(),0);
+            renderCore->draw(GL_TEXTURE_2D,frame.glTextureRef->textureId,mProgram.get(),0);
             eglCore->swapBuffer();
             return true;
         });

@@ -21,9 +21,6 @@ namespace smedia {
     }
 
     void GLBufferFrame::createTextureAttach(int width, int height) {
-        if (mTextureId != 0 && mWidth == width && mHeight == height) {
-            return;
-        }
         mWidth = width;
         mHeight = height;
         LOG_DEBUG << "create texture attach width=" << width << " height=" << height;
@@ -53,6 +50,10 @@ namespace smedia {
 
     unsigned int GLBufferFrame::getFBOId() {
         return mFBO;
+    }
+
+    void GLBufferFrame::detachTexture() {
+        mRenderCore->bindTextureInFrameBuffer(mFBO,0);
     }
 }
 

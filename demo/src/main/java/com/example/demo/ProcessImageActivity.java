@@ -88,7 +88,13 @@ public class ProcessImageActivity extends AppCompatActivity {
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PictureCache.saveBitmapExternal(mBitmap,"smedia/pictureProcess.jpg");
+                String path = PictureCache.saveBitmapExternal(mBitmap,"smedia/pictureProcess.jpg");
+                if (path != null) {
+                    Toast.makeText(ProcessImageActivity.this, "save picture to "+path,
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(ProcessImageActivity.this, "保存失败", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
@@ -162,5 +168,11 @@ public class ProcessImageActivity extends AppCompatActivity {
                 imageView.setImageBitmap(mBitmap);
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mGraph.release();
     }
 }

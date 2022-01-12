@@ -14,6 +14,7 @@ namespace smedia {
         GLBufferFrame(RenderCore* renderCore);
         void bindTexture(unsigned int textureId);
         void createTextureAttach(int width,int height);
+        void detachTexture();
         int getWidth();
         int getHeight();
         unsigned int getTextureId();

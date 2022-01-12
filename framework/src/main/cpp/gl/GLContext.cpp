@@ -22,7 +22,7 @@ namespace smedia {
         if (shareContext == nullptr) {
             LOG_DEBUG << "create GLContext with no shareContext";
         }
-        mGLThread = std::unique_ptr<GLThread>(new GLThread);
+        mGLThread = std::shared_ptr<GLThread>(new GLThread);
         runInRenderThread([this,shareContext]()->bool{
             auto *eglCore = new EGLCore;
             eglCore->initEGL(shareContext);
@@ -32,8 +32,8 @@ namespace smedia {
             auto* renderCore = new RenderCore;
             renderCore->initGLES();
 
-            mEglCore = std::unique_ptr<EGLCore>(eglCore);
-            mRenderCore = std::unique_ptr<RenderCore>(renderCore);
+            mEglCore = std::shared_ptr<EGLCore>(eglCore);
+            mRenderCore = std::shared_ptr<RenderCore>(renderCore);
             return true;
         });
         LOG_DEBUG << "GL_Context init success";
@@ -58,7 +58,17 @@ namespace smedia {
         return mEglCore->getEGLInfo();
     }
 
+    GLContext::~GLContext() {
+        LOG_DEBUG << "destroy glContext";
+    }
 
+    void GLContext::release() {
+        LOG_DEBUG << "glContext release";
+        mGLThread->runSync([this]()->bool{
+            mEglCore->release();
+            return true;
+        });
+    }
 
 
 }

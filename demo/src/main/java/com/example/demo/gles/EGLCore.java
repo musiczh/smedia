@@ -10,13 +10,33 @@ import android.view.Surface;
 
 import com.example.demo.util.LogUtil;
 
+import javax.microedition.khronos.egl.EGL;
+
 
 public class EGLCore {
     private EGLDisplay mEGLDisplay = EGL14.EGL_NO_DISPLAY;
     private EGLConfig mEGLConfig;
     private EGLContext mEGLContext = EGL14.EGL_NO_CONTEXT;
+    private EGLSurface mEGLSurface = EGL14.EGL_NO_SURFACE;
 
     public EGLCore() {
+    }
+
+    public void release() {
+        if (mEGLDisplay != EGL14.EGL_NO_DISPLAY) {
+
+            EGL14.eglMakeCurrent(mEGLDisplay, EGL14.EGL_NO_SURFACE, EGL14.EGL_NO_SURFACE,
+                    EGL14.EGL_NO_CONTEXT);
+            EGL14.eglDestroyContext(mEGLDisplay, mEGLContext);
+            EGL14.eglDestroySurface(mEGLDisplay,mEGLSurface);
+            EGL14.eglReleaseThread();
+            EGL14.eglTerminate(mEGLDisplay);
+        }
+
+        mEGLDisplay = EGL14.EGL_NO_DISPLAY;
+        mEGLContext = EGL14.EGL_NO_CONTEXT;
+        mEGLSurface = EGL14.EGL_NO_SURFACE;
+        mEGLConfig = null;
     }
 
     // 初始化config、display、context、egl
@@ -92,6 +112,10 @@ public class EGLCore {
         if (mEGLDisplay == EGL14.EGL_NO_DISPLAY) {
             LogUtil.log("have not create eglDisplay");
             return ;
+        }
+        if (mEGLSurface != EGL14.EGL_NO_SURFACE) {
+            EGL14.eglDestroySurface(mEGLDisplay,mEGLSurface);
+            mEGLSurface = EGL14.EGL_NO_SURFACE;
         }
         if (!EGL14.eglMakeCurrent(mEGLDisplay, eglSurface, eglSurface, mEGLContext)) {
             throw new RuntimeException("eglMakeCurrent failed");

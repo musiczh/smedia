@@ -37,10 +37,7 @@ namespace smedia {
     void lazyRegisterAllFunctors() {
         // 处理每个functor的注册
         REGISTER_FUNCTOR_LAZY(OESTexReaderFunctor)
-        REGISTER_FUNCTOR_LAZY(BrightnessFunctor)
         REGISTER_FUNCTOR_LAZY(RenderFunctor)
-        REGISTER_FUNCTOR_LAZY(ContrastFunctor)
-        REGISTER_FUNCTOR_LAZY(SaturationFunctor)
         REGISTER_FUNCTOR_LAZY(AdjustColorFunctor)
         REGISTER_FUNCTOR_LAZY(BeautyFunctor)
         REGISTER_FUNCTOR_LAZY(DeNoiseFunctor)
