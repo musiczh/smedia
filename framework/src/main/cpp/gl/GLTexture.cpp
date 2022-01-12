@@ -6,8 +6,8 @@
 #include "GLContext.h"
 namespace smedia {
 
-    GLTexture::GLTexture(GLContext* glContext,unsigned int textureId, int width, int height)
-    :glContext(glContext),textureId(textureId),width(width),height(height) {
+    GLTexture::GLTexture(GLContextRef glContext,unsigned int textureId, int width, int height)
+    :glContext(std::move(glContext)),textureId(textureId),width(width),height(height) {
         // 构建GLTexture
     }
 

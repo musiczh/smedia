@@ -26,12 +26,12 @@ namespace smedia {
             return;
         }
         mFunctorContext = context;
-        if (!mFunctorContext->getGlobalService("GLContext").getData(mGlContext)) {
+        if (!mFunctorContext->getGlobalService("GLContext").getData(mGLContext)) {
             LOG_ERROR << "glContext in functorContext is null";
             return;
         }
-        RenderCore* renderCore = mGlContext.getRenderCore();
-        mGlContext.runInRenderThread([this,renderCore]()->bool{
+        RenderCore* renderCore = mGLContext->getRenderCore();
+        mGLContext->runInRenderThread([this,renderCore]()->bool{
             mProgram = std::unique_ptr<Program>(renderCore->createProgram(fragmentShader));
             mFBO = renderCore->createFrameBuffer();
             return true;
@@ -66,19 +66,19 @@ namespace smedia {
             return false;
         }
 
-        mGlContext.runInRenderThread([this,frame]()->bool{
+        mGLContext->runInRenderThread([this,frame]()->bool{
             if (mTextureId == 0) {
-                mTextureId = mGlContext.getRenderCore()->create2DTexture(frame.width,frame.height);
+                mTextureId = mGLContext->getRenderCore()->create2DTexture(frame.width, frame.height);
             }
-            mGlContext.getRenderCore()->bindTextureInFrameBuffer(mFBO,mTextureId);
+            mGLContext->getRenderCore()->bindTextureInFrameBuffer(mFBO, mTextureId);
             glViewport(0,0,frame.width,frame.height);
             mProgram->use();
-            mGlContext.getRenderCore()->draw(GL_TEXTURE_EXTERNAL_OES,frame.glTextureRef->textureId,mProgram.get(),mFBO);
+            mGLContext->getRenderCore()->draw(GL_TEXTURE_EXTERNAL_OES, frame.glTextureRef->textureId, mProgram.get(), mFBO);
             return true;
         });
 
         auto* newFrame = new GLFrame(frame);
-        auto* glTexture = new GLTexture(&mGlContext,mTextureId,frame.width,frame.height);
+        auto* glTexture = new GLTexture(mGLContext, mTextureId, frame.width, frame.height);
         newFrame->glTextureRef = std::shared_ptr<GLTexture>(glTexture);
         Data newData = Data::create(newFrame);
         mFunctorContext->setOutput(newData,"VIDEO");
@@ -92,10 +92,8 @@ namespace smedia {
 
     void OESTexReaderFunctor::setOption(const std::string &key, smedia::Data value) {
         if (key == "DATA") {
-            GLContext glContext;
-            Data contextData = mFunctorContext->getGlobalService("GLContext");
-            if (contextData.isEmpty() || !contextData.getData(glContext)) {
-                LOG_ERROR << "glContext is null";
+            if (mGLContext == nullptr) {
+                LOG_ERROR << "mGLContext is null";
                 return;
             }
 
@@ -109,7 +107,7 @@ namespace smedia {
             glFrame->width = JNIInvoker<int>::GetObjectFiled(object.getJObject(),"width");
             glFrame->height = JNIInvoker<int>::GetObjectFiled(object.getJObject(),"height");
             int textureId = JNIInvoker<int>::GetObjectFiled(object.getJObject(),"textureId");
-            auto* glTexture = new GLTexture(&mGlContext,textureId,glFrame->width,glFrame->height);
+            auto* glTexture = new GLTexture(mGLContext, textureId, glFrame->width, glFrame->height);
             glFrame->glTextureRef = std::shared_ptr<GLTexture>(glTexture);
             JNIObject object1 = JNIInvoker<JNIObject>::InvokeObjectMethod(object.getJObject(),"onNativeGetUVMatrix");
             glFrame->orientation = JNIInvoker<int>::GetObjectFiled(object.getJObject(),"orientation");

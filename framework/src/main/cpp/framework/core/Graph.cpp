@@ -218,7 +218,8 @@ namespace smedia {
         }
         auto* glContext = new GLContext();
         glContext->init(data);
-        Data contextData = Data::create(glContext);
+        auto *glContextRef = new GLContextRef(glContext);
+        Data contextData = Data::create(glContextRef);
         mGlobalService["GLContext"] = contextData;
     }
 
@@ -227,7 +228,8 @@ namespace smedia {
         // todo 后续需要开辟一个全局服务模块，并负责全局服务的初始化析构等操作
         if (mGlobalService.find("GLContext") != mGlobalService.end()) {
             Data data = mGlobalService["GLContext"];
-            auto* glContext = data.getData<GLContext>();
+            GLContextRef glContext;
+            data.getData(glContext);
             glContext->release();
         }
         return true;

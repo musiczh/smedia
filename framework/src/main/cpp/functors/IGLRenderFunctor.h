@@ -43,7 +43,7 @@ namespace smedia {
         ~IGLRenderFunctor() override = default;
 
     protected:
-        GLContext mGLContext{};
+        GLContextRef mGLContext;
         std::unique_ptr<GLBufferFrame> mGLBufferFrame;
         std::unique_ptr<Program> mRenderProgram;
         InputHandler mInputHandler;

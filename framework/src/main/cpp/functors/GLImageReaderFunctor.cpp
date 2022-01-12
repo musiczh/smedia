@@ -47,12 +47,12 @@ namespace smedia {
         if (mRatio != -1) {
             // todo 处理图片比例问题，进行裁剪
         }
-        mGLContext.getRenderCore()->bindFrameBuffer(bufferFrame->getFBOId());
+        mGLContext->getRenderCore()->bindFrameBuffer(bufferFrame->getFBOId());
         mRenderProgram->use();
-        mGLContext.getRenderCore()->draw(GL_TEXTURE_2D,frame.glTextureRef->textureId,mRenderProgram.get(),0);
+        mGLContext->getRenderCore()->draw(GL_TEXTURE_2D,frame.glTextureRef->textureId,mRenderProgram.get(),0);
         // RGBA一个通道一个字节
-        uint8_t * buffer = mGLContext.getRenderCore()->getCurrentRGBAData(frame.width,frame.height);
-        mGLContext.getRenderCore()->bindFrameBuffer(0);
+        uint8_t * buffer = mGLContext->getRenderCore()->getCurrentRGBAData(frame.width,frame.height);
+        mGLContext->getRenderCore()->bindFrameBuffer(0);
         auto* imageFrame = new ImageFrame(frame.width,frame.height,buffer,RGBA);
         mFunctorContext->setOutput(Data::create(imageFrame),"Data");
     }

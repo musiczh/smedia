@@ -87,8 +87,8 @@ namespace smedia {
             // 转化为GLFrame
             unsigned int textureId = 0;
             auto* pb = pixelBuffer.get();
-            mGLContext.runInRenderThread([&textureId,this,info,pb]()->bool {
-                textureId = mGLContext.getRenderCore()
+            mGLContext->runInRenderThread([&textureId,this,info,pb]()->bool {
+                textureId = mGLContext->getRenderCore()
                         ->create2DTexture(info.width, info.height, pb);
                 return true;
             });
@@ -96,7 +96,7 @@ namespace smedia {
             auto *glFrame = new GLFrame;
             glFrame->width = info.width;
             glFrame->height = info.height;
-            auto* glTexture = new GLTexture(&mGLContext,textureId,info.width,info.height);
+            auto* glTexture = new GLTexture(mGLContext,textureId,info.width,info.height);
             glFrame->glTextureRef = std::shared_ptr<GLTexture>(glTexture);
             glFrame->format = TEXTURE_2D;
             mFunctorContext->setOutput(Data::create(glFrame),"video");

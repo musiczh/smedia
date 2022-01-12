@@ -41,8 +41,8 @@ namespace smedia {
     void SharpenFunctor::onInit(InputHandler &inputHandler) {
         mSharpen = 0;
         if (mProgram == nullptr) {
-            mGLContext.runInRenderThread([this]()->bool {
-                mProgram = std::unique_ptr<Program>(mGLContext.getRenderCore()->createProgram(fv));
+            mGLContext->runInRenderThread([this]()->bool {
+                mProgram = std::unique_ptr<Program>(mGLContext->getRenderCore()->createProgram(fv));
                 return true;
             });
         }
@@ -62,7 +62,7 @@ namespace smedia {
         mProgram->setFloat("sharpen",mSharpen);
         mProgram->setFloat("width",frame.width);
         mProgram->setFloat("height",frame.height);
-        mGLContext.getRenderCore()->draw(GL_TEXTURE_2D,frame.glTextureRef->textureId,mProgram.get(),bufferFrame->getFBOId());
+        mGLContext->getRenderCore()->draw(GL_TEXTURE_2D,frame.glTextureRef->textureId,mProgram.get(),bufferFrame->getFBOId());
     }
 
     void SharpenFunctor::unInitialize(FunctorContext *context) {

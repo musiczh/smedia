@@ -22,7 +22,7 @@ namespace smedia {
             return;
         }
         mFunctorContext = context;
-        if (!mFunctorContext->getGlobalService("GLContext").getData(mGlContext)) {
+        if (!mFunctorContext->getGlobalService("GLContext").getData(mGLContext)) {
             LOG_ERROR << "glContext in functorContext is null";
             return;
         }
@@ -46,8 +46,8 @@ namespace smedia {
             return false;
         }
 
-        RenderCore* renderCore = mGlContext.getRenderCore();
-        EGLCore* eglCore = mGlContext.getEglCore();
+        RenderCore* renderCore = mGLContext->getRenderCore();
+        EGLCore* eglCore = mGLContext->getEglCore();
 
         // 帧数据的比例和屏幕的比例不同，需要进行缩放裁剪
         float windowRatio = windowWidth/(windowHeight*1.0f);
@@ -75,7 +75,7 @@ namespace smedia {
 
         float *uvm = res;
 
-        mGlContext.runInRenderThread([this,renderCore,eglCore,uvm,frame]()->bool{
+        mGLContext->runInRenderThread([this,renderCore,eglCore,uvm,frame]()->bool{
             glViewport(0,0,windowWidth,windowHeight);
             if (mProgram == nullptr) {
                 mProgram = std::unique_ptr<Program>(renderCore->createProgram(fragmentShade));
@@ -90,7 +90,7 @@ namespace smedia {
     }
 
     void RenderFunctor::setOption(const std::string &key, Data value) {
-        GLContext glContext;
+        GLContextRef glContext;
         Data contextData = mFunctorContext->getGlobalService(GL_CONTEXT);
         if (!contextData.getData(glContext)) {
             LOG_ERROR << "glContext is not init";
@@ -105,8 +105,8 @@ namespace smedia {
             }
             ANativeWindow* nativeWindow = ANativeWindow_fromSurface(JNIService::getEnv(),object.getJObject());
             auto nativeWindowType = reinterpret_cast<EGLNativeWindowType>(nativeWindow);
-            EGLCore* eglCore = glContext.getEglCore();
-            glContext.runInRenderThread([eglCore,nativeWindowType]()->bool{
+            EGLCore* eglCore = glContext->getEglCore();
+            glContext->runInRenderThread([eglCore,nativeWindowType]()->bool{
                 EGLSurface surface = eglCore->createWindowSurface(nativeWindowType);
                 eglCore->makeCurrentContext(surface);
                 return true;

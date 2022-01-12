@@ -13,15 +13,15 @@ namespace smedia {
             return;
         }
         // 初始化fbo
-        mGLContext.runInRenderThread([this]()->bool{
+        mGLContext->runInRenderThread([this]()->bool{
             if (mGLBufferFrame == nullptr) {
-                mGLBufferFrame = std::unique_ptr<GLBufferFrame>(new GLBufferFrame(mGLContext.getRenderCore()));
+                mGLBufferFrame = std::unique_ptr<GLBufferFrame>(new GLBufferFrame(mGLContext->getRenderCore()));
             }
             if (mRenderProgram == nullptr) {
                 std::string fv = getFragmentCode();
                 if (fv.length() != 0) {
                     mRenderProgram = std::unique_ptr<Program>(
-                            mGLContext.getRenderCore()->createProgram(fv));
+                            mGLContext->getRenderCore()->createProgram(fv));
                 }
 
             }
@@ -43,15 +43,15 @@ namespace smedia {
             onDraw(mGLBufferFrame.get(),frame);
             if (ifSendFrame) {
                 auto* newFrame = new GLFrame(frame);
-                auto* glTexture = new GLTexture(&mGLContext,mGLBufferFrame->getTextureId(),frame.width,frame.height);
+                auto* glTexture = new GLTexture(mGLContext,mGLBufferFrame->getTextureId(),frame.width,frame.height);
                 newFrame->glTextureRef = std::shared_ptr<GLTexture>(glTexture);
                 mFunctorContext->setOutput(Data::create(newFrame),"VIDEO");
             }
-            mGLContext.runInRenderThread([this]()->bool{
+            mGLContext->runInRenderThread([this]()->bool{
                 unsigned int tex = mGLBufferFrame->getTextureId();
                 if (!ifSendFrame) {
                     // todo 如果没有存储到glFrame中，则需要释放纹理
-                    mGLContext.getRenderCore()->deleteTexture(tex);
+                    mGLContext->getRenderCore()->deleteTexture(tex);
                 }
                 return true;
             });
@@ -64,7 +64,7 @@ namespace smedia {
 
     bool IGLRenderFunctor::execute(FunctorContext *context) {
         // 渲染需要放到渲染线程中去执行
-        return mGLContext.runInRenderThread([this,context]()->bool {
+        return mGLContext->runInRenderThread([this,context]()->bool {
             return mInputHandler.runHandler(context);
         });
     }

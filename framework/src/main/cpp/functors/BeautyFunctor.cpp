@@ -144,13 +144,13 @@ namespace smedia {
 
     void BeautyFunctor::onDraw(GLBufferFrame *bufferFrame, GLFrame& frame) {
         if (mProgram == nullptr) {
-            mProgram = std::unique_ptr<Program>(mGLContext.getRenderCore()->createProgram(fragmentShader));
+            mProgram = std::unique_ptr<Program>(mGLContext->getRenderCore()->createProgram(fragmentShader));
         }
         mProgram->use();
         mProgram->setFloat("mulW",frame.width);
         mProgram->setFloat("mulH",frame.height);
         mProgram->setFloat("beautyStrength",mLevel);
-        mGLContext.getRenderCore()->draw(GL_TEXTURE_2D,frame.glTextureRef->textureId,mProgram.get(),bufferFrame->getFBOId());
+        mGLContext->getRenderCore()->draw(GL_TEXTURE_2D,frame.glTextureRef->textureId,mProgram.get(),bufferFrame->getFBOId());
     }
 
     void BeautyFunctor::unInitialize(FunctorContext *context) {

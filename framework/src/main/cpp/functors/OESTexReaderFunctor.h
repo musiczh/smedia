@@ -37,7 +37,7 @@ namespace smedia {
         int width;
         int height;
 
-        GLContext mGlContext{};
+        GLContextRef mGLContext;
         int windowWidth;
         int windowHeight;
 

@@ -33,7 +33,7 @@ namespace smedia {
     private:
         InputHandler mInputHandler;
         FunctorContext* mFunctorContext;
-        GLContext mGLContext{};
+        GLContextRef mGLContext;
 
         Data inputData{};
 

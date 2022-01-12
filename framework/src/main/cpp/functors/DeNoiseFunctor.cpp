@@ -64,8 +64,8 @@ namespace smedia {
         mKSigma = 0;
         mThreshold = 0.1;
         if (mProgram == nullptr) {
-            mGLContext.runInRenderThread([this]()->bool {
-                mProgram = std::unique_ptr<Program>(mGLContext.getRenderCore()->createProgram(fv));
+            mGLContext->runInRenderThread([this]()->bool {
+                mProgram = std::unique_ptr<Program>(mGLContext->getRenderCore()->createProgram(fv));
                 return true;
             });
         }
@@ -103,7 +103,7 @@ namespace smedia {
         mProgram->setFloat("sigma",mSigma);
         mProgram->setFloat("kSigma",mKSigma);
         mProgram->setFloat("threshold",mThreshold);
-        mGLContext.getRenderCore()->draw(GL_TEXTURE_2D,frame.glTextureRef->textureId,mProgram.get(),bufferFrame->getFBOId());
+        mGLContext->getRenderCore()->draw(GL_TEXTURE_2D,frame.glTextureRef->textureId,mProgram.get(),bufferFrame->getFBOId());
     }
 
     void DeNoiseFunctor::unInitialize(FunctorContext *context) {

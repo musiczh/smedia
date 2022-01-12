@@ -37,6 +37,8 @@ namespace smedia {
         std::shared_ptr<RenderCore> mRenderCore;
         std::shared_ptr<GLThread> mGLThread;
     };
+
+    using GLContextRef = std::shared_ptr<GLContext>;
 }
 
 

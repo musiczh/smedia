@@ -50,7 +50,7 @@ namespace smedia {
         mRenderProgram->use();
         mRenderProgram->setFloat("shadows",mShadow);
         mRenderProgram->setFloat("highlights",mHighLight);
-        mGLContext.getRenderCore()->draw(GL_TEXTURE_2D,frame.glTextureRef->textureId,mRenderProgram.get(),bufferFrame->getFBOId());
+        mGLContext->getRenderCore()->draw(GL_TEXTURE_2D,frame.glTextureRef->textureId,mRenderProgram.get(),bufferFrame->getFBOId());
     }
 
     void HighLightShadowFunctor::unInitialize(FunctorContext *context) {

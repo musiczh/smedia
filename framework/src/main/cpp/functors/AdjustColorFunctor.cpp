@@ -68,9 +68,9 @@ namespace smedia {
         mContrast = 1;
         mBrightness = 0;
         mSaturation = 1;
-        mGLContext.runInRenderThread([this]()->bool {
+        mGLContext->runInRenderThread([this]()->bool {
             if (mProgram == nullptr) {
-                mProgram = std::unique_ptr<Program>(mGLContext.getRenderCore()->createProgram(fragmentShader));
+                mProgram = std::unique_ptr<Program>(mGLContext->getRenderCore()->createProgram(fragmentShader));
             }
             return true;
         });
@@ -109,7 +109,7 @@ namespace smedia {
         mProgram->setFloat("brightness",mBrightness);
         mProgram->setFloat("contrast",mContrast);
         mProgram->setFloat("saturation",mSaturation);
-        mGLContext.getRenderCore()->draw(GL_TEXTURE_2D,frame.glTextureRef->textureId,mProgram.get(),bufferFrame->getFBOId());
+        mGLContext->getRenderCore()->draw(GL_TEXTURE_2D,frame.glTextureRef->textureId,mProgram.get(),bufferFrame->getFBOId());
     }
 
     void AdjustColorFunctor::unInitialize(FunctorContext *context) {
