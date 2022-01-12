@@ -24,9 +24,6 @@ namespace smedia {
         mWidth = width;
         mHeight = height;
         LOG_DEBUG << "create texture attach width=" << width << " height=" << height;
-        if (mTextureId != 0) {
-            mRenderCore->deleteTexture(mTextureId);
-        }
         mTextureId = mRenderCore->create2DTexture(width,height);
         mRenderCore->bindTextureInFrameBuffer(mFBO,mTextureId);
     }
