@@ -7,6 +7,7 @@ import android.graphics.SurfaceTexture;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.view.Surface;
 import android.view.TextureView;
 import android.widget.FrameLayout;
@@ -29,12 +30,19 @@ public class BeautyActivity extends AppCompatActivity {
     private ViewRender mRender = new ViewRender();
     private Graph mGraph = new Graph();
 
+    private Handler mInputTexHandler;
+    private Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
+
     private PreviewInfo mPreviewInfo = new PreviewInfo(0,0,0);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_beauty);
+
+        HandlerThread thread = new HandlerThread("setOnFrameAvailableListener");
+        thread.start();
+        mInputTexHandler = new Handler(thread.getLooper());
 
         mRender.makeCurrentContext();
         HashMap<String,Object> options = new HashMap<>();
@@ -43,22 +51,21 @@ public class BeautyActivity extends AppCompatActivity {
         mGraph.run();
 
         SurfaceTexture inputST = mRender.createInputTexture();
-        HandlerThread thread = new HandlerThread("setOnFrameAvailableListener");
-        thread.start();
-        Handler handler = new Handler(thread.getLooper());
         inputST.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
             @Override
             public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-                mRender.updateTex();
-                NativeGLFrame nativeGLFrame = new NativeGLFrame();
-                surfaceTexture.getTransformMatrix(nativeGLFrame.matrix);
-                nativeGLFrame.width = mPreviewInfo.width;
-                nativeGLFrame.height = mPreviewInfo.height;
-                nativeGLFrame.textureId = mRender.getTexId();
-                nativeGLFrame.orientation = mPreviewInfo.orientation;
-                mGraph.setOption("oesNode","DATA",nativeGLFrame);
+                mMainThreadHandler.post(()->{
+                    mRender.updateTex();
+                    NativeGLFrame nativeGLFrame = new NativeGLFrame();
+                    surfaceTexture.getTransformMatrix(nativeGLFrame.matrix);
+                    nativeGLFrame.width = mPreviewInfo.width;
+                    nativeGLFrame.height = mPreviewInfo.height;
+                    nativeGLFrame.textureId = mRender.getTexId();
+                    nativeGLFrame.orientation = mPreviewInfo.orientation;
+                    mGraph.setOption("oesNode","DATA",nativeGLFrame);
+                });
             }
-        },handler);
+        },mInputTexHandler);
 
         mCameraCapture.openCamera(this, CameraConfig.createBuilder()
                 .facing(CameraConfig.FACING_FRONT)
@@ -102,6 +109,9 @@ public class BeautyActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         mCameraCapture.release();
+        mInputTexHandler.getLooper().quit();
+        mInputTexHandler.removeCallbacksAndMessages(null);
+        mMainThreadHandler.removeCallbacksAndMessages(null);
         mGraph.release();
         mRender.release();
     }
