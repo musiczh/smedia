@@ -26,6 +26,10 @@ namespace smedia {
         Data newData;
         if (dataStream != nullptr && !dataStream->empty()) {
             if (pop) {
+                // todo 这里无论tag和index的类型如何，都是从streamKeyQueue的队列头弹出一个
+                //  所以如果使用指定tag+index和popFront方法混用的话，容易出现前者得到的Data为空，
+                //  而有些DataStream的数据却无法被弹出，造成内存泄露。所以这里暂时不能两者或者数据混用，只能使用一种。
+                //  后续再做优化
 //                StreamKey popKey = getFrontStreamKeyInner(true);
 //                // 遍历整个队列，找到相同的streamKey对象并弹出
 //                while (key != popKey && popKey.tag != "emptyStreamKey") {

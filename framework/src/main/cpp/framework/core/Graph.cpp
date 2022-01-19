@@ -138,6 +138,7 @@ namespace smedia {
             p.second->setExecuteSelfHandler(std::bind(&Graph::executeNode,this,p.second.get()));
             p.second->setExecuteConnectNodeHandler(std::bind(&Graph::executeConnectNode,this,p.second.get()));
             if (!p.second->run()) {
+                LOG_ERROR << "run graph error";
                 return false;
             }
         }
@@ -226,12 +227,6 @@ namespace smedia {
     bool Graph::release() {
         // 由于析构的先后顺序，当graph析构函数被调用时，其他的对象已经被析构，因此这里开辟一个release方法
         // todo 后续需要开辟一个全局服务模块，并负责全局服务的初始化析构等操作
-        if (mGlobalService.find("GLContext") != mGlobalService.end()) {
-            Data data = mGlobalService["GLContext"];
-            GLContextRef glContext;
-            data.getData(glContext);
-            glContext->release();
-        }
         return true;
     }
 

@@ -49,13 +49,17 @@ namespace smedia {
             }
         });
         // 一般而言，对于source node来说，init之后就会开始产生数据，所以把node的初始化延迟到run的时候。
-        m_Functor->initialize(m_functorContext.get());
+        if (!m_Functor->initialize(m_functorContext.get())) {
+            LOG_ERROR << name << " functor init error.Node run failed";
+            return false;
+        }
+
         // 修改状态并把之前的option全部设置给functor
         std::unique_lock<std::mutex> lock(m_lock);
         m_state = RUNNING;
         if (m_Functor != nullptr) {
             for (auto& option : m_runtimeOptions) {
-                m_Functor->setOption(option.first,option.second);
+                m_Functor->setOption(m_functorContext.get(),option.first,option.second);
             }
         }
         return true;
