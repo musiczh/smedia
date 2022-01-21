@@ -9,17 +9,17 @@
  */
 namespace smedia {
     enum FrameFormat {
-        UNKNOWN = -1,
-        NV12 = 0,
-        RGB = 1,
-        RGBA = 2,
-        BGRA = 3,
-        BGR = 4,
-        NV21 = 5,
-        GRAY = 6,
-        I420 = 7,
-        TEXTURE_2D = 100,
-        TEXTURE_OES = 101
+        FORMAT_UNKNOWN = -1,
+        FORMAT_NV12 = 0,
+        FORMAT_RGB = 1,
+        FORMAT_RGBA = 2,
+        FORMAT_BGRA = 3,
+        FORMAT_BGR = 4,
+        FORMAT_NV21 = 5,
+        FORMAT_GRAY = 6,
+        FORMAT_I420 = 7,
+        FORMAT_TEXTURE_2D = 100,
+        FORMAT_TEXTURE_OES = 101
     };
     class IFrame {
     public:

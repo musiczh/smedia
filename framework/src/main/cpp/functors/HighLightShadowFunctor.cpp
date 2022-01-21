@@ -25,7 +25,18 @@ namespace smedia {
            }
         );
 
-    void HighLightShadowFunctor::onInit(InputHandler &inputHandler) {
+
+    void HighLightShadowFunctor::unInitialize(FunctorContext *context) {
+
+    }
+
+    std::string HighLightShadowFunctor::getFragmentCode() {
+        return fv;
+    }
+
+    bool HighLightShadowFunctor::onInit(InputHandler &inputHandler) {
+        mShadow = 0;
+        mHighLight = 0;
         inputHandler.registerHandler("shadow",INPUT_CALLBACK{
             float value;
             if (inputData.data.getData(value)) {
@@ -44,21 +55,21 @@ namespace smedia {
             LOG_ERROR << "HighLightShadowFunctor get highLight fail";
             return false;
         });
+        return true;
     }
 
-    void HighLightShadowFunctor::onDraw(GLBufferFrame *bufferFrame, GLFrame &frame) {
-        mRenderProgram->use();
-        mRenderProgram->setFloat("shadows",mShadow);
-        mRenderProgram->setFloat("highlights",mHighLight);
-        mGLContext->getRenderCore()->draw(GL_TEXTURE_2D,frame.glTextureRef->textureId,mRenderProgram.get(),bufferFrame->getFBOId());
-    }
-
-    void HighLightShadowFunctor::unInitialize(FunctorContext *context) {
-
-    }
-
-    std::string HighLightShadowFunctor::getFragmentCode() {
-        return fv;
+    bool
+    HighLightShadowFunctor::onDraw(GLBufferFrame *bufferFrame, Render *render, GLFrame &frame) {
+        render->getProgram()->setTexture("inputImageTexture",frame.glTextureRef);
+        render->getProgram()->setFloat("shadows",mShadow);
+        render->getProgram()->setFloat("highlights",mHighLight);
+        bufferFrame->bind();
+        render->draw();
+        auto texture = bufferFrame->unBind();
+        auto* newFrame = new GLFrame(frame);
+        newFrame->glTextureRef = texture;
+        mFunctorContext->setOutput(Data::create(newFrame),"video");
+        return true;
     }
 
     REGISTER_FUNCTOR(HighLightShadowFunctor)

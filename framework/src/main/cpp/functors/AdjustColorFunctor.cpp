@@ -3,7 +3,7 @@
 //
 
 #include "AdjustColorFunctor.h"
-#include "../framework/core/FunctorContext.h"
+#include "FunctorContext.h"
 
 namespace smedia {
 
@@ -64,16 +64,11 @@ namespace smedia {
             "        saturationMatrix( saturation ) * color;\n"
             "}";
 
-    void AdjustColorFunctor::onInit(InputHandler &inputHandler) {
+    bool AdjustColorFunctor::onInit(InputHandler &inputHandler) {
         mContrast = 1;
         mBrightness = 0;
         mSaturation = 1;
-        mGLContext->runInRenderThread([this]()->bool {
-            if (mProgram == nullptr) {
-                mProgram = std::unique_ptr<Program>(mGLContext->getRenderCore()->createProgram(fragmentShader));
-            }
-            return true;
-        });
+
         mInputHandler.registerHandler("contrast",[this](InputData inputData)->bool {
             float value = 0;
             if (!inputData.data.getData(value)) {
@@ -102,18 +97,30 @@ namespace smedia {
             return true;
         });
         LOG_DEBUG << "AdjustColorFunctor init finish";
-    }
-
-    void AdjustColorFunctor::onDraw(GLBufferFrame *bufferFrame,GLFrame& frame) {
-        mProgram->use();
-        mProgram->setFloat("brightness",mBrightness);
-        mProgram->setFloat("contrast",mContrast);
-        mProgram->setFloat("saturation",mSaturation);
-        mGLContext->getRenderCore()->draw(GL_TEXTURE_2D,frame.glTextureRef->textureId,mProgram.get(),bufferFrame->getFBOId());
+        return true;
     }
 
     void AdjustColorFunctor::unInitialize(FunctorContext *context) {
+        // unInitialize
+    }
 
+
+    bool AdjustColorFunctor::onDraw(GLBufferFrame *bufferFrame, Render *render, GLFrame &frame) {
+        render->getProgram()->setTexture("tex",frame.glTextureRef);
+        render->getProgram()->setFloat("brightness",mBrightness);
+        render->getProgram()->setFloat("contrast",mContrast);
+        render->getProgram()->setFloat("saturation",mSaturation);
+        bufferFrame->bind();
+        render->draw();
+        GLTextureRef glTexture = bufferFrame->unBind();
+        auto *newFrame = new GLFrame(frame);
+        newFrame->glTextureRef = glTexture;
+        mFunctorContext->setOutput(Data::create(newFrame),"video");
+        return true;
+    }
+
+    std::string AdjustColorFunctor::getFragmentCode() {
+        return fragmentShader;
     }
 
     REGISTER_FUNCTOR(AdjustColorFunctor)

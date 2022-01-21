@@ -75,7 +75,7 @@ namespace smedia {
         }
 
         checkEGLError("createWindowSurface");
-        LOG_INFO << "create window surface success,width=" << width << ",height=" << height;
+        LOG_INFO << "create window surface success,mWidth=" << width << ",mHeight=" << height;
         return eglSurface;
     }
 
@@ -100,7 +100,7 @@ namespace smedia {
         }
 
         checkEGLError("createPBufferSurface");
-        LOG_INFO << "create PBuffer surface success,width=" << width << ",height=" << height;
+        LOG_INFO << "create PBuffer surface success,mWidth=" << width << ",mHeight=" << height;
         return eglSurface;
     }
 
@@ -140,6 +140,59 @@ namespace smedia {
         mDisplay = EGL_NO_DISPLAY;
         mEglContext = EGL_NO_CONTEXT;
         mCurrentSurface = EGL_NO_SURFACE;
+    }
+
+    bool EGLCore::makeCurrentPBufferContext(int width, int height) {
+        EGLint surfaceAttribs[] = {
+                EGL_WIDTH, width,
+                EGL_HEIGHT, height,
+                EGL_NONE
+        };
+        // 创建surface
+        CHECK_GL_CODE(EGLSurface eglSurface = eglCreatePbufferSurface(mDisplay, mEglConfig, surfaceAttribs);)
+        if (eglSurface == nullptr) {
+            LOG_ERROR << "create pBuffer error:" << eglGetError();
+            LOG_ERROR << "pBuffer size = " << width << "x" << height;
+            return false;
+        }
+
+        // 检查是否分配内存成功
+        int _width;
+        int _height;
+        if (!eglQuerySurface(mDisplay, eglSurface, EGL_WIDTH, &width) ||
+            !eglQuerySurface(mDisplay, eglSurface, EGL_HEIGHT, &height)) {
+            LOG_ERROR << "allocate surface error" << eglGetError();
+            return false;
+        }
+
+        CHECK_GL_ERROR(createPBufferSurface)
+        LOG_DEBUG << "create PBuffer surface success,mWidth=" << width << ",mHeight=" << height;
+        return makeCurrentContext(eglSurface);
+    }
+
+    bool EGLCore::makeCurrentWindowContext(EGLNativeWindowType window) {
+        EGLint surfaceAttribs[] = {
+                EGL_NONE
+        };
+        // 创建surface
+        CHECK_GL_CODE(EGLSurface eglSurface = eglCreateWindowSurface(mDisplay, mEglConfig, window,
+                                                                     surfaceAttribs);)
+        if (eglSurface == nullptr) {
+            LOG_ERROR << "create window error:" << eglGetError();
+            return false;
+        }
+        // 检查内存是否分配成功
+        int width;
+        int height;
+        if (!eglQuerySurface(mDisplay, eglSurface, EGL_WIDTH, &width) ||
+            !eglQuerySurface(mDisplay, eglSurface, EGL_HEIGHT, &height)) {
+            LOG_ERROR << "allocate surface error" << eglGetError();
+            return false;
+        }
+
+        CHECK_GL_ERROR(createWindowSurface)
+        LOG_INFO << "create window surface success,mWidth=" << width << ",mHeight=" << height;
+        return makeCurrentContext(eglSurface);
     }
 
 

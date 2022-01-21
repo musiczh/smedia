@@ -7,7 +7,7 @@
 #include "FunctorRegister.h"
 namespace smedia {
 
-    void ImageLoader::initialize(FunctorContext *context) {
+    bool ImageLoader::initialize(FunctorContext *context) {
         mFunctorContext = context;
         mInputHandler.registerHandler("Data",[this](InputData inputData) ->bool {
             ImageFrame* imageFramePtr;
@@ -25,6 +25,7 @@ namespace smedia {
             LOG_ERROR << "ImageLoader read input data error";
             return false;
         });
+        return true;
     }
 
     void ImageLoader::unInitialize(FunctorContext *context) {
@@ -32,17 +33,14 @@ namespace smedia {
     }
 
     bool ImageLoader::execute(FunctorContext *context) {
-        return mInputHandler.runHandler(context);
+        return mInputHandler.runExecuteHandler(context);
     }
 
-    void ImageLoader::setOption(const std::string &key, Data value) {
-        mInputHandler.runHandler(mFunctorContext,key,value);
-    }
 
     JNIObject ImageLoader::readPixelBuffer(ImageFrame &imageFrame) {
         JNIObject res;
         switch (imageFrame.format) {
-            case RGBA:{
+            case FORMAT_RGBA:{
                 res = readAsBitmap(imageFrame);
                 break;
             }
@@ -63,6 +61,10 @@ namespace smedia {
         JNIService::getEnv()->DeleteLocalRef(byteBufferObject);
 
         return bitmapObject;
+    }
+
+    void ImageLoader::setOption(FunctorContext *context, const std::string &key, Data value) {
+        mInputHandler.runOptionsHandler(context,key,value);
     }
 
     REGISTER_FUNCTOR(ImageLoader)

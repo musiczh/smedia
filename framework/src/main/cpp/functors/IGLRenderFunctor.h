@@ -9,6 +9,7 @@
 #include "InputHandler.h"
 #include "GLBufferFrame.h"
 #include "GLFrame.h"
+#include "Render.h"
 #include "FunctorRegister.h"
 
 // 帮助拼接字符串
@@ -27,17 +28,17 @@
 namespace smedia {
     class IGLRenderFunctor : public IFunctor{
     private:
-        void initialize(FunctorContext *context) override;
+        bool initialize(FunctorContext *context) override;
         bool execute(FunctorContext *context) override;
-        void setOption(const std::string &key, Data value) override;
+        void setOption(FunctorContext *context, const std::string &key, Data value) override;
 
     public:
-        // 初始化的时候调用，用于注册option以及其他的输入tag，VIDEO已经被注册
-        // 初始化program、input、输入参数
-        virtual void onInit(InputHandler& inputHandler) = 0;
-        // 进行绘制，需要创建渲染管线以及其他的操作,此方法执行在渲染线程
-        virtual void onDraw(GLBufferFrame* bufferFrame,GLFrame& frame) = 0;
-        virtual void unInitialize(FunctorContext *context) override = 0;
+        // 初始化的时候调用，用于注册option以及其他的输入tag，video默认已经被注册，并会回调onDraw方法
+        virtual bool onInit(InputHandler& inputHandler) = 0;
+        // 进行绘制，此方法运行在渲染线程中。需要绑定bufferFrame，设置uniform，最后render和unbind。
+        // 最后需要设置输出给functorContext
+        virtual bool onDraw(GLBufferFrame* bufferFrame,Render* render,GLFrame& frame) = 0;
+        virtual void unInitialize(FunctorContext *context) override;
         // 返回fragment着色器自动创建program,默认不创建program
         virtual std::string getFragmentCode();
         ~IGLRenderFunctor() override = default;
@@ -45,12 +46,9 @@ namespace smedia {
     protected:
         GLContextRef mGLContext;
         std::unique_ptr<GLBufferFrame> mGLBufferFrame;
-        std::unique_ptr<Program> mRenderProgram;
+        std::unique_ptr<Render> mRender;
         InputHandler mInputHandler;
         FunctorContext* mFunctorContext;
-
-        // 是否自动输出纹理到VIDEO tag，默认输出
-        bool ifSendFrame;
     };
 }
 

@@ -7,17 +7,20 @@
 #include "IGLRenderFunctor.h"
 #include "InputHandler.h"
 #include "GLBufferFrame.h"
+#include "Render.h"
 /**
  * 基本属性调节：brightness亮度 (0.1-x)，contrast对比度、saturation饱和度（1.0-x)
  */
 namespace smedia {
     class AdjustColorFunctor : public IGLRenderFunctor{
     public:
-        virtual void onInit(InputHandler &inputHandler);
+        bool onInit(InputHandler &inputHandler) override;
 
-        virtual void onDraw(GLBufferFrame *bufferFrame,GLFrame&);
+        bool onDraw(GLBufferFrame *bufferFrame, Render *render, GLFrame &frame) override;
 
-        virtual void unInitialize(FunctorContext *context);
+        std::string getFragmentCode() override;
+
+        virtual void unInitialize(FunctorContext *context) override;
 
         virtual ~AdjustColorFunctor() = default;
 
@@ -25,7 +28,6 @@ namespace smedia {
         float mSaturation;
         float mContrast;
         float mBrightness;
-        std::unique_ptr<Program> mProgram;
     };
 }
 

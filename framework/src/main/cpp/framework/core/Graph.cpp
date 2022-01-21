@@ -3,6 +3,7 @@
 //
 
 #include "Graph.h"
+#include "GLTexturePool.h"
 
 namespace smedia {
     Graph::Graph() {
@@ -220,6 +221,10 @@ namespace smedia {
         auto* glContext = new GLContext();
         glContext->init(data);
         auto *glContextRef = new GLContextRef(glContext);
+
+        auto* glTexturePool = new GLTexturePool(*glContextRef);
+        glContext->setGLTexturePool(glTexturePool);
+
         Data contextData = Data::create(glContextRef);
         mGlobalService["GLContext"] = contextData;
     }

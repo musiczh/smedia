@@ -6,7 +6,7 @@
 #include "FunctorRegister.h"
 namespace smedia {
 
-    void DispatchFunctor::initialize(FunctorContext *context) {
+    bool DispatchFunctor::initialize(FunctorContext *context) {
         mFunctorContext = context;
         mImageSignal = false;
         mInputHandler.registerHandler("imageSignal",[this](InputData inputData)->bool {
@@ -23,6 +23,7 @@ namespace smedia {
             mFunctorContext->setOutput(inputData.data,"Master");
             return true;
         });
+        return true;
     }
 
     void DispatchFunctor::unInitialize(FunctorContext *context) {
@@ -30,12 +31,13 @@ namespace smedia {
     }
 
     bool DispatchFunctor::execute(FunctorContext *context) {
-        return mInputHandler.runHandler(context);
+        return mInputHandler.runExecuteHandler(context);
     }
 
-    void DispatchFunctor::setOption(const std::string &key, Data value) {
-        mInputHandler.runHandler(mFunctorContext,key,value);
+    void DispatchFunctor::setOption(FunctorContext *context, const std::string &key, Data value) {
+        mInputHandler.runOptionsHandler(context,key,value);
     }
+
 
     REGISTER_FUNCTOR(DispatchFunctor)
 }

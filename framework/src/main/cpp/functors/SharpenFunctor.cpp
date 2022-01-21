@@ -8,8 +8,8 @@ namespace smedia {
                                   "out vec4 FragColor;\n"
                                   "in vec2 otPos;\n"
                                   "uniform float sharpen;\n"
-                                  "uniform float width;\n"
-                                  "uniform float height;\n"
+                                  "uniform float mWidth;\n"
+                                  "uniform float mHeight;\n"
                                   "uniform sampler2D tex;\n"
                                   "\n"
                                   "void main(){\n"
@@ -18,7 +18,7 @@ namespace smedia {
                                   "//uv.x = mod( uv.x * 2.0, 1.0 );\n"
                                   "\n"
                                   "\n"
-                                  "vec2 step = vec2(1.0/width,1.0/height);\n"
+                                  "vec2 step = vec2(1.0/mWidth,1.0/mHeight);\n"
                                   "\n"
                                   "vec3 texA = texture( tex, uv + vec2(-step.x, -step.y) * 1.5 ).rgb;\n"
                                   "vec3 texB = texture( tex, uv + vec2( step.x, -step.y) * 1.5 ).rgb;\n"
@@ -38,14 +38,8 @@ namespace smedia {
                                   "FragColor = vec4(col,1.0);"
                                   "}";
 
-    void SharpenFunctor::onInit(InputHandler &inputHandler) {
+    bool SharpenFunctor::onInit(InputHandler &inputHandler) {
         mSharpen = 0;
-        if (mProgram == nullptr) {
-            mGLContext->runInRenderThread([this]()->bool {
-                mProgram = std::unique_ptr<Program>(mGLContext->getRenderCore()->createProgram(fv));
-                return true;
-            });
-        }
         inputHandler.registerHandler("sharpen",INPUT_CALLBACK {
             float value;
             if (!inputData.data.getData(value)) {
@@ -55,18 +49,29 @@ namespace smedia {
             mSharpen = value;
             return true;
         });
+        return true;
     }
 
-    void SharpenFunctor::onDraw(GLBufferFrame *bufferFrame, GLFrame &frame) {
-        mProgram->use();
-        mProgram->setFloat("sharpen",mSharpen);
-        mProgram->setFloat("width",frame.width);
-        mProgram->setFloat("height",frame.height);
-        mGLContext->getRenderCore()->draw(GL_TEXTURE_2D,frame.glTextureRef->textureId,mProgram.get(),bufferFrame->getFBOId());
+    bool SharpenFunctor::onDraw(GLBufferFrame *bufferFrame, Render *render, GLFrame &frame) {
+        render->getProgram()->setTexture("tex",frame.glTextureRef);
+        render->getProgram()->setFloat("sharpen",mSharpen);
+        render->getProgram()->setFloat("mWidth",frame.width);
+        render->getProgram()->setFloat("mHeight",frame.height);
+        bufferFrame->bind();
+        render->draw();
+        auto texture = bufferFrame->unBind();
+        auto *newFrame = new GLFrame(frame);
+        newFrame->glTextureRef = texture;
+        mFunctorContext->setOutput(Data::create(newFrame),"video");
+        return true;
     }
 
     void SharpenFunctor::unInitialize(FunctorContext *context) {
+    }
 
+
+    std::string SharpenFunctor::getFragmentCode() {
+        return fv;
     }
 
     REGISTER_FUNCTOR(SharpenFunctor)

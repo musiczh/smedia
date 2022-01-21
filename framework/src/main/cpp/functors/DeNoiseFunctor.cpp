@@ -59,16 +59,16 @@ namespace smedia {
                                   "    FragColor = smartDeNoise(tex,otPos,sigma,kSigma,threshold);\n"
                                   "}";
 
-    void DeNoiseFunctor::onInit(InputHandler &inputHandler) {
+
+
+    void DeNoiseFunctor::unInitialize(FunctorContext *context) {
+
+    }
+
+    bool DeNoiseFunctor::onInit(InputHandler &inputHandler) {
         mSigma = 3;
         mKSigma = 0;
         mThreshold = 0.1;
-        if (mProgram == nullptr) {
-            mGLContext->runInRenderThread([this]()->bool {
-                mProgram = std::unique_ptr<Program>(mGLContext->getRenderCore()->createProgram(fv));
-                return true;
-            });
-        }
         inputHandler.registerHandler("sigma",[this](InputData inputData)->bool {
             float value;
             if (!inputData.data.getData(value)) {
@@ -96,18 +96,25 @@ namespace smedia {
             mThreshold = value;
             return true;
         });
+        return true;
     }
 
-    void DeNoiseFunctor::onDraw(GLBufferFrame *bufferFrame, GLFrame &frame) {
-        mProgram->use();
-        mProgram->setFloat("sigma",mSigma);
-        mProgram->setFloat("kSigma",mKSigma);
-        mProgram->setFloat("threshold",mThreshold);
-        mGLContext->getRenderCore()->draw(GL_TEXTURE_2D,frame.glTextureRef->textureId,mProgram.get(),bufferFrame->getFBOId());
+    bool DeNoiseFunctor::onDraw(GLBufferFrame *bufferFrame, Render *render, GLFrame &frame) {
+        render->getProgram()->setTexture("tex",frame.glTextureRef);
+        render->getProgram()->setFloat("sigma",mSigma);
+        render->getProgram()->setFloat("kSigma",mKSigma);
+        render->getProgram()->setFloat("threshold",mThreshold);
+        bufferFrame->bind();
+        render->draw();
+        auto texture = bufferFrame->unBind();
+        auto *newFrame = new GLFrame(frame);
+        newFrame->glTextureRef = texture;
+        mFunctorContext->setOutput(Data::create(newFrame),"video");
+        return true;
     }
 
-    void DeNoiseFunctor::unInitialize(FunctorContext *context) {
-
+    std::string DeNoiseFunctor::getFragmentCode() {
+        return IGLRenderFunctor::getFragmentCode();
     }
 
     REGISTER_FUNCTOR(DeNoiseFunctor)

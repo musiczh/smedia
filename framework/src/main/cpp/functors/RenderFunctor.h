@@ -14,31 +14,30 @@
 #include "MatrixUtil.h"
 #include <math.h>
 /**
- * 接收2d纹理，并渲染到屏幕上，需要先设置
+ * android接收2d纹理，并渲染到屏幕上，需要先设置：
  * 1.NativeWindow:Surface
  * 2.窗口宽高：决定了渲染尺寸的正确
  */
 namespace smedia {
+    class Render;
+    class GLBufferFrame;
     class RenderFunctor : public IFunctor {
     public:
-        void initialize(FunctorContext *context) override;
+        bool initialize(FunctorContext *context) override;
 
         void unInitialize(FunctorContext *context) override;
 
         bool execute(FunctorContext *context) override;
 
-        void setOption(const std::string &key, Data value) override;
+        void setOption(FunctorContext *context, const std::string &key, Data value) override;
 
     private:
-        std::unique_ptr<Program> mProgram;
         FunctorContext* mFunctorContext;
-
         GLContextRef mGLContext;
+        std::unique_ptr<Render> mRender;
 
-        int windowWidth;
-        int windowHeight;
-
-        volatile bool mInit;
+        int mWindowWidth;
+        int mWindowHeight;
     };
 }
 

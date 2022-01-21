@@ -11,14 +11,14 @@
       "functor": "OESTexReaderFunctor",
       "name": "oesNode",
       "outputs": [
-        "VIDEO:v1"
+        "video:v1"
       ]
     },
     {
       "functor": "RenderFunctor",
       "name": "renderNode",
       "inputs": [
-        "VIDEO:v1"
+        "video:v1"
       ]
 
     }

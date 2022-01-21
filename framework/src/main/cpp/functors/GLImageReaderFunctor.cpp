@@ -18,11 +18,31 @@ namespace smedia {
         }
     );
 
-    void GLImageReaderFunctor::onInit(InputHandler &inputHandler) {
+    void GLImageReaderFunctor::unInitialize(FunctorContext *context) {
+
+    }
+
+    std::string GLImageReaderFunctor::getFragmentCode() {
+        return fv;
+    }
+
+    bool GLImageReaderFunctor::onDraw(GLBufferFrame *bufferFrame, Render *render, GLFrame &frame) {
+        if (mRatio != -1) {
+            // todo 处理图片比例问题，进行裁剪
+        }
+        bufferFrame->bind();
+        render->getProgram()->setTexture("tex",frame.glTextureRef);
+        render->draw();
+        uint8_t * buffer = bufferFrame->readRGBAPixelData();
+        bufferFrame->unBind();
+        auto* imageFrame = new ImageFrame(frame.width, frame.height, buffer, FORMAT_RGBA);
+        mFunctorContext->setOutput(Data::create(imageFrame),"data");
+        return true;
+    }
+
+    bool GLImageReaderFunctor::onInit(InputHandler &inputHandler) {
         mEnableRGBA = true;
         mRatio = -1;
-        // 不自动发生数据给下面节点
-        ifSendFrame = false;
         inputHandler.registerHandler("enableRGBA",INPUT_CALLBACK{
             bool value;
             if (inputData.data.getData(value)) {
@@ -41,28 +61,7 @@ namespace smedia {
             LOG_ERROR << "GLImageReaderFunctor get ratio fail ";
             return false;
         });
-    }
-
-    void GLImageReaderFunctor::onDraw(GLBufferFrame *bufferFrame, GLFrame &frame) {
-        if (mRatio != -1) {
-            // todo 处理图片比例问题，进行裁剪
-        }
-        mGLContext->getRenderCore()->bindFrameBuffer(bufferFrame->getFBOId());
-        mRenderProgram->use();
-        mGLContext->getRenderCore()->draw(GL_TEXTURE_2D,frame.glTextureRef->textureId,mRenderProgram.get(),0);
-        // RGBA一个通道一个字节
-        uint8_t * buffer = mGLContext->getRenderCore()->getCurrentRGBAData(frame.width,frame.height);
-        mGLContext->getRenderCore()->bindFrameBuffer(0);
-        auto* imageFrame = new ImageFrame(frame.width,frame.height,buffer,RGBA);
-        mFunctorContext->setOutput(Data::create(imageFrame),"Data");
-    }
-
-    void GLImageReaderFunctor::unInitialize(FunctorContext *context) {
-
-    }
-
-    std::string GLImageReaderFunctor::getFragmentCode() {
-        return fv;
+        return true;
     }
 
     REGISTER_FUNCTOR(GLImageReaderFunctor)

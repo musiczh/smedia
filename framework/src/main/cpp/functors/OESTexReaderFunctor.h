@@ -8,7 +8,9 @@
 #include "IFunctor.h"
 #include "Program.h"
 #include "GLFrame.h"
-#include "GLHelper.h"
+#include "Render.h"
+#include "GLTexture.h"
+#include "GLBufferFrame.h"
 #include <deque>
 #include "JNIBridge.h"
 #include <android/native_window_jni.h>
@@ -20,32 +22,22 @@ namespace smedia {
     class OESTexReaderFunctor : public IFunctor {
 
     public:
-        void initialize(FunctorContext *context) override;
+        bool initialize(FunctorContext *context) override;
 
         void unInitialize(FunctorContext *context) override;
 
         bool execute(FunctorContext *context) override;
 
-        void setOption(const std::string &key, Data value) override;
+        void setOption(FunctorContext *context,const std::string &key, Data value) override;
 
     private:
         FunctorContext* mFunctorContext;
         std::deque<Data> mOptionQueue;
-
         std::mutex mQueueLock;
-
-        int width;
-        int height;
-
         GLContextRef mGLContext;
-        int windowWidth;
-        int windowHeight;
+        std::unique_ptr<Render> mRender;
+        std::unique_ptr<GLBufferFrame> mGLBufferFrame;
 
-        unsigned int mTextureId{0};
-        unsigned int mFBO{0};
-        std::unique_ptr<Program> mProgram;
-
-        volatile bool mInit;
     };
 }
 

@@ -86,8 +86,8 @@ public class BeautyActivity extends AppCompatActivity {
             public void onSurfaceTextureAvailable(@NonNull SurfaceTexture surface, int width, int height) {
                 Surface windowSurface = new Surface(surface);
                 mGraph.setOption("renderNode","nativeWindow",windowSurface);
-                mGraph.setOption("renderNode","windowWidth",width);
-                mGraph.setOption("renderNode","windowHeight",height);
+                mGraph.setOption("renderNode","mWindowWidth",width);
+                mGraph.setOption("renderNode","mWindowHeight",height);
             }
         });
         frameLayout.addView(textureView, FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);

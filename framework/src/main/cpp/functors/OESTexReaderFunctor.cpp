@@ -20,38 +20,28 @@ namespace smedia {
                                  "}";
 
 
-    void OESTexReaderFunctor::initialize(smedia::FunctorContext *context) {
-        if (mInit) {
-            LOG_DEBUG << "OESTexReaderFunctor has init";
-            return;
-        }
+    bool OESTexReaderFunctor::initialize(smedia::FunctorContext *context) {
         mFunctorContext = context;
         if (!mFunctorContext->getGlobalService("GLContext").getData(mGLContext)) {
-            LOG_ERROR << "glContext in functorContext is null";
-            return;
+            LOG_ERROR << "mGLContext in functorContext is null";
+            return false;
         }
-        RenderCore* renderCore = mGLContext->getRenderCore();
-        mGLContext->runInRenderThread([this,renderCore]()->bool{
-            mProgram = std::unique_ptr<Program>(renderCore->createProgram(fragmentShader));
-            mFBO = renderCore->createFrameBuffer();
-            return true;
-        });
-        LOG_DEBUG << "initial OESTexReaderFunctor success , textureId = " <<mTextureId << " fbo = " << mFBO;
-        mInit = true;
+        mGLBufferFrame = GLBufferFrame::Create(mGLContext, nullptr);
+        mRender = Render::CreateWithShaderCode(mGLContext,fragmentShader);
+        if (mRender == nullptr) {
+            LOG_ERROR << "create render error";
+            return false;
+        }
+        LOG_DEBUG << "initial OESTexReaderFunctor success";
+        return true;
     }
 
     void OESTexReaderFunctor::unInitialize(smedia::FunctorContext *context) {
         // 释放纹理和fbo对象
-        glDeleteTextures(1,&mTextureId);
-        glDeleteFramebuffers(1,&mFBO);
+        LOG_DEBUG << "unInitialize OESTexReaderFunctor";
     }
 
     bool OESTexReaderFunctor::execute(smedia::FunctorContext *context) {
-        if (!mInit) {
-            LOG_ERROR << "OESTexReaderFunctor has not init";
-            return false;
-        }
-
         Data data;
         GLFrame frame{};
         {
@@ -66,31 +56,22 @@ namespace smedia {
             return false;
         }
 
-        mGLContext->runInRenderThread([this,frame]()->bool{
-            if (mTextureId == 0) {
-                mTextureId = mGLContext->getRenderCore()->create2DTexture(frame.width, frame.height);
-            }
-            mGLContext->getRenderCore()->bindTextureInFrameBuffer(mFBO, mTextureId);
-            glViewport(0,0,frame.width,frame.height);
-            mProgram->use();
-            mGLContext->getRenderCore()->draw(GL_TEXTURE_EXTERNAL_OES, frame.glTextureRef->textureId, mProgram.get(), mFBO);
-            return true;
-        });
+        int viewPort[4] = {0,0,frame.width,frame.height};
+        mGLBufferFrame->setViewPort(viewPort);
+        mGLBufferFrame->bind();
+        mRender->getProgram()->setTexture("boxTexture",frame.glTextureRef);
+        mRender->draw();
+        GLTextureRef glTexture = mGLBufferFrame->unBind();
 
         auto* newFrame = new GLFrame(frame);
-        auto* glTexture = new GLTexture(mGLContext, mTextureId, frame.width, frame.height);
-        newFrame->glTextureRef = std::shared_ptr<GLTexture>(glTexture);
+        newFrame->glTextureRef = glTexture;
         Data newData = Data::create(newFrame);
-        mFunctorContext->setOutput(newData,"VIDEO");
-        // 下次需要重新创建纹理
-        mTextureId = 0;
-        // 不要释放oes纹理
-        frame.glTextureRef->textureId = 0;
+        mFunctorContext->setOutput(newData,"video");
         return true;
     }
 
 
-    void OESTexReaderFunctor::setOption(const std::string &key, smedia::Data value) {
+    void OESTexReaderFunctor::setOption(FunctorContext *context,const std::string &key, smedia::Data value) {
         if (key == "DATA") {
             if (mGLContext == nullptr) {
                 LOG_ERROR << "mGLContext is null";
@@ -106,13 +87,16 @@ namespace smedia {
             auto* glFrame = new GLFrame{};
             glFrame->width = JNIInvoker<int>::GetObjectFiled(object.getJObject(),"width");
             glFrame->height = JNIInvoker<int>::GetObjectFiled(object.getJObject(),"height");
-            int textureId = JNIInvoker<int>::GetObjectFiled(object.getJObject(),"textureId");
-            auto* glTexture = new GLTexture(mGLContext, textureId, glFrame->width, glFrame->height);
-            glFrame->glTextureRef = std::shared_ptr<GLTexture>(glTexture);
-            JNIObject object1 = JNIInvoker<JNIObject>::InvokeObjectMethod(object.getJObject(),"onNativeGetUVMatrix");
             glFrame->orientation = JNIInvoker<int>::GetObjectFiled(object.getJObject(),"orientation");
-            glFrame->format = TEXTURE_OES;
-            std::vector<float> v = JNIData::jFloatArrayToVector(reinterpret_cast<jfloatArray>(object1.getJObject()));
+            int textureId = JNIInvoker<int>::GetObjectFiled(object.getJObject(),"textureId");
+            JNIObject jUVMatrix = JNIInvoker<JNIObject>::InvokeObjectMethod(object.getJObject(), "onNativeGetUVMatrix");
+
+            auto glTexture = GLTexture::Create(mGLContext, glFrame->width, glFrame->height, TEXTURE_TYPE_OES, textureId);
+            // 外部纹理不要复用和自动释放
+            glTexture->setAutoOption(false, false);
+            glFrame->glTextureRef = glTexture;
+            glFrame->format = FORMAT_TEXTURE_OES;
+            std::vector<float> v = JNIData::jFloatArrayToVector(reinterpret_cast<jfloatArray>(jUVMatrix.getJObject()));
             for (int i=0;i<16;i++) {
                 glFrame->UVMatrix[i] = v[i];
             }

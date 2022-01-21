@@ -3,6 +3,9 @@
 //
 
 #include "RenderFunctor.h"
+#include "Render.h"
+#include "GLBufferFrame.h"
+
 namespace smedia {
     const static std::string fragmentShade = "#version 300 es\n"
                                               "out vec4 FragColor;\n"
@@ -16,18 +19,15 @@ namespace smedia {
                                               "    FragColor = texture(tex,vec2(pos.x,pos.y));\n"
                                               "}";
 
-    void RenderFunctor::initialize(FunctorContext *context) {
-        if (mInit) {
-            LOG_DEBUG << "RenderFunctor has init";
-            return;
-        }
+    bool RenderFunctor::initialize(FunctorContext *context) {
         mFunctorContext = context;
         if (!mFunctorContext->getGlobalService("GLContext").getData(mGLContext)) {
-            LOG_ERROR << "glContext in functorContext is null";
-            return;
+            LOG_ERROR << "mGLContext in functorContext is null";
+            return false;
         }
+        mRender = Render::CreateWithShaderCode(mGLContext,fragmentShade);
         LOG_DEBUG << "initial RenderFunctor success" ;
-        mInit = true;
+        return true;
     }
 
     void RenderFunctor::unInitialize(FunctorContext *context) {
@@ -35,22 +35,16 @@ namespace smedia {
     }
 
     bool RenderFunctor::execute(FunctorContext *context) {
-        if (!mInit) {
-            LOG_ERROR << "RenderFunctor has not init";
-            return false;
-        }
-        Data inputData = mFunctorContext->popInput("VIDEO");
+        Data inputData = mFunctorContext->popInput("video");
         GLFrame frame{};
         if (inputData.isEmpty() || !inputData.getData(frame)) {
             LOG_ERROR << "execute no input";
             return false;
         }
 
-        RenderCore* renderCore = mGLContext->getRenderCore();
-        EGLCore* eglCore = mGLContext->getEglCore();
-
         // 帧数据的比例和屏幕的比例不同，需要进行缩放裁剪
-        float windowRatio = windowWidth/(windowHeight*1.0f);
+        // todo 后面需要支持不同的缩放裁剪逻辑
+        float windowRatio = mWindowWidth / (mWindowHeight * 1.0f);
         float frameRatio;
         if (frame.orientation == 90 || frame.orientation == 270) {
             frameRatio = frame.height/(frame.width*1.0f);
@@ -62,8 +56,7 @@ namespace smedia {
                                  0,1,0,0,
                                  0,0,1,0,
                                  0,0,0,1};
-        float res[16] = {0};
-
+        auto *res = new float [16]{0};
         if (ratio > 1.0f) {
             mCropMatrix[0] = 1.0f / ratio;
             mCropMatrix[12] = 0.5f * (1.0f - 1.0f / ratio);
@@ -73,27 +66,18 @@ namespace smedia {
         }
         MultiplyMM(mCropMatrix,frame.UVMatrix,res);
 
-        float *uvm = res;
-
-        mGLContext->runInRenderThread([this,renderCore,eglCore,uvm,frame]()->bool{
-            glViewport(0,0,windowWidth,windowHeight);
-            if (mProgram == nullptr) {
-                mProgram = std::unique_ptr<Program>(renderCore->createProgram(fragmentShade));
-            }
-            mProgram->use();
-            mProgram->setMat4("model",uvm);
-            renderCore->draw(GL_TEXTURE_2D,frame.glTextureRef->textureId,mProgram.get(),0);
-            eglCore->swapBuffer();
-            return true;
-        });
+        mRender->getProgram()->setTexture("tex",frame.glTextureRef);
+        mRender->getProgram()->setMat4("model",res);
+        mRender->draw();
+        mGLContext->getEglCore()->swapBuffer();
         return true;
     }
 
-    void RenderFunctor::setOption(const std::string &key, Data value) {
+    void RenderFunctor::setOption(FunctorContext *context, const std::string &key, Data value) {
         GLContextRef glContext;
         Data contextData = mFunctorContext->getGlobalService(GL_CONTEXT);
         if (!contextData.getData(glContext)) {
-            LOG_ERROR << "glContext is not init";
+            LOG_ERROR << "mGLContext is not init";
             return;
         }
         if (key == NATIVE_WINDOW) {
@@ -114,14 +98,14 @@ namespace smedia {
             LOG_DEBUG << "create window context success";
             return;
         }
-        if (key == "windowHeight") {
-            value.getData(windowHeight);
+        if (key == "mWindowHeight") {
+            value.getData(mWindowHeight);
         }
-        if (key == "windowWidth") {
-            value.getData(windowWidth);
+        if (key == "mWindowWidth") {
+            value.getData(mWindowWidth);
         }
-
     }
+
 
     REGISTER_FUNCTOR(RenderFunctor)
 }

@@ -131,7 +131,14 @@ namespace smedia {
                                               "    gl_FragColor.a = textureColor.a;"
                                               "}";
 
-    void BeautyFunctor::onInit(InputHandler &inputHandler) {
+
+
+
+    void BeautyFunctor::unInitialize(FunctorContext *context) {
+        // unInitialize
+    }
+
+    bool BeautyFunctor::onInit(InputHandler &inputHandler) {
         mLevel = 0;
         inputHandler.registerHandler("level",[this](InputData data)->bool{
             float value = 0;
@@ -140,21 +147,23 @@ namespace smedia {
             }
             return true;
         });
+        return true;
     }
 
-    void BeautyFunctor::onDraw(GLBufferFrame *bufferFrame, GLFrame& frame) {
-        if (mProgram == nullptr) {
-            mProgram = std::unique_ptr<Program>(mGLContext->getRenderCore()->createProgram(fragmentShader));
-        }
-        mProgram->use();
-        mProgram->setFloat("mulW",frame.width);
-        mProgram->setFloat("mulH",frame.height);
-        mProgram->setFloat("beautyStrength",mLevel);
-        mGLContext->getRenderCore()->draw(GL_TEXTURE_2D,frame.glTextureRef->textureId,mProgram.get(),bufferFrame->getFBOId());
+    bool BeautyFunctor::onDraw(GLBufferFrame *bufferFrame, Render *render, GLFrame &frame) {
+        render->getProgram()->setFloat("beautyStrength",mLevel);
+        render->getProgram()->setTexture("inputImageTexture",frame.glTextureRef);
+        bufferFrame->bind();
+        render->draw();
+        auto texture = bufferFrame->unBind();
+        auto *newFrame = new GLFrame(frame);
+        newFrame->glTextureRef = frame.glTextureRef;
+        mFunctorContext->setOutput(Data::create(newFrame),"video");
+        return true;
     }
 
-    void BeautyFunctor::unInitialize(FunctorContext *context) {
-
+    std::string BeautyFunctor::getFragmentCode() {
+        return fragmentShader;
     }
 
     REGISTER_FUNCTOR(BeautyFunctor)

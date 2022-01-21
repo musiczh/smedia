@@ -10,12 +10,13 @@
 #include "FunctorRegister.h"
 namespace smedia {
 
-    void ImageSourceFunctor::initialize(FunctorContext *context) {
+    bool ImageSourceFunctor::initialize(FunctorContext *context) {
         mFunctorContext = context;
         if (!mFunctorContext->getGlobalService("GLContext").getData(mGLContext)) {
-            LOG_ERROR << "glContext in functorContext is null";
-            return;
+            LOG_ERROR << "mGLContext in functorContext is null";
+            return false;
         }
+        // 默认都不输出
         mImageEnable = false;
         mGlEnable = false;
         mInputHandler.registerHandler("imageEnable",[this](InputData inputData)->bool {
@@ -34,11 +35,12 @@ namespace smedia {
             }
             return false;
         });
-        mInputHandler.registerHandler("Data",[this](InputData inputData_)->bool {
+        mInputHandler.registerHandler("data",[this](InputData inputData_)->bool {
             inputData = inputData_.data;
             mFunctorContext->executeSelf();
             return true;
         });
+        return true;
     }
 
     void ImageSourceFunctor::unInitialize(FunctorContext *context) {
@@ -83,35 +85,37 @@ namespace smedia {
             LOG_ERROR << "unlock pixel error";
             return false;
         }
+        // 按照配置进行输出
         if (mGlEnable) {
             // 转化为GLFrame
-            unsigned int textureId = 0;
             auto* pb = pixelBuffer.get();
-            mGLContext->runInRenderThread([&textureId,this,info,pb]()->bool {
-                textureId = mGLContext->getRenderCore()
-                        ->create2DTexture(info.width, info.height, pb);
-                return true;
-            });
+            GLTextureRef texture = GLTexture::Create(mGLContext,info.width,info.height,TEXTURE_TYPE_2D);
+            texture->setPixelData(PIXEL_RGBA,pb);
 
             auto *glFrame = new GLFrame;
             glFrame->width = info.width;
             glFrame->height = info.height;
-            auto* glTexture = new GLTexture(mGLContext,textureId,info.width,info.height);
-            glFrame->glTextureRef = std::shared_ptr<GLTexture>(glTexture);
-            glFrame->format = TEXTURE_2D;
+            glFrame->glTextureRef = texture;
+            glFrame->format = FORMAT_TEXTURE_2D;
             mFunctorContext->setOutput(Data::create(glFrame),"video");
         }
         if (mImageEnable) {
             // 转化为ImageFrame
-            auto* frame = new ImageFrame(info.width, info.height, pixelBuffer.release(), RGBA);
+            auto* frame = new ImageFrame(info.width, info.height, pixelBuffer.release(), FORMAT_RGBA);
             mFunctorContext->setOutput(Data::create(frame),"image");
         }
-        return true;
+        // 如果没有输出不需要调度后面的节点
+        if (mGlEnable || mImageEnable) {
+            return true;
+        }
+        return false;
     }
 
-    void ImageSourceFunctor::setOption(const std::string &key, Data value) {
-        mInputHandler.runHandler(mFunctorContext,key,value);
+    void
+    ImageSourceFunctor::setOption(FunctorContext *context, const std::string &key, Data value) {
+        mInputHandler.runOptionsHandler(context,key,value);
     }
+
 
     REGISTER_FUNCTOR(ImageSourceFunctor)
 }

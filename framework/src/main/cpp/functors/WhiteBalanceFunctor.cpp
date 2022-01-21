@@ -32,7 +32,7 @@ namespace smedia {
             }
             );
 
-    void WhiteBalanceFunctor::onInit(InputHandler &inputHandler) {
+    bool WhiteBalanceFunctor::onInit(InputHandler &inputHandler) {
 		inputHandler.registerHandler("temperature",INPUT_CALLBACK{
 			float value;
 			if (inputData.data.getData(value)){
@@ -51,13 +51,7 @@ namespace smedia {
 			LOG_DEBUG << "WhiteBalanceFunctor get tint fail";
 			return false;
 		});
-    }
-
-    void WhiteBalanceFunctor::onDraw(GLBufferFrame *bufferFrame, GLFrame &frame) {
-		mRenderProgram->use();
-		mRenderProgram->setFloat("temperature",mTemperature);
-		mRenderProgram->setFloat("tint",mTint);
-		mGLContext->getRenderCore()->draw(GL_TEXTURE_2D,frame.glTextureRef->textureId,mRenderProgram.get(),bufferFrame->getFBOId());
+		return true;
     }
 
     void WhiteBalanceFunctor::unInitialize(FunctorContext *context) {
@@ -68,5 +62,18 @@ namespace smedia {
         return fragmentCode;
     }
 
-    REGISTER_FUNCTOR(WhiteBalanceFunctor)
+	bool WhiteBalanceFunctor::onDraw(GLBufferFrame *bufferFrame, Render *render, GLFrame &frame) {
+		render->getProgram()->setFloat("temperature",mTemperature);
+		render->getProgram()->setFloat("tint",mTint);
+		render->getProgram()->setTexture("inputImageTexture",frame.glTextureRef);
+		bufferFrame->bind();
+		render->draw();
+		auto texture = bufferFrame->unBind();
+		auto* newFrame = new GLFrame(frame);
+		newFrame->glTextureRef = texture;
+		mFunctorContext->setOutput(Data::create(newFrame),"video");
+		return true;
+	}
+
+	REGISTER_FUNCTOR(WhiteBalanceFunctor)
 }

@@ -20,11 +20,10 @@ include_directories(functors)
 file(GLOB_RECURSE SOURCE_FUNCTORS functors/*.cpp)
 
 # gl
-include_directories(gl gl/gles gl/util)
+include_directories(gl gl/util)
 file(GLOB_RECURSE FILE_GL gl/*.cpp)
-file(GLOB_RECURSE FILE_ES gl/gles/*.cpp)
 file(GLOB_RECURSE FILE_UTIL gl/util/*.cpp)
-set(SOURCE_GL ${FILE_GL} ${FILE_ES} ${FILE_UTIL})
+set(SOURCE_GL ${FILE_GL} ${FILE_ES} ${FILE_UTIL} )
 
 # 全局util
 include_directories(util)

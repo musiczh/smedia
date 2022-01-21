@@ -11,7 +11,7 @@ namespace smedia {
     class GLFrame : public IFrame {
     public:
         // 纹理对象共享指针
-        GLTextureRef glTextureRef{};
+        GLTextureRef glTextureRef;
     };
 }
 

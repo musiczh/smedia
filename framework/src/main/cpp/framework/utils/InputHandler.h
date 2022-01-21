@@ -26,9 +26,9 @@ namespace smedia {
         void registerDefaultHandler(Handler defaultHandler);
 
         // 给execute用，内部popInput
-        bool runHandler(FunctorContext*);
+        bool runExecuteHandler(FunctorContext*);
         // 给setOption用
-        bool runHandler(FunctorContext*,const std::string& key,Data data);
+        bool runOptionsHandler(FunctorContext*,const std::string& key,Data data);
 
     private:
         bool handle(InputData);

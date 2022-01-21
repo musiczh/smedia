@@ -12,9 +12,9 @@
 namespace smedia {
     class HighLightShadowFunctor : public IGLRenderFunctor{
     public:
-        void onInit(InputHandler &inputHandler) override;
+        bool onInit(InputHandler &inputHandler) override;
 
-        void onDraw(GLBufferFrame *bufferFrame, GLFrame &frame) override;
+        bool onDraw(GLBufferFrame *bufferFrame, Render *render, GLFrame &frame) override;
 
         void unInitialize(FunctorContext *context) override;
 

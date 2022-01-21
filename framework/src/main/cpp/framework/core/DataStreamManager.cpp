@@ -48,7 +48,7 @@ namespace smedia {
         }
         if (newData.isEmpty()) {
             // 如果上面没有获取到数据，这里返回空数据
-            LOG_INFO << "return null data";
+            LOG_DEBUG << "return null data,tag" << tag << " index=" << index;
         }
         return newData;
     }

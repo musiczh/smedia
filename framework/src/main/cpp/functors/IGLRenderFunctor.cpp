@@ -5,30 +5,21 @@
 #include "IGLRenderFunctor.h"
 namespace smedia {
 
-    void IGLRenderFunctor::initialize(FunctorContext *context) {
+    bool IGLRenderFunctor::initialize(FunctorContext *context) {
         mFunctorContext = context;
-        ifSendFrame = true;
         if (!mFunctorContext->getGlobalService("GLContext").getData(mGLContext)) {
-            LOG_ERROR << "glContext in functorContext is null";
-            return;
+            LOG_ERROR << "mGLContext in functorContext is null";
+            return false;
         }
         // 初始化fbo
-        mGLContext->runInRenderThread([this]()->bool{
-            if (mGLBufferFrame == nullptr) {
-                mGLBufferFrame = std::unique_ptr<GLBufferFrame>(new GLBufferFrame(mGLContext->getRenderCore()));
-            }
-            if (mRenderProgram == nullptr) {
-                std::string fv = getFragmentCode();
-                if (fv.length() != 0) {
-                    mRenderProgram = std::unique_ptr<Program>(
-                            mGLContext->getRenderCore()->createProgram(fv));
-                }
+        mGLBufferFrame = GLBufferFrame::Create(mGLContext, nullptr);
+        mRender = Render::CreateWithShaderCode(mGLContext,getFragmentCode());
+        if (mRender == nullptr) {
+            LOG_ERROR << "create render fail";
+            return false;
+        }
 
-            }
-            return true;
-        } );
-
-        mInputHandler.registerHandler("VIDEO",[this](const InputData& inputData)->bool{
+        mInputHandler.registerHandler("video",[this](const InputData& inputData)->bool{
             GLFrame *ptr = nullptr;
             Data data = inputData.data;
             if (data.isEmpty() || !data.isTypeOf<GLFrame>() || !(ptr = data.getData<GLFrame>())) {
@@ -36,44 +27,34 @@ namespace smedia {
                 return false;
             }
             GLFrame frame = *ptr;
-            // 创建fbo的颜色附着，若已经创建了则为无操作，否则会创建对应的新的纹理附着
-            mGLBufferFrame->createTextureAttach(frame.width,frame.height);
-            glViewport(0,0,frame.width,frame.height);
+            int viewPort[] = {0,0,frame.width,frame.height};
+
+            mGLBufferFrame->setViewPort(viewPort);
             // 最后调用draw方法
-            onDraw(mGLBufferFrame.get(),frame);
-            if (ifSendFrame) {
-                auto* newFrame = new GLFrame(frame);
-                auto* glTexture = new GLTexture(mGLContext,mGLBufferFrame->getTextureId(),frame.width,frame.height);
-                newFrame->glTextureRef = std::shared_ptr<GLTexture>(glTexture);
-                mFunctorContext->setOutput(Data::create(newFrame),"VIDEO");
-            }
-            mGLContext->runInRenderThread([this]()->bool{
-                unsigned int tex = mGLBufferFrame->getTextureId();
-                if (!ifSendFrame) {
-                    // todo 如果没有存储到glFrame中，则需要释放纹理
-                    mGLContext->getRenderCore()->deleteTexture(tex);
-                }
-                return true;
+            return mGLContext->runInRenderThread([this,&frame]()->bool{
+                return onDraw(mGLBufferFrame.get(),mRender.get(),frame);
             });
-
-
-            return true;
         });
-        onInit(mInputHandler);
+
+        return onInit(mInputHandler);
     }
 
     bool IGLRenderFunctor::execute(FunctorContext *context) {
         // 渲染需要放到渲染线程中去执行
         return mGLContext->runInRenderThread([this,context]()->bool {
-            return mInputHandler.runHandler(context);
+            return mInputHandler.runExecuteHandler(context);
         });
     }
 
-    void IGLRenderFunctor::setOption(const std::string &key, Data value) {
-        mInputHandler.runHandler(mFunctorContext,key,value);
+    void IGLRenderFunctor::setOption(FunctorContext *context,const std::string &key, Data value) {
+        mInputHandler.runOptionsHandler(context,key,value);
     }
 
     std::string IGLRenderFunctor::getFragmentCode() {
         return "";
+    }
+
+    void IGLRenderFunctor::unInitialize(FunctorContext *context) {
+        //
     }
 }

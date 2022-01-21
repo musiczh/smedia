@@ -73,7 +73,7 @@ namespace smedia {
             }
             case RUNNING: {
                 for (auto& option : options) {
-                    m_Functor->setOption(option.first,option.second);
+                    m_Functor->setOption(m_functorContext.get(),option.first,option.second);
                 }
                 break;
             }
@@ -119,6 +119,7 @@ namespace smedia {
     }
 
     void Node::execute() {
+        LOG_DEBUG << name <<" execute------------";
         if (m_state != RUNNING) {
             LOG_INFO << "node is not running";
             return ;

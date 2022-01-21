@@ -21,13 +21,13 @@
 namespace smedia {
     class CallbackFunctor : public IFunctor{
     public:
-        void initialize(FunctorContext *context) override;
+        bool initialize(FunctorContext *context) override;
 
         void unInitialize(FunctorContext *context) override;
 
         bool execute(FunctorContext *context) override;
 
-        void setOption(const std::string &key, Data value) override;
+        void setOption(FunctorContext *context, const std::string &key, Data value) override;
 
         ~CallbackFunctor() override = default;
 

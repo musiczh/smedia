@@ -3,12 +3,11 @@
 //
 
 #include "GLContext.h"
-
-#include <utility>
+#include "GLTexturePool.h"
 
 namespace smedia {
     void GLContext::init(Data data) {
-        EGLContext eglContext{};
+        EGLContext eglContext;
         long eglContextHandle;
         if (data.isEmpty() || !data.getData(eglContextHandle)) {
             init(nullptr);
@@ -22,18 +21,14 @@ namespace smedia {
         if (shareContext == nullptr) {
             LOG_DEBUG << "create GLContext with no shareContext";
         }
-        mGLThread = std::shared_ptr<GLThread>(new GLThread);
+        mGLThread = std::unique_ptr<GLThread>(new GLThread);
         runInRenderThread([this,shareContext]()->bool{
+            // 初始化egl环境
             auto *eglCore = new EGLCore;
             eglCore->initEGL(shareContext);
             EGLSurface surface = eglCore->createPBufferSurface();
             eglCore->makeCurrentContext(surface);
-
-            auto* renderCore = new RenderCore;
-            renderCore->initGLES();
-
-            mEglCore = std::shared_ptr<EGLCore>(eglCore);
-            mRenderCore = std::shared_ptr<RenderCore>(renderCore);
+            mEglCore = std::unique_ptr<EGLCore>(eglCore);
             return true;
         });
         LOG_DEBUG << "GL_Context init success";
@@ -44,30 +39,42 @@ namespace smedia {
         return mGLThread->runSync(std::move(task));
     }
 
-    EGLCore *GLContext::getEglCore() {
+    void GLContext::runInRenderThreadV(const std::function<void()>& task) {
+        mGLThread->runSync([task]()->bool{
+            task();
+            return true;
+        });
+    }
+
+    EGLCore* GLContext::getEglCore() {
         return mEglCore.get();
     }
-
-    RenderCore *GLContext::getRenderCore() {
-        return mRenderCore.get();
-    }
-
-
 
     EGLInfo GLContext::getEglInfo() {
         return mEglCore->getEGLInfo();
     }
 
     GLContext::~GLContext() {
-        LOG_DEBUG << "destroy glContext";
-    }
-
-    void GLContext::release() {
-        LOG_DEBUG << "glContext release";
+        // 析构的时候释放egl环境
+        mGLTexturePool->release();
         mGLThread->runSync([this]()->bool{
             mEglCore->release();
             return true;
         });
+        LOG_DEBUG << "destroy GLContext";
+    }
+
+    GLTexturePool *GLContext::getGLTexturePool() {
+        return mGLTexturePool.get();
+    }
+
+    GLContext::GLContext() {
+        LOG_DEBUG << "create gl context";
+    }
+
+    void GLContext::setGLTexturePool(GLTexturePool *glTexturePool) {
+        mGLTexturePool.reset();
+        mGLTexturePool = std::unique_ptr<GLTexturePool>(glTexturePool);
     }
 
 

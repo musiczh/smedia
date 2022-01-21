@@ -6,7 +6,7 @@
 #include "FunctorRegister.h"
 namespace smedia {
 
-    void CallbackFunctor::initialize(FunctorContext *context) {
+    bool CallbackFunctor::initialize(FunctorContext *context) {
         mFunctorContext = context;
         mInputHandler.registerHandler("callback",[this](InputData inputData)->bool {
             JNIObject callbackObject;
@@ -27,18 +27,20 @@ namespace smedia {
             }
             return true;
         });
+        return true;
     }
 
     void CallbackFunctor::unInitialize(FunctorContext *context) {
-
+        //
     }
 
     bool CallbackFunctor::execute(FunctorContext *context) {
-        return mInputHandler.runHandler(context);
+        return mInputHandler.runExecuteHandler(context);
     }
 
-    void CallbackFunctor::setOption(const std::string &key, Data value) {
-        mInputHandler.runHandler(mFunctorContext,key,value);
+    void CallbackFunctor::setOption(FunctorContext *context, const std::string &key, Data value) {
+        mInputHandler.runOptionsHandler(context,key,value);
     }
+
     REGISTER_FUNCTOR(CallbackFunctor)
 }

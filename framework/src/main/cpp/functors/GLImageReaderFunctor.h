@@ -11,6 +11,7 @@
 #include "IGLRenderFunctor.h"
 
 /**
+ * 从GPU读取纹理数据到CPU中，输出RGBA类型的ImageFrame
  * enable决定输出的数据类型
  * ratio决定输出的图形的比例，-1表示原始数据比例
  * 输入：VIDEO，纹理Frame
@@ -20,9 +21,9 @@
 namespace smedia {
     class GLImageReaderFunctor : public IGLRenderFunctor{
     public:
-        void onInit(InputHandler &inputHandler) override;
+        bool onInit(InputHandler &inputHandler) override;
 
-        void onDraw(GLBufferFrame *bufferFrame, GLFrame &frame) override;
+        bool onDraw(GLBufferFrame *bufferFrame, Render *render, GLFrame &frame) override;
 
         void unInitialize(FunctorContext *context) override;
 
