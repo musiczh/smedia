@@ -91,7 +91,7 @@ namespace smedia {
     }
 
     unsigned char *GLBufferFrame::readRGBAPixelData(int width,int height) {
-        if (width == 1 && height == -1) {
+        if (width == -1 && height == -1) {
             width = mViewPort[2];
             height = mViewPort[3];
         }
