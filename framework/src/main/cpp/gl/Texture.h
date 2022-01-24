@@ -31,11 +31,11 @@ namespace smedia {
          * @param height
          * @param textureId 默认自动申请一个纹理，当textureId不为0，则不申请纹理，使用存在的纹理构建对象
          */
-        Texture(GLContextRef glContext, int width, int height, TextureType textureType,
+        Texture(GLContext* glContext, int width, int height, TextureType textureType,
                 unsigned int textureId = 0);
 
         // 构建一个纹理并传递数据
-        Texture(GLContextRef glContext, int width, int height, TextureType textureType,
+        Texture(GLContext* glContext, int width, int height, TextureType textureType,
                 PixelFormat format, const unsigned char* pixelData);
 
         ~Texture();
@@ -55,7 +55,7 @@ namespace smedia {
         int mWidth;
         int mHeight;
         TextureType mTextureType;
-        GLContextRef mGLContext;
+        GLContext* mGLContext;
         volatile bool mAutoRelease{true};
 
     };

@@ -10,10 +10,8 @@ namespace smedia {
     const static std::string fragmentShade = "#version 300 es\n"
                                               "out vec4 FragColor;\n"
                                               "in vec2 otPos;\n"
-                                             "uniform mat4 model;\n"
-                                              "\n"
+                                              "uniform mat4 model;\n"
                                               "uniform sampler2D tex;\n"
-                                              "\n"
                                               "void main(){\n"
                                               "    vec4 pos = model * vec4(otPos.xy,0.0,1.0);\n"
                                               "    FragColor = texture(tex,vec2(pos.x,pos.y));\n"
@@ -66,10 +64,15 @@ namespace smedia {
         }
         MultiplyMM(mCropMatrix,frame.UVMatrix,res);
 
+        mGLContext->runInRenderThreadV([this,frame](){
+            glViewport(0,0,mWindowWidth,mWindowHeight);
+        });
         mRender->getProgram()->setTexture("tex",frame.glTextureRef);
         mRender->getProgram()->setMat4("model",res);
         mRender->draw();
-        mGLContext->getEglCore()->swapBuffer();
+        mGLContext->runInRenderThreadV([this](){
+            mGLContext->getEglCore()->swapBuffer();
+        });
         return true;
     }
 

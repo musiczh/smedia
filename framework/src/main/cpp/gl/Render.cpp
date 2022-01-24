@@ -24,14 +24,13 @@ namespace smedia {
 
     // 默认的顶点着色器
     const static std::string defaultVShaderCode = "#version 300 es\n"
-                                                    "layout (location=0) in vec3 aPos;\n"
-                                                    "layout (location=1) in vec2 tPos;\n"
-                                                    "\n"
-                                                    "out vec2 otPos;\n"
-                                                    "void main(){\n"
-                                                    "    gl_Position = vec4(aPos,1.0);\n"
-                                                    "    otPos = tPos;\n"
-                                                    "}";
+                                                  "layout (location=0) in vec3 aPos;\n"
+                                                  "layout (location=1) in vec2 tPos;\n"
+                                                  "out vec2 otPos;\n"
+                                                  "void main(){\n"
+                                                  "    gl_Position = vec4(aPos,1.0);\n"
+                                                  "    otPos = tPos;\n"
+                                                  "}";
 
 
     Render::Render(GLContextRef glContext):mGLContext(std::move(glContext)) {
@@ -44,6 +43,8 @@ namespace smedia {
         mGLContext->runInRenderThreadV([this](){
             GL_CODE(glDeleteVertexArrays(1,&mVAO))
         });
+        mState = RENDER_DESTROY;
+        LOG_DEBUG << "destroy render";
     }
 
     std::unique_ptr<Render>
@@ -88,26 +89,23 @@ namespace smedia {
             LOG_ERROR << "illegal render state,can not bind,state=" << mState;
             return;
         }
+        // 第一次需要绑定顶点对象
+        if (mVAO == 0) {
+            GL_CODE(glGenVertexArrays(1, &mVAO))
+            GL_CODE(glBindVertexArray(mVAO);)
+            unsigned int VBO;
+            GL_CODE(glGenBuffers(1, &VBO))
+            GL_CODE(glBindBuffer(GL_ARRAY_BUFFER, VBO))
+            GL_CODE(glBufferData(GL_ARRAY_BUFFER, sizeof(verticesQuad), verticesQuad, GL_STATIC_DRAW))
+            GL_CODE(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) nullptr))
+            GL_CODE(glEnableVertexAttribArray(0))
+            GL_CODE(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
+                                          (void *) (3 * sizeof(float))))
+            GL_CODE(glEnableVertexAttribArray(1))
+            LOG_DEBUG << "init vertex array success";
+        }
+        GL_CODE(glBindVertexArray(mVAO))
         mProgram->bind();
-        mGLContext->runInRenderThreadV([this](){
-            // 第一次需要绑定顶点对象
-            if (mVAO == 0) {
-                GL_CODE(glGenVertexArrays(1, &mVAO))
-                glBindVertexArray(mVAO);
-                unsigned int VBO;
-                GL_CODE(glGenBuffers(1, &VBO))
-                GL_CODE(glBindBuffer(GL_ARRAY_BUFFER, VBO))
-                GL_CODE(glBufferData(GL_ARRAY_BUFFER, sizeof(verticesQuad), verticesQuad, GL_STATIC_DRAW))
-                GL_CODE(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) nullptr))
-                GL_CODE(glEnableVertexAttribArray(0))
-                GL_CODE(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                                              (void *) (3 * sizeof(float))))
-                GL_CODE(glEnableVertexAttribArray(1))
-                GL_CODE(glBindVertexArray(0))
-                LOG_DEBUG << "init vertex array success";
-            }
-            GL_CODE(glBindVertexArray(mVAO))
-        });
         mState = RENDER_BIND;
     }
 
@@ -117,18 +115,19 @@ namespace smedia {
             LOG_ERROR << "illegal render state,can not unbind ,state=" << mState;
             return;
         }
-        mGLContext->runInRenderThreadV([](){
-            CHECK_GL_CODE(glBindVertexArray(0);)
-        });
+        CHECK_GL_CODE(glBindVertexArray(0);)
         mState = RENDER_INIT;
     }
 
     void Render::draw() {
-        bind();
-        GL_CODE(glClear(GL_COLOR_BUFFER_BIT))
-        GL_CODE(glClearColor(0.7, 0.8, 0.6, 1.0))
-        GL_CODE(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4))
-        unBind();
+        mGLContext->runInRenderThreadV([this](){
+            bind();
+            GL_CODE(glClear(GL_COLOR_BUFFER_BIT))
+            GL_CODE(glClearColor(0.7, 0.8, 0.6, 1.0))
+            GL_CODE(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4))
+            unBind();
+            CHECK_GL_ERROR(draw finish)
+        });
     }
 
 

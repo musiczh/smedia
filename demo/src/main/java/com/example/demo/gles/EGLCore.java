@@ -6,6 +6,7 @@ import android.opengl.EGLContext;
 import android.opengl.EGLDisplay;
 import android.opengl.EGLExt;
 import android.opengl.EGLSurface;
+import android.util.Log;
 import android.view.Surface;
 
 import com.example.demo.util.LogUtil;
@@ -37,6 +38,7 @@ public class EGLCore {
         mEGLContext = EGL14.EGL_NO_CONTEXT;
         mEGLSurface = EGL14.EGL_NO_SURFACE;
         mEGLConfig = null;
+        Log.d("huan","java egl release success");
     }
 
     // 初始化config、display、context、egl

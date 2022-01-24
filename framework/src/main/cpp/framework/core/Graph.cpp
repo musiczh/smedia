@@ -130,7 +130,7 @@ namespace smedia {
 
     Graph::~Graph() {
         // 资源统一使用智能指针，各持有资源的对象自己负责释放内存，因此这里不需要进行内存释放
-        LOG_INFO << "graph stop";
+        LOG_DEBUG << "graph destroy";
     }
 
     bool Graph::run() {
@@ -221,9 +221,6 @@ namespace smedia {
         auto* glContext = new GLContext();
         glContext->init(data);
         auto *glContextRef = new GLContextRef(glContext);
-
-        auto* glTexturePool = new GLTexturePool(*glContextRef);
-        glContext->setGLTexturePool(glTexturePool);
 
         Data contextData = Data::create(glContextRef);
         mGlobalService["GLContext"] = contextData;

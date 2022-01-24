@@ -30,7 +30,9 @@ namespace smedia {
     void JClassManager::unInitJavaClass() {
         std::unique_lock<std::mutex> lock(dataLock);
         releaseAllJavaClass();
-        JNIService::getEnv()->DeleteGlobalRef(globalClassLoader);
+        // 释放class对象，类加载器不需要释放
+//        JNIService::getEnv()->DeleteGlobalRef(globalClassLoader);
+//        globalClassLoader = nullptr;
     }
 
 

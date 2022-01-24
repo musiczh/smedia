@@ -14,6 +14,9 @@ file(GLOB_RECURSE FILE_REGIS framework/registration/*.cpp)
 file(GLOB_RECURSE FILE_UTILS framework/utils/*.cpp)
 set(SOURCE_FRAMEWORK ${FILE_CORE} ${FILE_DATA} ${FILE_EXECUTE} ${FILE_JSON} ${FILE_REGIS} ${FILE_UTILS})
 
+#test
+include_directories(functors/gles)
+file(GLOB_RECURSE test_FUNCTORS functors/gles/*.cpp)
 
 # functors
 include_directories(functors)
@@ -47,6 +50,7 @@ add_library(framework SHARED
         ${SOURCE_GL}
         ${SOURCE_JNI}
         ${SOURCE_UTIL}
+        ${test_FUNCTORS}
 )
 
 target_link_libraries(framework android EGL GLESv3 jnigraphics ${log-lib})

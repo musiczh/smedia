@@ -7,7 +7,7 @@
 #include <sstream>
 namespace smedia {
 
-    GLTexturePool::GLTexturePool(GLContextRef glContext):mGLContext(glContext) {
+    GLTexturePool::GLTexturePool(GLContext* glContext):mGLContext(glContext) {
         LOG_DEBUG << "create glTexturePool";
     }
 
@@ -44,13 +44,13 @@ namespace smedia {
         return std::make_shared<Texture>(mGLContext, width, height, type);
     }
 
-    void GLTexturePool::recycleTexture(std::shared_ptr<Texture> glTextureRef) {
-        if (glTextureRef == nullptr) {
+    void GLTexturePool::recycleTexture(std::shared_ptr<Texture> textureRef) {
+        if (textureRef == nullptr) {
             LOG_ERROR << "can not recycle null texture";
             return;
         }
-        auto key = hashTexture(glTextureRef->mWidth, glTextureRef->mHeight,
-                               glTextureRef->mTextureType);
+        auto key = hashTexture(textureRef->mWidth, textureRef->mHeight,
+                               textureRef->mTextureType);
         if (mTexMap.find(key) == mTexMap.end()) {
             std::vector<TextureRef> newVector{};
             mTexMap[key] = newVector;
@@ -58,7 +58,7 @@ namespace smedia {
 
         auto ptr = mTexMap.find(key);
         if (ptr->second.size() < 3) {
-            ptr->second.push_back(std::move(glTextureRef));
+            ptr->second.push_back(std::move(textureRef));
         }
     }
 
@@ -70,6 +70,7 @@ namespace smedia {
     }
 
     GLTexturePool::~GLTexturePool() {
+        release();
         LOG_DEBUG << "destroy glTexturePool";
     }
 }

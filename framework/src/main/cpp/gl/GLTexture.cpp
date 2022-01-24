@@ -7,7 +7,7 @@
 namespace smedia {
 
     GLTexture::GLTexture(GLContextRef glContext, int width, int height,TextureType type, int textureId):
-    mGLContext(std::move(glContext)),mWidth(width),mHeight(height) {
+    mGLContext(std::move(glContext)),mWidth(width),mHeight(height),mAutoReuse(true) {
         mTexture = mGLContext->getGLTexturePool()->obtainTexture(width, height, type, textureId);
         mTextureId = mTexture->mTextureId;
     }

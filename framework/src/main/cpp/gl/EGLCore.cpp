@@ -132,14 +132,15 @@ namespace smedia {
     }
 
     void EGLCore::release() {
-        eglMakeCurrent(EGL_NO_DISPLAY,EGL_NO_SURFACE,EGL_NO_SURFACE,EGL_NO_CONTEXT);
-        eglDestroyContext(mDisplay,mEglContext);
-        eglDestroySurface(mDisplay,mCurrentSurface);
-        eglReleaseThread();
-        eglTerminate(mDisplay);
+        GL_CODE(eglMakeCurrent(mDisplay,EGL_NO_SURFACE,EGL_NO_SURFACE,EGL_NO_CONTEXT))
+        GL_CODE(eglDestroySurface(mDisplay,mCurrentSurface))
+        GL_CODE(eglDestroyContext(mDisplay,mEglContext))
+        GL_CODE(eglReleaseThread())
+        GL_CODE(eglTerminate(mDisplay))
         mDisplay = EGL_NO_DISPLAY;
         mEglContext = EGL_NO_CONTEXT;
         mCurrentSurface = EGL_NO_SURFACE;
+        LOG_DEBUG << "release eglCore finish";
     }
 
     bool EGLCore::makeCurrentPBufferContext(int width, int height) {

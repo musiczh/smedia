@@ -23,7 +23,7 @@ namespace smedia {
          * 需要传入GLContext对象，因为所有纹理相关的操作，都必须有egl上下文
          * @param glContext
          */
-        GLTexturePool(GLContextRef glContext);
+        GLTexturePool(GLContext* glContext);
         ~GLTexturePool();
 
         /**
@@ -40,7 +40,7 @@ namespace smedia {
          * 回收纹理
          * @param glTextureRef 纹理对象
          */
-        void recycleTexture(std::shared_ptr<Texture> glTextureRef);
+        void recycleTexture(std::shared_ptr<Texture> textureRef);
 
         /**
          * 释放纹理池中所有的纹理
@@ -51,7 +51,7 @@ namespace smedia {
         static std::string hashTexture(int width, int height, int textureType);
 
     private:
-        GLContextRef mGLContext;
+        GLContext* mGLContext;
         std::map<std::string,std::vector<std::shared_ptr<Texture>>> mTexMap;
     };
 }

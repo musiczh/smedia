@@ -119,7 +119,7 @@ namespace smedia {
     }
 
     void Node::execute() {
-        LOG_DEBUG << name <<" execute------------";
+        //LOG_DEBUG << name <<" execute------------";
         if (m_state != RUNNING) {
             LOG_INFO << "node is not running";
             return ;

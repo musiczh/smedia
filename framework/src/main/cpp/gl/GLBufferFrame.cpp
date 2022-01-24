@@ -50,10 +50,10 @@ namespace smedia {
             // 设置viewPort
             GL_CODE(glViewport(mViewPort[0],mViewPort[1],mViewPort[2],mViewPort[3]))
             // 绑定纹理和fbo
-            CHECK_GL_CODE(glBindFramebuffer(GL_FRAMEBUFFER,mFBO);)
+            GL_CODE(glBindFramebuffer(GL_FRAMEBUFFER,mFBO))
             if (mGLTexture != nullptr) {
-                CHECK_GL_CODE(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                                     GL_TEXTURE_2D, mGLTexture->getTextureId(), 0);)
+                GL_CODE(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                                     GL_TEXTURE_2D, mGLTexture->getTextureId(), 0))
             } else {
                 LOG_ERROR << "the texture in GLBufferFrame is null";
             }

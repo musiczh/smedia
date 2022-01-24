@@ -22,6 +22,7 @@ namespace smedia {
             LOG_DEBUG << "create GLContext with no shareContext";
         }
         mGLThread = std::unique_ptr<GLThread>(new GLThread);
+        mGLTexturePool = std::unique_ptr<GLTexturePool>(new GLTexturePool(this));
         runInRenderThread([this,shareContext]()->bool{
             // 初始化egl环境
             auto *eglCore = new EGLCore;
@@ -71,12 +72,6 @@ namespace smedia {
     GLContext::GLContext() {
         LOG_DEBUG << "create gl context";
     }
-
-    void GLContext::setGLTexturePool(GLTexturePool *glTexturePool) {
-        mGLTexturePool.reset();
-        mGLTexturePool = std::unique_ptr<GLTexturePool>(glTexturePool);
-    }
-
 
 }
 

@@ -8,35 +8,37 @@
 
 namespace smedia {
 
-    Texture::Texture(GLContextRef glContext, int width, int height,
+    Texture::Texture(GLContext* glContext, int width, int height,
                      TextureType type, unsigned int textureId)
-    : mGLContext(std::move(glContext)), mWidth(width), mHeight(height),mTextureType(type) {
+    : mGLContext(glContext), mWidth(width), mHeight(height),mTextureType(type),mAutoRelease(true) {
         if (textureId == 0) {
             mGLContext->runInRenderThreadV([this,type](){
                 mTextureId = createTexture(type,mWidth,mHeight, nullptr);
+                LOG_DEBUG << "create tex:" << mTextureId;
             });
         } else {
             mTextureId = textureId;
         }
     }
 
-    Texture::~Texture() {
-        if (mAutoRelease) {
-            mGLContext->runInRenderThreadV([this](){
-                DeleteGLTexture(mTextureId);
-                LOG_DEBUG << "delete 纹理" << mTextureId;
-            });
-        }
-    }
-
-    Texture::Texture(GLContextRef glContext, int width, int height, TextureType textureType,
+    Texture::Texture(GLContext* glContext, int width, int height, TextureType textureType,
                      PixelFormat format, const unsigned char* pixelData)
-    : mGLContext(std::move(glContext)), mWidth(width), mHeight(height),mTextureType(textureType){
+            : mGLContext(glContext), mWidth(width), mHeight(height),mTextureType(textureType){
         // todo 这里暂时只处理RGBA format，后续需要支持更多的format
         mGLContext->runInRenderThreadV([this,pixelData,textureType](){
             mTextureId = createTexture(textureType,mWidth,mHeight,pixelData);
         });
     }
+
+    Texture::~Texture() {
+        if (mAutoRelease) {
+            mGLContext->runInRenderThreadV([this](){
+                DeleteGLTexture(mTextureId);
+                LOG_DEBUG << "delete texture" << mTextureId;
+            });
+        }
+    }
+
 
     void Texture::setPixelData(PixelFormat format, const unsigned char *pixelData) {
         // todo 这里暂时只处理RGBA format，后续需要支持更多的format

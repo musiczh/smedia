@@ -10,12 +10,8 @@ namespace smedia {
                                  "out vec4 FragColor;\n"
                                  "// 顶点着色传进来的纹理坐标\n"
                                  "in vec2 otPos;\n"
-                                 "\n"
-                                 "// 采样器，外部可以把纹理赋值给此\n"
                                  "uniform samplerExternalOES boxTexture;\n"
-                                 "\n"
                                  "void main(){\n"
-                                 "    // 传入坐标和采样器，获取颜色并返回\n"
                                  "    FragColor = texture(boxTexture,vec2(otPos.xy));\n"
                                  "}";
 

@@ -38,8 +38,6 @@ namespace smedia {
         GLTexturePool* getGLTexturePool();
         EGLInfo getEglInfo();
 
-        void setGLTexturePool(GLTexturePool *glTexturePool);
-
     private:
         std::unique_ptr<EGLCore> mEglCore;
         std::unique_ptr<GLThread> mGLThread;

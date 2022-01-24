@@ -82,6 +82,7 @@ namespace smedia {
         mGLContext->runInRenderThreadV([this](){
             CHECK_GL_CODE(glDeleteProgram(mProgram);)
         });
+        LOG_DEBUG << "destroy Program";
     }
 
     std::unique_ptr<Program>
@@ -164,6 +165,7 @@ namespace smedia {
                 }
                 setUniform(item,mUniformMap[item->name]);
             }
+            // 设置完成之后清除所有的uniform属性设置缓存
             mUniformCache.clear();
         });
     }
@@ -196,7 +198,8 @@ namespace smedia {
                 break;
             case GLParameter::TEXTURE:
                 GL_CODE(glActiveTexture(uniformParameter->mSamplerIndex))
-                GL_CODE(glUniform1i(uniformParameter->mLocation,uniformParameter->mSamplerIndex))
+                // todo 这里为啥得注释
+                //GL_CODE(glUniform1i(uniformParameter->mLocation,uniformParameter->mSamplerIndex))
                 (*(glParameter->value.glTextureValue))->bind();
                 break;
             case GLParameter::MATRIX4:
@@ -226,7 +229,7 @@ namespace smedia {
         type = shaderType;
         mShader = glCreateShader(shaderType);
         const char* shaderCode = mShaderCode.c_str();
-        CHECK_GL_CODE(glShaderSource(mShader,1,&shaderCode, nullptr);)
+        GL_CODE(glShaderSource(mShader,1,&shaderCode, nullptr);)
     }
 
     bool Shader::compile() {
@@ -244,7 +247,7 @@ namespace smedia {
 
 
     Shader::~Shader() {
-        CHECK_GL_CODE(glDeleteShader(mShader);)
+        GL_CODE(glDeleteShader(mShader);)
     }
 
     unsigned int Shader::get() {
