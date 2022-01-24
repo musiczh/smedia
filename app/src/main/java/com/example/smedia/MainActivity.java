@@ -35,7 +35,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void initMap() {
         map = new HashMap<>();
-        map.put("eglDemo", EGLMainActivity.class);
         map.put("相机功能", CameraDemoActivity.class);
         map.put("相机美颜", BeautyActivity.class);
         map.put("图片处理", ProcessImageActivity.class);

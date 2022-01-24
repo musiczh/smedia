@@ -13,6 +13,12 @@
 #include "IGLRenderFunctor.h"
 
 namespace smedia {
+    /**
+     * 美颜functor
+     * 输入：video
+     * 输出：video
+     * setOption: level [0-1]
+     */
     class BeautyFunctor : public IGLRenderFunctor {
     public:
         bool onInit(InputHandler &inputHandler) override;

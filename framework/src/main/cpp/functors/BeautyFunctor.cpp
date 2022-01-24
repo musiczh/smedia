@@ -4,13 +4,14 @@
 
 #include "BeautyFunctor.h"
 namespace smedia {
-    const static std::string __fragmentShader = "#version 300 es\n"
+    const static std::string fragmentShader = "#version 300 es\n"
                                               "out vec4 gl_FragColor;\n"
                                               "uniform sampler2D inputImageTexture;\n"
                                               "in vec2 otPos;\n"
                                               "uniform float mulW;\n"
                                               "uniform float mulH;\n"
-                                              "uniform float beautyStrength;\n"
+                                              "uniform float beautyStrength;"
+                                              "\n"
                                               "void main(){\n"
                                               "    vec2 textureCoordinate = vec2(otPos.x,otPos.y);"
                                               "    vec4 textureColor;\n"
@@ -158,13 +159,13 @@ namespace smedia {
         render->draw();
         auto texture = bufferFrame->unBind();
         auto *newFrame = new GLFrame(frame);
-        newFrame->glTextureRef = frame.glTextureRef;
+        newFrame->glTextureRef = texture;
         mFunctorContext->setOutput(Data::create(newFrame),"video");
         return true;
     }
 
     std::string BeautyFunctor::getFragmentCode() {
-        return __fragmentShader;
+        return fragmentShader;
     }
 
     REGISTER_FUNCTOR(BeautyFunctor)

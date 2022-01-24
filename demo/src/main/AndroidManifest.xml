@@ -4,6 +4,9 @@
 
     <application>
         <activity
+            android:name=".CameraAdjustActivity"
+            android:exported="false" />
+        <activity
             android:name=".ProcessImageActivity"
             android:exported="false" />
         <activity
@@ -11,9 +14,6 @@
             android:exported="false" />
         <activity
             android:name=".CameraDemoActivity"
-            android:exported="false" />
-        <activity
-            android:name=".SMediaDemoMainActivity"
             android:exported="false" />
     </application>
 
