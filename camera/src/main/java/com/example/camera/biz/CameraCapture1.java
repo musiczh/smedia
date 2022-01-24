@@ -104,6 +104,10 @@ public class CameraCapture1 implements CameraCapture {
     @Override
     public void toggleFlash() {
         Camera.Parameters parameters = mCamera.getParameters();
+        if (parameters.getFlashMode() == null) {
+            mLogger.d("current camera is not support flash");
+            return;
+        }
         if (parameters.getFlashMode().equals(Camera.Parameters.FLASH_MODE_TORCH)) {
             parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
         }else{

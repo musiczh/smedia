@@ -12,6 +12,7 @@ public class Graph {
     }
 
     public void init(String json, HashMap<String,Object> options){
+        mLogger.d("init java graph");
         if (options == null || options.isEmpty()) {
             mNativeGraphHandle = initNativeGraph(json,new String[]{},new Object[]{},0);
             return;
@@ -23,6 +24,7 @@ public class Graph {
 
 
     public void run() {
+        mLogger.d("run java graph");
         runNativeGraph(mNativeGraphHandle);
     }
 
@@ -31,6 +33,7 @@ public class Graph {
     }
 
     public void release() {
+        mLogger.d("release java graph");
         stopNativeGraph(mNativeGraphHandle);
         releaseNativeGraph(mNativeGraphHandle);
     }
