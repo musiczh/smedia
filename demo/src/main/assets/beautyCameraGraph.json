@@ -11,24 +11,24 @@
       "functor": "OESTexReaderFunctor",
       "name": "oesNode",
       "outputs": [
-        "VIDEO:v1"
+        "video:v1"
       ]
     },
     {
       "functor": "BeautyFunctor",
       "name": "beautyNode",
       "inputs": [
-        "VIDEO:v1"
+        "video:v1"
       ],
       "outputs": [
-        "VIDEO:v2"
+        "video:v2"
       ]
     },
     {
       "functor": "RenderFunctor",
       "name": "renderNode",
       "inputs": [
-        "VIDEO:v2"
+        "video:v2"
       ]
 
     }

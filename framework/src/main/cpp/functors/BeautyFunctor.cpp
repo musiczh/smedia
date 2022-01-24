@@ -152,6 +152,8 @@ namespace smedia {
 
     bool BeautyFunctor::onDraw(GLBufferFrame *bufferFrame, Render *render, GLFrame &frame) {
         render->getProgram()->setFloat("beautyStrength",mLevel);
+        render->getProgram()->setFloat("mulW",frame.width);
+        render->getProgram()->setFloat("mulH",frame.height);
         render->getProgram()->setTexture("inputImageTexture",frame.glTextureRef);
         bufferFrame->bind();
         render->draw();

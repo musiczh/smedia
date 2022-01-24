@@ -36,15 +36,7 @@ public class CameraDemoActivity extends AppCompatActivity {
     private HandlerThread mInputThread;
     // todo 这里必须在主线程操作c++,因为如果在子线程，当activity退出杀了子线程时，内部
     // 会找不到env从而报错。这里后续需要优化JNIService来避免这个问题
-    private Handler mMainThreadHandler = new Handler(Looper.getMainLooper()){
-        @Override
-        public void handleMessage(@NonNull Message msg) {
-            super.handleMessage(msg);
-            if (msg.obj instanceof Runnable) {
-                ((Runnable) msg.obj).run();
-            }
-        }
-    };
+    private Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
     private Logger mLogger = Logger.create("huan_CameraDemoActivity");
 
     private int frameWidth;
@@ -63,7 +55,6 @@ public class CameraDemoActivity extends AppCompatActivity {
         options.put("EGLSharedContext",mRender.getEGLContext().getNativeHandle());
         mGraph.init(Util.getJson("cameraGraph.json",this),options);
         mGraph.run();
-        mLogger.e("init graph finish");
 
         initView();
         mLogger.d("cameraActivity onCreate finish");
@@ -93,8 +84,7 @@ public class CameraDemoActivity extends AppCompatActivity {
                     @Override
                     public void onFrameAvailable(SurfaceTexture surfaceTexture) {
                         // todo 切到主线程，但这里会有一点卡顿，因为消息执行需要先走完前面的消息内容
-                        Message msg = Message.obtain();
-                        msg.obj = (Runnable) () -> {
+                        mMainThreadHandler.post(() -> {
                             mRender.updateTex();
                             NativeGLFrame frame = new NativeGLFrame();
                             frame.orientation = orientation;
@@ -103,8 +93,7 @@ public class CameraDemoActivity extends AppCompatActivity {
                             frame.textureId = mRender.getTexId();
                             surfaceTexture.getTransformMatrix(frame.matrix);
                             mGraph.setOption("oesNode", "DATA", frame);
-                        };
-                        mMainThreadHandler.sendMessage(msg);
+                        });
                     }
                 },mInputTexHandler);
                 CameraConfig config = CameraConfig.createBuilder()
@@ -142,9 +131,8 @@ public class CameraDemoActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        mLogger.d("onPause start");
+    protected void onStop() {
+        super.onStop();
         mCameraCapture.release();
         // 必须要在render之前释放，否则相机还没完全停止，会继续发送帧，导致发送消息到一个dead线程，
         // todo 此处需要增强syncHandler的健壮性
@@ -155,12 +143,6 @@ public class CameraDemoActivity extends AppCompatActivity {
         mMainThreadHandler.removeCallbacksAndMessages(null);
         mGraph.release();
         mRender.release();
-        mLogger.d("onPause finish");
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-
+        mLogger.d("onStop finish");
     }
 }
