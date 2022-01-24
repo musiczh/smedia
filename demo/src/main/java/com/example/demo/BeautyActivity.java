@@ -56,7 +56,6 @@ public class BeautyActivity extends AppCompatActivity {
         options.put("EGLSharedContext",mRender.getEGLContext().getNativeHandle());
         mGraph.init(Util.getJson("beautyCameraGraph.json",this),options);
         mGraph.run();
-
         initView();
     }
 

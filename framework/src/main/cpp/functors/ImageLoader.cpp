@@ -9,7 +9,7 @@ namespace smedia {
 
     bool ImageLoader::initialize(FunctorContext *context) {
         mFunctorContext = context;
-        mInputHandler.registerHandler("Data",[this](InputData inputData) ->bool {
+        mInputHandler.registerHandler("data",[this](InputData inputData) ->bool {
             ImageFrame* imageFramePtr;
             Data data = inputData.data;
             if (data.isTypeOf<ImageFrame>() && (imageFramePtr = data.getData<ImageFrame>())) {
@@ -19,7 +19,7 @@ namespace smedia {
                     return false;
                 }
                 Data res = Data::create(new JNIObject(object));
-                mFunctorContext->setOutput(res,"Data");
+                mFunctorContext->setOutput(res,"data");
                 return true;
             }
             LOG_ERROR << "ImageLoader read input data error";

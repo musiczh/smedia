@@ -21,37 +21,37 @@
       "functor":"AdjustColorFunctor",
       "name": "adjustNode",
       "inputs" : [
-        "VIDEO:v1"
+        "video:v1"
       ],
       "outputs": [
-        "VIDEO:v2"
+        "video:v2"
       ]
     },
     {
       "functor":"GLImageReaderFunctor",
       "name": "glImageReaderNode",
       "inputs" : [
-        "VIDEO:v2"
+        "video:v2"
       ],
       "outputs": [
-        "Data:v3"
+        "data:v3"
       ]
     },
     {
       "functor": "ImageLoader",
       "name": "imageLoaderNode",
       "inputs": [
-        "Data:v3"
+        "data:v3"
       ],
       "outputs": [
-        "Data:v4"
+        "data:v4"
       ]
     },
     {
       "functor": "CallbackFunctor",
       "name": "callbackNode",
       "inputs": [
-        "Data:v4"
+        "data:v4"
       ]
     }
   ]

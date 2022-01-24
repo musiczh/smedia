@@ -21,7 +21,7 @@ namespace smedia {
         if (mDefaultHandler != nullptr) {
             return mDefaultHandler(std::move(inputData));
         }
-        LOG_DEBUG << "can not found handler to run";
+        LOG_ERROR << "can not found handler to run,tag = " << inputData.key << ",index=" << inputData.index;
         return false;
     }
 

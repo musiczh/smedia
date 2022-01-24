@@ -55,7 +55,7 @@ public class ProcessImageActivity extends AppCompatActivity {
         Bitmap bitmap = Util.GetAssetsBitmap("awesomeface.png",ProcessImageActivity.this);
         mBitmap = bitmap;
         mRawBitmap = bitmap;
-        mGraph.setOption("imageSourceNode","Data",bitmap);
+        mGraph.setOption("imageSourceNode","data",bitmap);
 
         SeekBar seekBar = findViewById(R.id.seekBar);
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -63,7 +63,7 @@ public class ProcessImageActivity extends AppCompatActivity {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 float value = progress/120.f+0.1f;
                 mGraph.setOption("adjustNode","brightness",value);
-                mGraph.setOption("imageSourceNode","Data",mRawBitmap);
+                mGraph.setOption("imageSourceNode","data",mRawBitmap);
             }
 
             @Override
@@ -152,7 +152,7 @@ public class ProcessImageActivity extends AppCompatActivity {
         if (imagePath != null){
             Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
             mRawBitmap = bitmap;
-            mGraph.setOption("imageSourceNode","Data",mRawBitmap);
+            mGraph.setOption("imageSourceNode","data",mRawBitmap);
         }else{
             Toast.makeText(this,"fail to set image",Toast.LENGTH_SHORT).show();
         }
