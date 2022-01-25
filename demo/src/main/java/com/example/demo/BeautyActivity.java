@@ -38,7 +38,7 @@ public class BeautyActivity extends AppCompatActivity {
     // todo 这里必须在主线程操作c++,因为如果在子线程，当activity退出杀了子线程时，内部
     // 会找不到env从而报错。这里后续需要优化JNIService来避免这个问题
     private Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
-    private Logger mLogger = Logger.create("huan_CameraDemoActivity");
+    private Logger mLogger = Logger.create("huan_BeautyActivity");
 
     private int frameWidth;
     private int frameHeight;

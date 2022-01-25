@@ -13,6 +13,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.demo.BeautyActivity;
+import com.example.demo.CameraAdjustActivity;
 import com.example.demo.CameraDemoActivity;
 import com.example.demo.ProcessImageActivity;
 import com.example.egldemo.EGLMainActivity;
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
         map.put("相机功能", CameraDemoActivity.class);
         map.put("相机美颜", BeautyActivity.class);
         map.put("图片处理", ProcessImageActivity.class);
+        map.put("相机预览基本效果", CameraAdjustActivity.class);
 
     }
 

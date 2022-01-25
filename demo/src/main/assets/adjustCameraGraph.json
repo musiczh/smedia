@@ -1,0 +1,76 @@
+{
+  "executors": [
+    {
+      "options": {
+        "threadNum": 1
+      }
+    }
+  ],
+  "nodes": [
+    {
+      "functor": "OESTexReaderFunctor",
+      "name": "oesNode",
+      "outputs": [
+        "video:v1"
+      ]
+    },
+    {
+      "functor": "AdjustColorFunctor",
+      "name": "adjustNode",
+      "inputs": [
+        "video:v1"
+      ],
+      "outputs": [
+        "video:v2"
+      ]
+    },
+    {
+      "functor": "HighLightShadowFunctor",
+      "name": "shadowNode",
+      "inputs": [
+        "video:v2"
+      ],
+      "outputs": [
+        "video:v3"
+      ]
+    },
+    {
+      "functor": "SharpenFunctor",
+      "name": "sharpenNode",
+      "inputs": [
+        "video:v3"
+      ],
+      "outputs": [
+        "video:v4"
+      ]
+    },
+    {
+      "functor": "WhiteBalanceFunctor",
+      "name": "whiteBalanceNode",
+      "inputs": [
+        "video:v4"
+      ],
+      "outputs": [
+        "video:v5"
+      ]
+    },
+    {
+      "functor": "WhiteBalanceFunctor",
+      "name": "whiteBalanceNode2",
+      "inputs": [
+        "video:v5"
+      ],
+      "outputs": [
+        "video:v6"
+      ]
+    },
+    {
+      "functor": "RenderFunctor",
+      "name": "renderNode",
+      "inputs": [
+        "video:v6"
+      ]
+
+    }
+  ]
+}
