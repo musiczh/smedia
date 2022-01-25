@@ -126,6 +126,14 @@ namespace smedia {
         m_updateStreams.emplace(key);
     }
 
+    std::unique_ptr<std::vector<std::string>> DataStreamManager::getTags() const {
+        auto* list = new std::vector<std::string>;
+        for (auto& item : m_StreamToKeyMap) {
+            list->push_back(item.second.tag);
+        }
+        return std::unique_ptr<std::vector<std::string>>(list);
+    }
+
     bool DataStreamManager::StreamKey::operator==(const StreamKey& key) const{
         return index == key.index && tag == key.tag;
     }

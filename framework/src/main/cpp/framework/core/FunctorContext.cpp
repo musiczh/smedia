@@ -78,5 +78,13 @@ namespace smedia {
         return Data{};
     }
 
+    std::unique_ptr<std::vector<std::string>> FunctorContext::getInputTags() {
+        return m_inputManager.getTags();
+    }
+
+    std::unique_ptr<std::vector<std::string>> FunctorContext::getOutputTags() {
+        return m_outputManager.getTags();
+    }
+
 
 }

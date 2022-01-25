@@ -31,6 +31,7 @@ namespace smedia {
         Data PopFront(const std::string& tag,int index = 0);
         StreamKey getFrontStreamKey() ;
         int getTagCount(const std::string& tag) const;
+        std::unique_ptr<std::vector<std::string>> getTags() const;
         void PushData(Data& data,const std::string& tag,int index = -1);
     public:
        void onDataStreamUpdate(DataStream* dataStream);
@@ -39,6 +40,7 @@ namespace smedia {
         // 自定义key的map,方便从StreamKey来获取DataStream*
         std::unordered_map<StreamKey,DataStream*,std::function<size_t(StreamKey)>,std::function<bool(StreamKey,StreamKey)>> m_KeyToStreamMap;
         std::map<DataStream*,StreamKey> m_StreamToKeyMap;
+
         // 提供两种方式来获取输入：使用tag+index ，or 从streamKeyQueue中pop
         // 使用前者每次获取一次data会从这里pop出来一个key
         // 所以一般一个functor不要两种方式混用，否则可能出现pop出来的key找不到数据的情况
