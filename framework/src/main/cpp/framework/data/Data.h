@@ -11,9 +11,15 @@ namespace smedia {
     template<typename C>
     class DataHolder;
 
+    /**
+     * 存储一个数据指针，本身无泛型，支持模板构建与读取；支持值拷贝。
+     * 注意，内部使用shared_ptr来存储，若相关Data被全部析构，则内部保存的数据也会被析构。
+     * 如果需要数据不被析构，则需要使用二级指针，这样内部析构的就是一级指针，数据得以保留。
+     * 当然，为避免造成内存泄露，必要时再采取此方法
+     */
     class Data {
     public:
-        template<class U> static Data create(U* data);
+        template<class U> static Data create(U* data,double timeStamp = 0);
         Data() = default;
         Data(const Data& data);
         Data(Data&& data) noexcept;
@@ -25,8 +31,10 @@ namespace smedia {
         template<class T> bool isTypeOf();
         template<class T> T* getData();
         bool isEmpty();
+        void setTime(double timeStamp);
 
     private:
+        double mTimeStamp;
         // 支持多个Data同时持有资源，让Data可以使用值传递。最后释放的Data会释放资源
         std::shared_ptr<DataHolderBase> m_dataHolderPtr;
 
@@ -81,8 +89,9 @@ namespace smedia {
 
 
     template<class U>
-    Data Data::create(U *data) {
+    Data Data::create(U *data,double timeStamp) {
         Data newData;
+        newData.setTime(timeStamp);
         auto* dataHolder = new DataHolder<U>(data);
         newData.m_dataHolderPtr = std::shared_ptr<DataHolderBase>(dataHolder);
         return newData;
@@ -116,6 +125,10 @@ namespace smedia {
             return nullptr;
         }
         return ptr->getDataPtr();
+    }
+
+    void Data::setTime(double timeStamp) {
+        mTimeStamp = timeStamp;
     }
 
     template<class T>
