@@ -13,9 +13,9 @@
 /**
  * 将RGBA数据读取到平台层的图片对象，android是读取到bitmap中
  * Input：
- *  - Data: 只能是ImageFrame
+ *  - data: 只能是ImageFrame
  * output:
- *  - Data: JNIObject，可回调给java层
+ *  - data: JNIObject，可回调给java层
  */
 namespace smedia {
     class ImageLoader : public IFunctor {

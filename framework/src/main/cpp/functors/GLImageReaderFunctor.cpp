@@ -36,7 +36,7 @@ namespace smedia {
         uint8_t * buffer = bufferFrame->readRGBAPixelData();
         bufferFrame->unBind();
         auto* imageFrame = new ImageFrame(frame.width, frame.height, buffer, FORMAT_RGBA);
-        mFunctorContext->setOutput(Data::create(imageFrame),"data");
+        mFunctorContext->setOutput(Data::create(imageFrame),"buffer");
         return true;
     }
 

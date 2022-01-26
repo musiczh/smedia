@@ -15,13 +15,14 @@ namespace smedia {
 
 
     bool InputHandler::handle(InputData inputData) {
-        if (mHandlerMap.find(inputData.key) != mHandlerMap.end()) {
-            return mHandlerMap[inputData.key](inputData);
+        if (mHandlerMap.find(inputData.tag) != mHandlerMap.end()) {
+            return mHandlerMap[inputData.tag](inputData);
         }
         if (mDefaultHandler != nullptr) {
             return mDefaultHandler(std::move(inputData));
         }
-        LOG_ERROR << "can not found handler to run,tag = " << inputData.key << ",index=" << inputData.index;
+        LOG_ERROR << "can not found handler to run,nodeName = " << inputData.nodeName
+                << ",tag = " << inputData.tag << ",index=" << inputData.index;
         return false;
     }
 
@@ -36,7 +37,7 @@ namespace smedia {
             LOG_DEBUG << "handle input data is null";
             return false;
         }
-        return handle({data,key.tag,key.index,functorContext});
+        return handle({functorContext->getNodeName(),data,key.tag,key.index,functorContext});
     }
 
     bool InputHandler::runOptionsHandler(FunctorContext *functorContext, const std::string &key, Data data) {
@@ -44,7 +45,7 @@ namespace smedia {
             LOG_DEBUG << "run handle data is empty";
             return false;
         }
-        return handle({data,key,-1,functorContext});
+        return handle({functorContext->getNodeName(),data,key,-1,functorContext});
     }
 }
 

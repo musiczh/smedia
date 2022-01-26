@@ -11,7 +11,7 @@ namespace smedia {
         mInputHandler.registerHandler("callback",[this](InputData inputData)->bool {
             JNIObject callbackObject;
             if (inputData.data.getData(callbackObject)) {
-                mJniCallbackMap[inputData.key] = callbackObject;
+                mJniCallbackMap[inputData.tag] = callbackObject;
                 return true;
             }
             LOG_ERROR << "CallbackFunctor get callback fail";

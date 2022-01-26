@@ -102,7 +102,7 @@ namespace smedia {
         if (mImageEnable) {
             // 转化为ImageFrame
             auto* frame = new ImageFrame(info.width, info.height, pixelBuffer.release(), FORMAT_RGBA);
-            mFunctorContext->setOutput(Data::create(frame),"image");
+            mFunctorContext->setOutput(Data::create(frame),"buffer");
         }
         // 如果没有输出不需要调度后面的节点
         if (mGlEnable || mImageEnable) {

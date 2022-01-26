@@ -74,30 +74,18 @@ namespace smedia {
                 return;
             }
 
-            JNIObject object;
-            if (!value.getData(object)) {
+            GLFrame* frame;
+            if (!value.isTypeOf<GLFrame>() || value.isEmpty() || !(frame = value.getData<GLFrame>())) {
                 LOG_ERROR << "get data fail";
                 return;
             }
-
-            auto* glFrame = new GLFrame{};
-            glFrame->width = JNIInvoker<int>::GetObjectFiled(object.getJObject(),"width");
-            glFrame->height = JNIInvoker<int>::GetObjectFiled(object.getJObject(),"height");
-            glFrame->orientation = JNIInvoker<int>::GetObjectFiled(object.getJObject(),"orientation");
-            int textureId = JNIInvoker<int>::GetObjectFiled(object.getJObject(),"textureId");
-            JNIObject jUVMatrix = JNIInvoker<JNIObject>::InvokeObjectMethod(object.getJObject(), "onNativeGetUVMatrix");
-
-            auto glTexture = GLTexture::Create(mGLContext, glFrame->width, glFrame->height, TEXTURE_TYPE_OES, textureId);
-            // 外部纹理不要复用和自动释放
-            glTexture->setAutoOption(false, false);
-            glFrame->glTextureRef = glTexture;
-            glFrame->format = FORMAT_TEXTURE_OES;
-            std::vector<float> v = JNIData::jFloatArrayToVector(reinterpret_cast<jfloatArray>(jUVMatrix.getJObject()));
-            for (int i=0;i<16;i++) {
-                glFrame->UVMatrix[i] = v[i];
-            }
+            frame->glTextureRef = GLTexture::Create(mGLContext,frame->width,frame->height,
+                                                    frame->format == FORMAT_TEXTURE_2D? TEXTURE_TYPE_2D : TEXTURE_TYPE_OES,
+                                                    frame->textureId);
+            // 外部oes纹理不能回收和复用
+            frame->glTextureRef->setAutoOption(false, false);
             std::unique_lock<std::mutex> lock(mQueueLock);
-            mOptionQueue.push_back(Data::create(glFrame));
+            mOptionQueue.push_back(value);
             mFunctorContext->executeSelf();
         }
     }

@@ -8,7 +8,7 @@
 
     <ListView
         android:layout_width="match_parent"
-        android:layout_height="150dp"
+        android:layout_height="220dp"
         android:id="@+id/listView"
         android:orientation="horizontal"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -31,17 +31,33 @@
         android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintBottom_toTopOf="@id/seekBar"/>
 
     <SeekBar
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/seekBar"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text"
+        app:layout_constraintBottom_toTopOf="@id/listView"
         android:layout_marginTop="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/buttonTakePicture"
+        android:text="拍照"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/switchButton"
+        android:text="切换摄像头"
+        app:layout_constraintTop_toBottomOf="@id/buttonTakePicture"
+        app:layout_constraintRight_toRightOf="parent"/>
 
 
 

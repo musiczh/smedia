@@ -4,25 +4,27 @@
 
 #ifndef SMEDIA_FUNCTORCONTEXT_H
 #define SMEDIA_FUNCTORCONTEXT_H
-#include "../data/Data.h"
+#include "Data.h"
 #include "Edge.h"
 #include "DataStreamManager.h"
-#include "../data/typeDef.h"
-#include <vector>
+#include "typeDef.h"
+#include <set>
 namespace smedia {
+    class Node;
     class FunctorContext {
     public:
         FunctorContext(std::vector<std::string>& inputEdges,
                        std::vector<std::string>& outputEdges,
                        EdgeMap& edgeMap,
-                       OptionMap& globalService);
+                       OptionMap& globalService,
+                       Node* node);
         Data getInput(const std::string& tag,int index = 0);
         Data popInput(const std::string& tag,int index = 0);
         void setOutput(Data data, const std::string& tag,int index = -1);
         int getInputTagCount(const std::string& tag);
         int getOutputTagCount(const std::string& tag);
-        std::unique_ptr<std::vector<std::string>> getInputTags();
-        std::unique_ptr<std::vector<std::string>> getOutputTags();
+        std::unique_ptr<std::set<std::string>> getInputTags();
+        std::unique_ptr<std::set<std::string>> getOutputTags();
          /**
          * 获取当前节点输入数据队列中最前的一个数据key
          * 若当前队列为空则返回{"emptyStreamKey",-2}
@@ -44,6 +46,8 @@ namespace smedia {
 
         Data getGlobalService(const std::string& name);
 
+        std::string getNodeName();
+
     private:
         DataStreamManager m_inputManager;
         DataStreamManager m_outputManager;
@@ -52,6 +56,7 @@ namespace smedia {
         std::function<void()> m_executeConnectNodeHandler;
 
         OptionMap mGlobalService;
+        Node* mNode;
     };
 }
 

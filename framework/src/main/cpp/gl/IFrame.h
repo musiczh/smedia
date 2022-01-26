@@ -26,7 +26,7 @@ namespace smedia {
         int width;
         int height;
         // 图形需要旋转的角度，来自相机的orientation
-        int orientation {0};
+        int orientation {-1};
         double timeStamp {0};
         FrameFormat format;
 

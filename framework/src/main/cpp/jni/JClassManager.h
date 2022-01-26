@@ -18,7 +18,7 @@ namespace smedia {
     enum JClassType {
         Boolean,Short,Float,Integer,Double,Long,Byte,String,
         StringArray,IntArray,FloatArray,DoubleArray,LongArray,ByteArray,ShortArray,
-        Object
+        Object,NativeGLFrame,NativeImageFrame
     };
 
     class JClassManager {

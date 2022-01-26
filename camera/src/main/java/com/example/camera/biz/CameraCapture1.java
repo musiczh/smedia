@@ -1,19 +1,18 @@
 package com.example.camera.biz;
 
 import android.content.Context;
+import android.graphics.Picture;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.os.SystemClock;
-import android.util.Log;
 import android.view.Surface;
 import android.view.WindowManager;
-
 import com.example.camera.api.CameraCapture;
 import com.example.camera.api.CameraConfig;
 import com.example.camera.api.CameraListener;
-import com.example.camera.api.PreviewInfo;
+import com.example.camera.api.CameraPictureListener;
+import com.example.camera.api.CameraPreviewListener;
 import com.example.util.Logger;
-
 import java.io.IOException;
 import java.util.List;
 
@@ -24,10 +23,14 @@ public class CameraCapture1 implements CameraCapture {
     private SurfaceTexture mSurfaceTexture;
     private CameraConfig mCameraConfig = new CameraConfig();
     private final Logger mLogger = Logger.create("CameraCapture1");
+    private CameraState mState = CameraState.CAMERA_CREATE;
 
     private int mPreviewWidth;
     private int mPreviewHeight;
-    private int mOrientation;
+    private int mPictureWidth;
+    private int mPictureHeight;
+    private int mDisplayOrientation;
+    private int mPictureRotation;
 
     @Override
     public void openCamera(Context context, CameraConfig config) {
@@ -73,12 +76,13 @@ public class CameraCapture1 implements CameraCapture {
         }
 
         if (mCameraConfig.cameraListener != null) {
-            mCameraConfig.cameraListener.onPreviewStart(new PreviewInfo(mPreviewWidth,mPreviewHeight,
-                    mOrientation));
+            mCameraConfig.cameraListener.onPreviewStart(new CameraPreviewListener.PreviewInfo(mPreviewWidth,mPreviewHeight,
+                    mDisplayOrientation));
         }
         mCamera.startPreview();
 
         mLogger.d("camera start success,cost="+(SystemClock.elapsedRealtime()-startTime));
+        mState = CameraState.CAMERA_PREVIEW;
     }
 
     @Override
@@ -92,6 +96,35 @@ public class CameraCapture1 implements CameraCapture {
     }
 
     @Override
+    public void takePicture(CameraPictureListener listener) {
+        if (mCamera == null || mState != CameraState.CAMERA_PREVIEW) {
+            return ;
+        }
+        mCamera.takePicture(null, null, new Camera.PictureCallback() {
+            @Override
+            public void onPictureTaken(byte[] data, Camera camera) {
+                CameraPictureListener.PictureData pictureData =
+                        new CameraPictureListener.PictureData(
+                                data,
+                                mPictureWidth,
+                                mPictureHeight,
+                                mPictureRotation);
+                if (listener != null) {
+                    listener.onPictureTaken(pictureData);
+                    return;
+                }
+                if (mCameraConfig.cameraListener != null) {
+                    mCameraConfig.cameraListener.onPictureTaken(pictureData);
+                }
+                if (mCamera != null && mState != CameraState.CAMERA_DESTROY) {
+                    mCamera.cancelAutoFocus();
+                    mCamera.startPreview();
+                }
+            }
+        });
+    }
+
+    @Override
     public void switchCamera() {
         if (mCameraConfig.facing == CameraConfig.FACING_FRONT) {
             mCameraConfig.facing = CameraConfig.FACING_BACKGROUND;
@@ -99,6 +132,11 @@ public class CameraCapture1 implements CameraCapture {
             mCameraConfig.facing = CameraConfig.FACING_FRONT;
         }
         openCamera(mContext,mCameraConfig);
+    }
+
+    @Override
+    public int getFacing() {
+        return mCameraInfo.facing;
     }
 
     @Override
@@ -118,13 +156,17 @@ public class CameraCapture1 implements CameraCapture {
 
     @Override
     public void release() {
+        if (mState == CameraState.CAMERA_DESTROY) {
+            return;
+        }
         if (mCamera != null) {
+            mState = CameraState.CAMERA_DESTROY;
             mCamera.stopPreview();
             mCamera.release();
         }
     }
 
-    private int calculateOrientation() {
+    private void calculateOrientation() {
         WindowManager windowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         int def = Surface.ROTATION_90;
         if (windowManager != null && windowManager.getDefaultDisplay() != null) {
@@ -137,24 +179,35 @@ public class CameraCapture1 implements CameraCapture {
             case Surface.ROTATION_180: activityOrientation = 180; break;
             case Surface.ROTATION_270: activityOrientation = 270;break;
         }
+        Camera.Parameters parameters = mCamera.getParameters();
         if (mCameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK){
-            return (mCameraInfo.orientation-activityOrientation+360)%360;
+            mPictureRotation = (mCameraInfo.orientation-activityOrientation+360)%360;
+            mDisplayOrientation = mPictureRotation;
         }else {
-            return (360-(mCameraInfo.orientation+activityOrientation)%360)%360;
+            mPictureRotation = (mCameraInfo.orientation+activityOrientation)%360;
+            mDisplayOrientation = (360-mPictureRotation)%360;
         }
+        mCamera.setDisplayOrientation(mDisplayOrientation);
+        parameters.setRotation(mPictureRotation);
+        mCamera.setParameters(parameters);
     }
 
     private void initCameraParameters() {
         // 设置旋转角度
-        mOrientation = calculateOrientation();
-        mCamera.setDisplayOrientation(mOrientation);
+        calculateOrientation();
 
         // 预览尺寸
         Camera.Parameters parameters = mCamera.getParameters();
+
         Camera.Size size = parameters.getSupportedPreviewSizes().get(0);
         mPreviewWidth = size.width;
         mPreviewHeight = size.height;
         parameters.setPreviewSize(mPreviewWidth,mPreviewHeight);
+
+        size = parameters.getSupportedPictureSizes().get(0);
+        mPictureWidth = size.width;
+        mPictureHeight = size.height;
+        parameters.setPictureSize(mPictureWidth,mPictureHeight);
 
         // 对焦模式
         List<String> focusModes = parameters.getSupportedFocusModes();

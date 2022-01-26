@@ -20,7 +20,6 @@ import com.example.camera.CameraService;
 import com.example.camera.api.CameraCapture;
 import com.example.camera.api.CameraConfig;
 import com.example.camera.api.CameraListener;
-import com.example.camera.api.PreviewInfo;
 import com.example.demo.gles.ViewRender;
 import com.example.demo.util.SamplerSurfaceTextureListener;
 import com.example.frameword.framework.Graph;
@@ -116,6 +115,7 @@ public class BeautyActivity extends AppCompatActivity {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 float value = progress/100.f;
                 mGraph.setOption("beautyNode","level",value);
+
             }
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {}

@@ -3,12 +3,12 @@
 //
 
 #include "FunctorContext.h"
-
+#include "Node.h"
 #include <utility>
 namespace smedia {
 
     FunctorContext::FunctorContext(std::vector<std::string> &inputEdges, std::vector<std::string> &outputEdges,
-                                   EdgeMap &edgeMap,OptionMap& globalService) {
+                                   EdgeMap &edgeMap,OptionMap& globalService,Node* node) {
         // 解析输入输出边，并绑定DataStream
         for (auto& edgeName : inputEdges) {
             if (edgeMap.find(edgeName) != edgeMap.end()) {
@@ -27,6 +27,7 @@ namespace smedia {
         for (auto& item : globalService) {
             mGlobalService[item.first] = item.second;
         }
+        mNode = node;
     }
 
     Data FunctorContext::getInput(const std::string &tag, int index) {
@@ -78,12 +79,16 @@ namespace smedia {
         return Data{};
     }
 
-    std::unique_ptr<std::vector<std::string>> FunctorContext::getInputTags() {
+    std::unique_ptr<std::set<std::string>> FunctorContext::getInputTags() {
         return m_inputManager.getTags();
     }
 
-    std::unique_ptr<std::vector<std::string>> FunctorContext::getOutputTags() {
+    std::unique_ptr<std::set<std::string>> FunctorContext::getOutputTags() {
         return m_outputManager.getTags();
+    }
+
+    std::string FunctorContext::getNodeName() {
+        return mNode->getName();
     }
 
 

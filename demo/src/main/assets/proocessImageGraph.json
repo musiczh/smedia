@@ -34,7 +34,7 @@
         "video:v2"
       ],
       "outputs": [
-        "data:v3"
+        "buffer:v3"
       ]
     },
     {

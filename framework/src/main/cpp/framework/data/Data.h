@@ -32,6 +32,7 @@ namespace smedia {
         template<class T> T* getData();
         bool isEmpty();
         void setTime(double timeStamp);
+        double getTime();
 
     private:
         double mTimeStamp;
@@ -125,10 +126,6 @@ namespace smedia {
             return nullptr;
         }
         return ptr->getDataPtr();
-    }
-
-    void Data::setTime(double timeStamp) {
-        mTimeStamp = timeStamp;
     }
 
     template<class T>

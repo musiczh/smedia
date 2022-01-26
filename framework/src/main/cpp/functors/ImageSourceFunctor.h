@@ -11,10 +11,12 @@
 /**
  * 接收平台层的图片数据，进行转化为内部传递数据结构：GLFrame or ImageFrame
  * - options
- *  - Data: 上层输入bitmap对象即可
+ *  - data: 上层输入bitmap对象即可
+ *  - glEnable: 是否输出gl纹理对象
+ *  - imageEnable：是否输出image对象
  * - outputs
  *  - video: glFrame
- *  - image: imageFrame
+ *  - buffer: imageFrame
  * todo 目前仅接收RGBA格式的bitmap
  */
 namespace smedia {

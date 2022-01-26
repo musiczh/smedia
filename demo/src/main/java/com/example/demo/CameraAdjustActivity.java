@@ -4,11 +4,15 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
@@ -24,12 +28,13 @@ import com.example.camera.CameraService;
 import com.example.camera.api.CameraCapture;
 import com.example.camera.api.CameraConfig;
 import com.example.camera.api.CameraListener;
-import com.example.camera.api.PreviewInfo;
 import com.example.demo.gles.ViewRender;
 import com.example.demo.util.SamplerSurfaceTextureListener;
 import com.example.frameword.framework.Graph;
+import com.example.frameword.framework.NativeCallback;
 import com.example.frameword.framework.NativeGLFrame;
 import com.example.util.Logger;
+import com.example.util.PictureCache;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -78,6 +83,20 @@ public class CameraAdjustActivity extends AppCompatActivity {
         options.put("EGLSharedContext",mRender.getEGLContext().getNativeHandle());
         mGraph.init(Util.getJson("adjustCameraGraph.json",this),options);
         mGraph.run();
+        mGraph.setOption("callbackNode", "callback", new NativeCallback() {
+            @Override
+            public boolean onNativeCallback(String nodeName, String keyName, Object value) {
+                if (value instanceof Bitmap) {
+                    Bitmap bitmap = (Bitmap)value;
+                    String path = PictureCache.saveBitmapExternal(bitmap,"smedia/cameraAdjust.jpg");
+                    runOnUiThread(()->{
+                        Toast.makeText(CameraAdjustActivity.this, "save picture to "+path,
+                                Toast.LENGTH_SHORT).show();
+                    });
+                }
+                return true;
+            }
+        });
         initView();
     }
 
@@ -103,6 +122,20 @@ public class CameraAdjustActivity extends AppCompatActivity {
         mInputThread.start();
         mInputTexHandler = new Handler(mInputThread.getLooper());
 
+        findViewById(R.id.buttonTakePicture).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCameraCapture.takePicture(null);
+            }
+        });
+
+        findViewById(R.id.switchButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCameraCapture.switchCamera();
+            }
+        });
+
         TextureView textureView = new TextureView(this);
         textureView.setSurfaceTextureListener(new SamplerSurfaceTextureListener(){
             @Override
@@ -126,6 +159,7 @@ public class CameraAdjustActivity extends AppCompatActivity {
                             frame.width = frameWidth;
                             frame.height = frameHeight;
                             frame.textureId = mRender.getTexId();
+                            frame.timeStamp = SystemClock.elapsedRealtime();
                             surfaceTexture.getTransformMatrix(frame.matrix);
                             mGraph.setOption("oesNode", "DATA", frame);
                         });
@@ -139,6 +173,15 @@ public class CameraAdjustActivity extends AppCompatActivity {
                                 frameHeight = info.height;
                                 frameWidth = info.width;
                                 orientation = info.orientation;
+                            }
+
+                            @Override
+                            public void onPictureTaken(PictureData result) {
+                                Bitmap bitmap = BitmapFactory.decodeByteArray(result.data,0,result.data.length);
+                                Matrix matrix = new Matrix();
+                                matrix.setRotate(result.orientation);
+                                Bitmap newBitmap = Bitmap.createBitmap(bitmap,0,0,bitmap.getWidth(),bitmap.getHeight(),matrix,false);
+                                mGraph.setOption("imageSourceNode","data",newBitmap);
                             }
                         })
                         .setSurfaceTexture(cameraTexture)
@@ -197,6 +240,12 @@ public class CameraAdjustActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
         mCameraCapture.release();
         // 必须要在render之前释放，否则相机还没完全停止，会继续发送帧，导致发送消息到一个dead线程，
         // todo 此处需要增强syncHandler的健壮性
@@ -207,6 +256,6 @@ public class CameraAdjustActivity extends AppCompatActivity {
         mMainThreadHandler.removeCallbacksAndMessages(null);
         mGraph.release();
         mRender.release();
-        mLogger.d("onStop finish");
+        mLogger.d("onDestroy finish");
     }
 }

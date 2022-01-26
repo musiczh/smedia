@@ -3,7 +3,30 @@
 //
 
 #include "JNIBridge.h"
+#include "GLFrame.h"
 namespace smedia {
+    static Data JNIGetGLFrame(jobject object) {
+        auto* glFrame = new GLFrame{};
+        glFrame->width = JNIInvoker<int>::GetObjectFiled(object,"width");
+        glFrame->height = JNIInvoker<int>::GetObjectFiled(object,"height");
+        glFrame->timeStamp = JNIInvoker<double>::GetObjectFiled(object,"timeStamp");
+        glFrame->orientation = JNIInvoker<int>::GetObjectFiled(object,"orientation");
+        glFrame->isMirrorY = JNIInvoker<bool>::GetObjectFiled(object,"isMirrorY");
+        int textureId = JNIInvoker<int>::GetObjectFiled(object,"textureId");
+        JNIObject jUVMatrix = JNIInvoker<JNIObject>::InvokeObjectMethod(object, "onNativeGetUVMatrix");
+        glFrame->textureId = textureId;
+        glFrame->format = FORMAT_TEXTURE_OES;
+        std::vector<float> v = JNIData::jFloatArrayToVector(reinterpret_cast<jfloatArray>(jUVMatrix.getJObject()));
+        for (int i=0;i<16;i++) {
+            glFrame->UVMatrix[i] = v[i];
+        }
+        return Data::create(glFrame);
+    }
+
+    static Data JNIGetImageFrame(jobject object) {
+        return Data();
+    }
+
     Data JNIData::jObjectToData(jobject object) {
         Data res;
         if (JClassManager::isInstanceOf(object,Float)) {
@@ -20,14 +43,20 @@ namespace smedia {
             res = Data::create(value);
         }else if (JClassManager::isInstanceOf(object,String)) {
             auto s_ = reinterpret_cast<jstring>(object);
-            auto* value = new std::string(jStringToCString(s_));
+            auto *value = new std::string(jStringToCString(s_));
             res = Data::create(value);
+        }else if (JClassManager::isInstanceOf(object,NativeGLFrame)) {
+            res = JNIGetGLFrame(object);
+        }else if (JClassManager::isInstanceOf(object,NativeImageFrame)) {
+            res = JNIGetImageFrame(object);
         }else {
             auto * value = new JNIObject(object);
             res = Data::create(value);
         }
         return res;
     }
+
+
 
     std::string JNIData::jStringToCString(jstring str) {
         if (!str) {

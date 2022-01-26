@@ -3,6 +3,8 @@ package com.example.demo;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,17 +16,18 @@ import android.view.TextureView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import com.example.camera.CameraService;
 import com.example.camera.api.CameraCapture;
 import com.example.camera.api.CameraConfig;
 import com.example.camera.api.CameraListener;
-import com.example.camera.api.PreviewInfo;
 import com.example.demo.gles.ViewRender;
 import com.example.demo.util.SamplerSurfaceTextureListener;
 import com.example.frameword.framework.Graph;
 import com.example.frameword.framework.NativeGLFrame;
 import com.example.util.Logger;
+import com.example.util.PictureCache;
 
 import java.util.HashMap;
 
@@ -105,6 +108,14 @@ public class CameraDemoActivity extends AppCompatActivity {
                                 frameWidth = info.width;
                                 orientation = info.orientation;
                             }
+
+                            @Override
+                            public void onPictureTaken(PictureData result) {
+                                Bitmap bitmap = BitmapFactory.decodeByteArray(result.data,0,result.data.length);
+                                String path = PictureCache.saveBitmapExternal(bitmap,"smedia/pictureDemo.jpg");
+                                Toast.makeText(CameraDemoActivity.this, "save to "+path,
+                                        Toast.LENGTH_SHORT).show();
+                            }
                         })
                         .setSurfaceTexture(cameraTexture)
                         .build();
@@ -126,6 +137,14 @@ public class CameraDemoActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 mCameraCapture.toggleFlash();
+            }
+        });
+
+        Button takeButton = findViewById(R.id.pictureButton);
+        takeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCameraCapture.takePicture(null);
             }
         });
     }

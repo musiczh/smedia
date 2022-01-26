@@ -89,7 +89,7 @@ Java_com_example_frameword_framework_Graph_setOptionNative(JNIEnv *env, jobject 
     std::string c_nodeName = JNIData::jStringToCString(nodeName);
     std::string c_keyName = JNIData::jStringToCString(key);
     graph->setOption(c_nodeName,{{c_keyName,data}});
-    //LOG_DEBUG << "set option success,node=" << nodeName <<",key=" << c_keyName ;
+    //LOG_DEBUG << "set option success,node=" << nodeName <<",tag=" << c_keyName ;
 }
 extern "C"
 JNIEXPORT void JNICALL

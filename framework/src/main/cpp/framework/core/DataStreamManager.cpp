@@ -32,7 +32,7 @@ namespace smedia {
                 //  后续再做优化
 //                StreamKey popKey = getFrontStreamKeyInner(true);
 //                // 遍历整个队列，找到相同的streamKey对象并弹出
-//                while (key != popKey && popKey.tag != "emptyStreamKey") {
+//                while (tag != popKey && popKey.tag != "emptyStreamKey") {
 //                    pushStreamKeyInner(popKey);
 //                    popKey = getFrontStreamKeyInner(true);
 //                }
@@ -117,7 +117,7 @@ namespace smedia {
             }
             return key;
         }
-        LOG_INFO << "return blank stream key";
+        LOG_INFO << "return blank stream tag";
         return {"emptyStreamKey",-2};
     }
 
@@ -126,12 +126,12 @@ namespace smedia {
         m_updateStreams.emplace(key);
     }
 
-    std::unique_ptr<std::vector<std::string>> DataStreamManager::getTags() const {
-        auto* list = new std::vector<std::string>;
+    std::unique_ptr<std::set<std::string>> DataStreamManager::getTags() const {
+        auto* tags = new std::set<std::string>;
         for (auto& item : m_StreamToKeyMap) {
-            list->push_back(item.second.tag);
+            tags->insert(item.second.tag);
         }
-        return std::unique_ptr<std::vector<std::string>>(list);
+        return std::unique_ptr<std::set<std::string>>(tags);
     }
 
     bool DataStreamManager::StreamKey::operator==(const StreamKey& key) const{

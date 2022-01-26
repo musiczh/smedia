@@ -12,6 +12,8 @@ namespace smedia {
     public:
         // 纹理对象共享指针
         GLTextureRef glTextureRef;
+        // 这里补充textured的原因是，在JNI场景下没有GLContext无法构建GLTexture，采用此字段来传递纹理id
+        unsigned int textureId;
     };
 }
 

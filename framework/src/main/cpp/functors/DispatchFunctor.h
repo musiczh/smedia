@@ -6,8 +6,11 @@
 #define SMEDIA_DISPATCHFUNCTOR_H
 #include "IFunctor.h"
 #include "InputHandler.h"
+#include <map>
+#include <deque>
 /**
- * 分流器,目前支持从主干流中分出一帧来读取bitmap
+ * 分流器,从主干流中分出一帧来读取bitmap
+ * 输入主干为Data，其他的输入tag由图来自定义
  */
 namespace smedia {
     class DispatchFunctor : public IFunctor{
@@ -22,9 +25,17 @@ namespace smedia {
 
         ~DispatchFunctor() override = default;
 
+    private:
+        void registerInputHandler();
+        bool parseGraphTag();
+
     public:
         FunctorContext* mFunctorContext;
         InputHandler mInputHandler;
+
+        std::deque<std::string> mTagList;
+        std::map<double,std::string> mDispatchMap;
+
         volatile bool mImageSignal;
     };
 }

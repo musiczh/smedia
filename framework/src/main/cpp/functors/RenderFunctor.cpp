@@ -12,8 +12,12 @@ namespace smedia {
                                               "in vec2 otPos;\n"
                                               "uniform mat4 model;\n"
                                               "uniform sampler2D tex;\n"
+                                              "uniform int mirrorY;\n"
                                               "void main(){\n"
                                               "    vec4 pos = model * vec4(otPos.xy,0.0,1.0);\n"
+                                              "    if (mirrorY == 1) {\n"
+                                              "        pos.y = 1.0-pos.y;\n"
+                                              "    }\n"
                                               "    FragColor = texture(tex,vec2(pos.x,pos.y));\n"
                                               "}";
 
@@ -24,12 +28,11 @@ namespace smedia {
             return false;
         }
         mRender = Render::CreateWithShaderCode(mGLContext,fragmentShade);
-        LOG_DEBUG << "initial RenderFunctor success" ;
+        LOG_DEBUG << "initial RenderFunctor success";
         return true;
     }
 
     void RenderFunctor::unInitialize(FunctorContext *context) {
-
     }
 
     bool RenderFunctor::execute(FunctorContext *context) {
@@ -69,6 +72,10 @@ namespace smedia {
         });
         mRender->getProgram()->setTexture("tex",frame.glTextureRef);
         mRender->getProgram()->setMat4("model",res);
+        // todo 系统相机出来的UVMatrix对openGL坐标和纹理坐标的Y轴倒置问题已经解决，而普通的照片显示需要进行Y轴倒置
+        //  最好的解决思路是去掉系统的倒置，然后统一添加倒置矩阵。但是这里还不会使用矩阵
+        //  暂时的解决方式是通过orientation判断是照片还是相机纹理，但是这个做法并不好，后续进行优化
+        mRender->getProgram()->setInt("mirrorY",frame.orientation == -1 ? 1 : 0);
         mRender->draw();
         mGLContext->runInRenderThreadV([this](){
             mGLContext->getEglCore()->swapBuffer();

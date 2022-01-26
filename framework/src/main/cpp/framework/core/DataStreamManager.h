@@ -5,11 +5,12 @@
 #ifndef SMEDIA_DATASTREAMMANAGER_H
 #define SMEDIA_DATASTREAMMANAGER_H
 #include "DataStream.h"
-#include "../data/Data.h"
+#include "Data.h"
 #include <string>
 #include <map>
 #include <internal.h>
 #include <unordered_map>
+#include <set>
 namespace smedia {
 
     class DataStreamManager {
@@ -31,7 +32,7 @@ namespace smedia {
         Data PopFront(const std::string& tag,int index = 0);
         StreamKey getFrontStreamKey() ;
         int getTagCount(const std::string& tag) const;
-        std::unique_ptr<std::vector<std::string>> getTags() const;
+        std::unique_ptr<std::set<std::string>> getTags() const;
         void PushData(Data& data,const std::string& tag,int index = -1);
     public:
        void onDataStreamUpdate(DataStream* dataStream);

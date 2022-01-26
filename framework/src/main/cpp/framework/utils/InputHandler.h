@@ -13,8 +13,9 @@
  */
 namespace smedia {
     struct InputData {
+        std::string nodeName;
         Data data;
-        std::string key;
+        std::string tag;
         int index;
         FunctorContext* functorContext;
     };

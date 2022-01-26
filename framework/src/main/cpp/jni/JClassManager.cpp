@@ -92,6 +92,8 @@ namespace smedia {
             case LongArray:name = "[J";break;
             case ByteArray:name = "[B";break;
             case ShortArray:name = "[S";break;
+            case NativeGLFrame:name = "com/example/frameword/framework/NativeGLFrame";break;
+            case NativeImageFrame:name = "com/example/frameword/framework/NativeImageFrame";break;
             default:break;
         }
         return name;

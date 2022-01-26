@@ -24,7 +24,6 @@ import android.widget.Toast;
 import com.example.camera.CameraService;
 import com.example.camera.api.CameraCapture;
 import com.example.camera.api.CameraListener;
-import com.example.camera.api.PreviewInfo;
 import com.example.egldemo.gles.EGLCore;
 import com.example.egldemo.gles.NativeRender;
 import com.example.egldemo.gles.RenderCore;
