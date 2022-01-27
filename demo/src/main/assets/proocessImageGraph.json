@@ -2,56 +2,96 @@
   "executors": [
     {
       "options": {
-        "threadNum" : 1
+        "threadNum": 1
       }
     }
   ],
   "nodes": [
     {
-      "functor":"ImageSourceFunctor",
+      "functor": "ImageSourceFunctor",
       "name": "imageSourceNode",
       "options": {
         "glEnable": true
       },
       "outputs": [
-        "video:v1"
+        "video:video1"
       ]
     },
     {
-      "functor":"AdjustColorFunctor",
+      "functor": "AdjustColorFunctor",
       "name": "adjustNode",
-      "inputs" : [
-        "video:v1"
+      "inputs": [
+        "video:video1"
       ],
       "outputs": [
         "video:v2"
       ]
     },
     {
-      "functor":"GLImageReaderFunctor",
-      "name": "glImageReaderNode",
-      "inputs" : [
+      "functor": "HighLightShadowFunctor",
+      "name": "shadowNode",
+      "inputs": [
         "video:v2"
       ],
       "outputs": [
-        "buffer:v3"
+        "video:v3"
+      ]
+    },
+    {
+      "functor": "SharpenFunctor",
+      "name": "sharpenNode",
+      "inputs": [
+        "video:v3"
+      ],
+      "outputs": [
+        "video:v4"
+      ]
+    },
+    {
+      "functor": "WhiteBalanceFunctor",
+      "name": "whiteBalanceNode",
+      "inputs": [
+        "video:v4"
+      ],
+      "outputs": [
+        "video:v5"
+      ]
+    },
+    {
+      "functor": "WhiteBalanceFunctor",
+      "name": "whiteBalanceNode2",
+      "inputs": [
+        "video:v5"
+      ],
+      "outputs": [
+        "video:v6"
+      ]
+    },
+    {
+      "functor": "GLImageReaderFunctor",
+      "name": "imageReaderNode",
+      "inputs": [
+        "video:v6"
+      ],
+      "outputs": [
+        "buffer:imageData"
       ]
     },
     {
       "functor": "ImageLoader",
       "name": "imageLoaderNode",
       "inputs": [
-        "data:v3"
+        "data:imageData"
       ],
       "outputs": [
-        "data:v4"
+        "data:bitmapData"
       ]
     },
     {
       "functor": "CallbackFunctor",
       "name": "callbackNode",
       "inputs": [
-        "data:v4"
+        "data:bitmapData"
       ]
     }
   ]

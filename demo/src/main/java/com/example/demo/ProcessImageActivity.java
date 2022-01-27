@@ -20,10 +20,14 @@ import android.provider.MediaStore;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.demo.util.SamplerSurfaceTextureListener;
@@ -31,16 +35,49 @@ import com.example.frameword.framework.Graph;
 import com.example.frameword.framework.NativeCallback;
 import com.example.util.PictureCache;
 
-public class ProcessImageActivity extends AppCompatActivity {
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+public class ProcessImageActivity extends AppCompatActivity {
+    class Effect {
+        public Effect(String name,int process) {
+            this.name = name;
+            this.process = process;
+        }
+        public String name = "";
+        public int process = 0;
+    }
+    enum ProcessState {
+        NONE,PROCESSING,UPDATE
+    }
+    private Map<Integer,Effect> mMap;
     private Graph mGraph = new Graph();
     private Bitmap mBitmap = null;
     private Bitmap mRawBitmap = null;
+
+    private SeekBar mSeekBar;
+    private int mSelect = 0;
+    private AtomicBoolean mNeedUpdate = new AtomicBoolean(false);
+    private volatile ProcessState mState = ProcessState.NONE;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_process_image);
+
+        mMap = new HashMap<>();
+        mMap.put(1,new ProcessImageActivity.Effect("亮度",0));
+        mMap.put(2,new ProcessImageActivity.Effect("对比度",0));
+        mMap.put(3,new ProcessImageActivity.Effect("饱和度",0));
+        mMap.put(4,new ProcessImageActivity.Effect("锐化",0));
+        mMap.put(5,new ProcessImageActivity.Effect("高光",0));
+        mMap.put(6,new ProcessImageActivity.Effect("阴影",0));
+        mMap.put(7,new ProcessImageActivity.Effect("暖色调",0));
+        mMap.put(8,new ProcessImageActivity.Effect("冷色调",0));
+        mMap.put(9,new ProcessImageActivity.Effect("着色(紫)",0));
+        mMap.put(10,new ProcessImageActivity.Effect("着色(绿)",0));
 
         mGraph.init(Util.getJson("proocessImageGraph.json",this),null);
         mGraph.run();
@@ -49,6 +86,12 @@ public class ProcessImageActivity extends AppCompatActivity {
             public boolean onNativeCallback(String nodeName, String keyName, Object value) {
                 mBitmap = (Bitmap) value;
                 onBitmapShow();
+                if (mState == ProcessState.UPDATE) {
+                    mState = ProcessState.PROCESSING;
+                    mGraph.setOption("imageSourceNode","data",mRawBitmap);
+                } else if (mState == ProcessState.PROCESSING) {
+                    mState = ProcessState.NONE;
+                }
                 return true;
             }
         });
@@ -57,13 +100,54 @@ public class ProcessImageActivity extends AppCompatActivity {
         mRawBitmap = bitmap;
         mGraph.setOption("imageSourceNode","data",bitmap);
 
-        SeekBar seekBar = findViewById(R.id.seekBar);
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        mSeekBar = findViewById(R.id.seekBar);
+        mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                float value = progress/120.f+0.1f;
-                mGraph.setOption("adjustNode","brightness",value);
-                mGraph.setOption("imageSourceNode","data",mRawBitmap);
+                if (mMap.get(mSelect) == null) {
+                    return;
+                }
+                mMap.get(mSelect).process = progress;
+                float value = progress/100.f;
+                switch (mSelect) {
+                    case 1: {
+                        mGraph.setOption("adjustNode","brightness",value/4.0f);break;
+                    }
+                    case 2: {
+                        mGraph.setOption("adjustNode","contrast",value+1.0f);break;
+                    }
+                    case 3 : {
+                        mGraph.setOption("adjustNode","saturation",value+1.0f);break;
+                    }
+                    case 4 : {
+                        mGraph.setOption("sharpenNode","sharpen",value*4.0f);break;
+                    }
+                    case 5 : {
+                        mGraph.setOption("shadowNode","highLight",value*2.0f);break;
+                    }
+                    case 6 : {
+                        mGraph.setOption("shadowNode","shadow",value*2.0f);break;
+                    }
+                    case 7 : {
+                        mGraph.setOption("whiteBalanceNode","temperature",value/2.0f);break;
+                    }
+                    case 8 : {
+                        mGraph.setOption("whiteBalanceNode2","temperature",-(value/2.0f));break;
+                    }
+                    case 9 : {
+                        mGraph.setOption("whiteBalanceNode","tint",value*1.5f);break;
+                    }
+                    case 10 : {
+                        mGraph.setOption("whiteBalanceNode2","tint",-(value*1.5f));break;
+                    }
+                    default: break;
+                }
+                if (mState == ProcessState.NONE) {
+                    mState = ProcessState.PROCESSING;
+                    mGraph.setOption("imageSourceNode","data",mRawBitmap);
+                } else if (mState == ProcessState.PROCESSING) {
+                    mState = ProcessState.UPDATE;
+                }
             }
 
             @Override
@@ -95,6 +179,26 @@ public class ProcessImageActivity extends AppCompatActivity {
                 } else {
                     Toast.makeText(ProcessImageActivity.this, "保存失败", Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
+
+        int i = 0;
+        String[] data = new String[mMap.size()];
+        for (Effect e : mMap.values()) {
+            data[i] = e.name;
+            i++;
+        }
+
+        TextView textView = findViewById(R.id.text);
+        ListView listView = findViewById(R.id.listView);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, data);
+        listView.setAdapter(adapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                mSelect = position+1;
+                textView.setText(Objects.requireNonNull(mMap.get(mSelect)).name);
+                mSeekBar.setProgress(Objects.requireNonNull(mMap.get(mSelect)).process);
             }
         });
     }

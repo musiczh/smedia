@@ -51,7 +51,6 @@ public class CameraAdjustActivity extends AppCompatActivity {
         public String name = "";
         public int process = 0;
     }
-    private List<String> mList;
     private Map<Integer,Effect> mMap;
     private Graph mGraph;
     private CameraCapture mCameraCapture = CameraService.obtainCamera();

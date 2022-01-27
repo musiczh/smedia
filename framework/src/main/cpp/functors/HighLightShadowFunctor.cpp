@@ -36,7 +36,7 @@ namespace smedia {
 
     bool HighLightShadowFunctor::onInit(InputHandler &inputHandler) {
         mShadow = 0;
-        mHighLight = 0;
+        mHighLight = 1;
         inputHandler.registerHandler("shadow",INPUT_CALLBACK{
             float value;
             if (inputData.data.getData(value)) {

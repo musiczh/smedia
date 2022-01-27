@@ -6,7 +6,8 @@
 #define SMEDIA_HIGHLIGHTSHADOWFUNCTOR_H
 #include "IGLRenderFunctor.h"
 /**
- * 高光和阴影调节，此functor暂时有bug，暂不使用
+ * 高光和阴影调节，此functor暂时有bug，暂不使用，效果不好
+ * 高光1-2
  * todo bugfix
  */
 namespace smedia {
