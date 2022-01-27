@@ -40,10 +40,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class CameraAdjustActivity extends AppCompatActivity {
+    class Effect {
+        public Effect(String name,int process) {
+            this.name = name;
+            this.process = process;
+        }
+        public String name = "";
+        public int process = 0;
+    }
     private List<String> mList;
-    private Map<Integer,String> mMap;
+    private Map<Integer,Effect> mMap;
     private Graph mGraph;
     private CameraCapture mCameraCapture = CameraService.obtainCamera();
     private ViewRender mRender = new ViewRender();
@@ -53,6 +62,7 @@ public class CameraAdjustActivity extends AppCompatActivity {
     // 会找不到env从而报错。这里后续需要优化JNIService来避免这个问题
     private Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
     private Logger mLogger = Logger.create("huan_CameraAdjustActivity");
+    private SeekBar mSeekBar;
 
     private int frameWidth;
     private int frameHeight;
@@ -66,16 +76,17 @@ public class CameraAdjustActivity extends AppCompatActivity {
         setContentView(R.layout.activity_camera_adjust);
 
         mMap = new HashMap<>();
-        mMap.put(1,"亮度");
-        mMap.put(2,"对比度");
-        mMap.put(3,"饱和度");
-        mMap.put(4,"锐化");
-        mMap.put(5,"高光");
-        mMap.put(6,"阴影");
-        mMap.put(7,"暖色调");
-        mMap.put(8,"冷色调");
-        mMap.put(9,"着色(紫)");
-        mMap.put(10,"着色(绿)");
+        mMap.put(1,new Effect("亮度",0));
+        mMap.put(2,new Effect("对比度",0));
+        mMap.put(3,new Effect("饱和度",0));
+        mMap.put(4,new Effect("锐化",0));
+        mMap.put(5,new Effect("高光",0));
+        mMap.put(6,new Effect("阴影",0));
+        mMap.put(7,new Effect("暖色调",0));
+        mMap.put(8,new Effect("冷色调",0));
+        mMap.put(9,new Effect("着色(紫)",0));
+        mMap.put(10,new Effect("着色(绿)",0));
+
 
         mGraph = new Graph();
         mRender.makeCurrentContext();
@@ -101,7 +112,12 @@ public class CameraAdjustActivity extends AppCompatActivity {
     }
 
     private void initView() {
-        String[] data = mMap.values().toArray(new String[0]);
+        int i = 0;
+        String[] data = new String[mMap.size()];
+        for (Effect e : mMap.values()) {
+            data[i] = e.name;
+            i++;
+        }
 
         TextView textView = findViewById(R.id.text);
         ListView listView = findViewById(R.id.listView);
@@ -112,7 +128,8 @@ public class CameraAdjustActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 mSelect = position+1;
                 mLogger.d("select index = "+mSelect+",text ="+mMap.get(mSelect));
-                textView.setText(mMap.get(mSelect));
+                textView.setText(Objects.requireNonNull(mMap.get(mSelect)).name);
+                mSeekBar.setProgress(Objects.requireNonNull(mMap.get(mSelect)).process);
             }
         });
 
@@ -166,7 +183,7 @@ public class CameraAdjustActivity extends AppCompatActivity {
                     }
                 },mInputTexHandler);
                 CameraConfig config = CameraConfig.createBuilder()
-                        .facing(CameraConfig.FACING_FRONT)
+                        .facing(CameraConfig.FACING_BACKGROUND)
                         .setCameraListener(new CameraListener(){
                             @Override
                             public void onPreviewStart(PreviewInfo info) {
@@ -191,10 +208,11 @@ public class CameraAdjustActivity extends AppCompatActivity {
         });
         mainLayout.addView(textureView, FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
 
-        SeekBar seekBar = findViewById(R.id.seekBar);
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        mSeekBar = findViewById(R.id.seekBar);
+        mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                mMap.get(mSelect).process = progress;
                 float value = progress/100.f;
                 switch (mSelect) {
                     case 1: {

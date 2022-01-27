@@ -43,11 +43,13 @@ namespace smedia {
             if (mImageSignal) {
                 mFunctorContext->setOutput(inputData.data,"subSignal");
                 mImageSignal = false;
+                return true;
             }
             // 判断是会否有相同的时间戳，有的话进行分流
             if (mDispatchMap.find(inputData.data.getTime()) != mDispatchMap.end()) {
                 mFunctorContext->setOutput(inputData.data,mDispatchMap[inputData.data.getTime()]);
                 mDispatchMap.erase(inputData.data.getTime());
+                return true;
             }
             mFunctorContext->setOutput(inputData.data,"master");
             return true;
