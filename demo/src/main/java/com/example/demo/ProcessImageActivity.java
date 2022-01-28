@@ -30,7 +30,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.demo.util.SamplerSurfaceTextureListener;
 import com.example.frameword.framework.Graph;
 import com.example.frameword.framework.NativeCallback;
 import com.example.util.PictureCache;
@@ -269,7 +268,9 @@ public class ProcessImageActivity extends AppCompatActivity {
             @Override
             public void run() {
                 ImageView imageView = findViewById(R.id.imageView);
-                imageView.setImageBitmap(mBitmap);
+                // 对图片进行缩放到和Bitmap一样的大小，防止图片过大导致设置失败
+                imageView.setImageBitmap(Bitmap.createScaledBitmap(mBitmap,imageView.getWidth(),
+                        mBitmap.getHeight()*imageView.getWidth()/mBitmap.getWidth(),true));
             }
         });
     }
