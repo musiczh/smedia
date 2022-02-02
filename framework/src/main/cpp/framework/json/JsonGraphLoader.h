@@ -21,11 +21,12 @@ namespace smedia {
     private:
         void parseExecutor(nlohmann::json& jsonObject);
         void parseNode(nlohmann::json& jsonObject);
+        void parseService(nlohmann::json& jsonObject);
 
     private:
-        static void parseNodeOptions(nlohmann::json& nodeJson,NodeConfig& nodeConfig);
         static void parseNodeInputs(nlohmann::json& nodeJson,NodeConfig& nodeConfig);
         static void parseNodeOutput(nlohmann::json& nodeJson,NodeConfig& nodeConfig);
+        static void parseOptions(nlohmann::json& jsonObject,OptionMap& optionMap);
         static void parseTagIndexName(std::vector<PortTag>& v,
                                       const std::string& tag,
                                       nlohmann::json& nodeJson,

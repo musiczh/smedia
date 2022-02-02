@@ -52,7 +52,7 @@ namespace smedia {
 
         if (executorNameSet.find(executorConfig.name) != executorNameSet.end()) {
             LOG_ERROR << "can not set the same executor name";
-            graphConfig = nullptr;
+            graphConfig.reset();
             return ;
         } else {
             executorNameSet.insert(executorConfig.name);
@@ -61,5 +61,27 @@ namespace smedia {
         if (graphConfig != nullptr) {
             graphConfig->executors.push_back(executorConfig);
         }
+    }
+
+    void GraphBuilder::addService(ServiceConfig &serviceConfig) {
+        if (graphConfig == nullptr) {
+            return ;
+        }
+        if (serviceConfig.service.empty()) {
+            LOG_ERROR << "service is null,json parse fail";
+            graphConfig.reset();
+            return;
+        }
+
+        // 若没有字段，采用和service类名一致的名称
+        // 存在相同名称解析失败，因为后续需要通过名称来获取service，此处强制不能有相同名称的service
+        std::string name = serviceConfig.name.empty() ? serviceConfig.service : serviceConfig.name;
+        if (serviceNameSet.find(name) != serviceNameSet.end()) {
+            LOG_ERROR << "service has the same name,json parse fail";
+            graphConfig.reset();
+            return;
+        }
+
+        graphConfig->services.push_back(serviceConfig);
     }
 }

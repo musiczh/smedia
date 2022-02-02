@@ -17,7 +17,10 @@ namespace smedia {
             LOG_INFO << "graph has init";
             return false;
         }
-        initGlobalService(config,options);
+        if (!initService(config,options)) {
+            LOG_ERROR << "init global service error";
+            return false;
+        }
         if (!initializeExecutor(config)) {
             LOG_ERROR << "Graph init executors error";
             return false;
@@ -41,7 +44,7 @@ namespace smedia {
         for (NodeConfig& nodeConfig : nodes) {
             parseNodeTag(nodeConfig, true);
             parseNodeTag(nodeConfig, false);
-            Node *newNode = new Node(new NodeContext(m_edgesMap, mGlobalService, nodeConfig));
+            Node *newNode = new Node(new NodeContext(m_edgesMap, nodeConfig ,*mGlobalServiceManager));
             if (!newNode -> initialize()){
                 LOG_ERROR << "functor:" << nodeConfig.functor << " name:" << nodeConfig.name << " init fail";
                 return false;
@@ -204,26 +207,13 @@ namespace smedia {
         node->setOption(options);
     }
 
-    void Graph::initGlobalService(GraphConfig& config,const OptionMap& options) {
-        mGlobalService = options;
-        initGLService(config);
-        LOG_INFO << "init global service success";
-    }
-
-    void Graph::initGLService(GraphConfig &config) {
-        // 初始化全局GLContext并初始化egl环境，接收来自外部设置的EGLContext作为shareContext
-        // 后续functor可以通过functorContext来访问eglContext
-        // todo 这里后面的处理要处理和框架无关
-        Data data;
-        if (mGlobalService.find("EGLSharedContext") != mGlobalService.end()) {
-            data = mGlobalService["EGLSharedContext"];
+    bool Graph::initService(GraphConfig& config,const OptionMap& options) {
+        mGlobalServiceManager = std::unique_ptr<GlobalServiceManager>(new GlobalServiceManager);
+        if (!mGlobalServiceManager->init(config,options)) {
+            return false;
         }
-        auto* glContext = new GLContext();
-        glContext->init(data);
-        auto *glContextRef = new GLContextRef(glContext);
-
-        Data contextData = Data::create(glContextRef);
-        mGlobalService["GLContext"] = contextData;
+        LOG_DEBUG << "init global service success";
+        return true;
     }
 
     bool Graph::release() {

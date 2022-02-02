@@ -6,6 +6,7 @@
 #define SMEDIA_FUNCTORCONTEXT_H
 #include "Data.h"
 #include "Edge.h"
+#include "GlobalServiceManager.h"
 #include "DataStreamManager.h"
 #include "typeDef.h"
 #include <set>
@@ -15,8 +16,8 @@ namespace smedia {
     public:
         FunctorContext(std::vector<std::string>& inputEdges,
                        std::vector<std::string>& outputEdges,
+                       GlobalServiceManager& serviceManager,
                        EdgeMap& edgeMap,
-                       OptionMap& globalService,
                        Node* node);
         Data getInput(const std::string& tag,int index = 0);
         Data popInput(const std::string& tag,int index = 0);
@@ -44,7 +45,14 @@ namespace smedia {
          */
         void executeConnectNode();
 
-        Data getGlobalService(const std::string& name);
+        /**
+         * 获取全局服务
+         * @tparam T 具体的service实现类
+         * @param name service的名称
+         * @return 返回该对象的指针
+         */
+        template<class T>
+        T* getService(const std::string name);
 
         std::string getNodeName();
 
@@ -55,10 +63,22 @@ namespace smedia {
         std::function<void()> m_executeSelfHandler;
         std::function<void()> m_executeConnectNodeHandler;
 
-        OptionMap mGlobalService;
+        GlobalServiceManager& mServiceManager;
         Node* mNode;
     };
+
+    template<class T>
+    T *FunctorContext::getService(const std::string name) {
+        auto* service = mServiceManager.getService(name);
+        T* ptr = nullptr;
+        if (service == nullptr || (ptr = dynamic_cast<T*>(service)) == nullptr) {
+            LOG_ERROR << "getService error. service is null or dynamic fail";
+        }
+        return ptr;
+    }
+
 }
+
 
 
 

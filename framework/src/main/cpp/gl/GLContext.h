@@ -8,6 +8,7 @@
 #include <GLES3/gl3.h>
 #include <GLES3/gl3ext.h>
 #include <memory>
+#include "ServiceRegister.h"
 #include "EGLCore.h"
 #include "GLThread.h"
 #include "Data.h"
@@ -20,10 +21,12 @@
 namespace smedia {
     class GLTexturePool;
 
-    class GLContext {
+    class GLContext : public Service{
     public:
         GLContext();
         ~GLContext();
+
+        bool init(OptionMap options) override;
 
         void init(EGLContext eglContext);
         // todo 读取Data中的EGLContext，这个接口后续剥离更好，不然和外部耦合了

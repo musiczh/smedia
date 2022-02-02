@@ -6,9 +6,9 @@
 
 #include <utility>
 namespace smedia {
-    std::unique_ptr<GLBufferFrame> GLBufferFrame::Create(GLContextRef glContext,const int *viewPort) {
+    std::unique_ptr<GLBufferFrame> GLBufferFrame::Create(GLContext* glContext,const int *viewPort) {
         std::unique_ptr<GLBufferFrame> bufferFrame = std::unique_ptr<GLBufferFrame>(
-                new GLBufferFrame(std::move(glContext),viewPort));
+                new GLBufferFrame(glContext,viewPort));
         return bufferFrame;
     }
 
@@ -16,8 +16,8 @@ namespace smedia {
         mGLTexture = std::move(glTexture);
     }
 
-    GLBufferFrame::GLBufferFrame(GLContextRef glContext,const int *viewPort) {
-        mGLContext = std::move(glContext);
+    GLBufferFrame::GLBufferFrame(GLContext* glContext,const int *viewPort) {
+        mGLContext = glContext;
         setViewPort(viewPort);
         // 创建FBO
         mGLContext->runInRenderThreadV([this](){

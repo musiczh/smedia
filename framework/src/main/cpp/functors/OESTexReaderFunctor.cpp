@@ -18,7 +18,7 @@ namespace smedia {
 
     bool OESTexReaderFunctor::initialize(smedia::FunctorContext *context) {
         mFunctorContext = context;
-        if (!mFunctorContext->getGlobalService("GLContext").getData(mGLContext)) {
+        if ((mGLContext = mFunctorContext->getService<GLContext>("GLContext")) == nullptr) {
             LOG_ERROR << "mGLContext in functorContext is null";
             return false;
         }
@@ -38,6 +38,10 @@ namespace smedia {
     }
 
     bool OESTexReaderFunctor::execute(smedia::FunctorContext *context) {
+        if (mGLContext == nullptr) {
+            // 这里不打印错误日志，原因是上面会打印可以定位错误；且execute是每帧调用会大量产生日志
+            return false;
+        }
         Data data;
         GLFrame frame{};
         {
@@ -70,7 +74,6 @@ namespace smedia {
     void OESTexReaderFunctor::setOption(FunctorContext *context,const std::string &key, smedia::Data value) {
         if (key == "DATA") {
             if (mGLContext == nullptr) {
-                LOG_ERROR << "mGLContext is null";
                 return;
             }
 

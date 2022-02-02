@@ -19,11 +19,12 @@ namespace smedia {
 
     class GLTexture {
     public:
-        static GLTextureRef Create(GLContextRef glContext,int width,int height,
+        // 静态方法构建GLTexture
+        static GLTextureRef Create(GLContext* glContext,int width,int height,
                                    TextureType type, int textureId = 0);
 
     public:
-        GLTexture(GLContextRef glContext,int width,int height,TextureType type, int textureId);
+        GLTexture(GLContext* glContext,int width,int height,TextureType type, int textureId);
         ~GLTexture();
 
     public:
@@ -49,7 +50,7 @@ namespace smedia {
         unsigned int getTextureId();
 
     private:
-        GLContextRef mGLContext;
+        GLContext* mGLContext;
         TextureRef mTexture;
         volatile bool mAutoReuse;
 

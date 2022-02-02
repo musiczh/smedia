@@ -33,7 +33,7 @@ namespace smedia {
 
     private:
         FunctorContext* mFunctorContext;
-        GLContextRef mGLContext;
+        GLContext* mGLContext;
         std::unique_ptr<Render> mRender;
 
         int mWindowWidth;

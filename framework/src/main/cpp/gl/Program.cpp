@@ -11,8 +11,23 @@
 
 namespace smedia {
 
-    Program::Program(std::shared_ptr<GLContext> glContext) {
-        mGLContext = std::move(glContext);
+    std::unique_ptr<Program>
+    Program::CreateWithShaderSource(GLContext* glContext,
+                                    const std::string &vShader,
+                                    const std::string &fShader) {
+        auto* program = new Program(glContext);
+        program->addShader(GL_VERTEX_SHADER,vShader);
+        program->addShader(GL_FRAGMENT_SHADER,fShader);
+        if (!program->link()) {
+            LOG_ERROR << "link program error";
+            return nullptr;
+        }
+        program->initUniform();
+        return std::unique_ptr<Program>(program);
+    }
+
+    Program::Program(GLContext* glContext) {
+        mGLContext = glContext;
         mGLContext->runInRenderThreadV([this](){
             mProgram = glCreateProgram();
         });
@@ -83,21 +98,6 @@ namespace smedia {
             CHECK_GL_CODE(glDeleteProgram(mProgram);)
         });
         LOG_DEBUG << "destroy Program";
-    }
-
-    std::unique_ptr<Program>
-    Program::CreateWithShaderSource(std::shared_ptr<GLContext> glContext,
-                                    const std::string &vShader,
-                                    const std::string &fShader) {
-        auto* program = new Program(std::move(glContext));
-        program->addShader(GL_VERTEX_SHADER,vShader);
-        program->addShader(GL_FRAGMENT_SHADER,fShader);
-        if (!program->link()) {
-            LOG_ERROR << "link program error";
-            return nullptr;
-        }
-        program->initUniform();
-        return std::unique_ptr<Program>(program);
     }
 
     void Program::initUniform() {

@@ -19,7 +19,7 @@ namespace smedia {
 
     class Render {
     public:
-        static std::unique_ptr<Render> CreateWithShaderCode(GLContextRef glContext,
+        static std::unique_ptr<Render> CreateWithShaderCode(GLContext* glContext,
                                               const std::string& fShaderCode = "",
                                               const std::string& vShaderCode = "");
     public:
@@ -31,7 +31,7 @@ namespace smedia {
 
     private:
         // 通过静态方法来创建
-        Render(GLContextRef glContext);
+        Render(GLContext* glContext);
         /**
          * 绑定渲染管线和顶点数据
          */
@@ -43,7 +43,7 @@ namespace smedia {
 
     private:
         std::unique_ptr<Program> mProgram;
-        GLContextRef mGLContext;
+        GLContext* mGLContext;
         // todo 后续有需求可以把顶点数据操作抽离到一个单独类去处理，（顶点类型、解析等）这里纹理渲染只需要矩形，暂时不需要
         unsigned int mVAO{0};
 

@@ -6,8 +6,8 @@
 #include "GLTexturePool.h"
 namespace smedia {
 
-    GLTexture::GLTexture(GLContextRef glContext, int width, int height,TextureType type, int textureId):
-    mGLContext(std::move(glContext)),mWidth(width),mHeight(height),mAutoReuse(true) {
+    GLTexture::GLTexture(GLContext* glContext, int width, int height,TextureType type, int textureId):
+    mGLContext(glContext),mWidth(width),mHeight(height),mAutoReuse(true) {
         mTexture = mGLContext->getGLTexturePool()->obtainTexture(width, height, type, textureId);
         mTextureId = mTexture->mTextureId;
     }
@@ -34,7 +34,7 @@ namespace smedia {
         return mTexture->mTextureId;
     }
 
-    GLTextureRef GLTexture::Create(GLContextRef glContext,int width,int height,
+    GLTextureRef GLTexture::Create(GLContext* glContext,int width,int height,
                                    TextureType type, int textureId) {
         return std::make_shared<GLTexture>(glContext,width,height,type,textureId);
     }

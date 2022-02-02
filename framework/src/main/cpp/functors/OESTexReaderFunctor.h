@@ -34,7 +34,7 @@ namespace smedia {
         FunctorContext* mFunctorContext;
         std::deque<Data> mOptionQueue;
         std::mutex mQueueLock;
-        GLContextRef mGLContext;
+        GLContext* mGLContext;
         std::unique_ptr<Render> mRender;
         std::unique_ptr<GLBufferFrame> mGLBufferFrame;
 

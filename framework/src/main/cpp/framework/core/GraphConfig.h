@@ -26,10 +26,16 @@ namespace smedia {
         std::string name;
         OptionMap options;
     };
+    struct ServiceConfig {
+        std::string service;
+        std::string name;
+        OptionMap options;
+    };
 
     struct GraphConfig {
         std::deque<NodeConfig> nodes;
         std::deque<ExecutorConfig> executors;
+        std::deque<ServiceConfig> services;
     };
 }
 

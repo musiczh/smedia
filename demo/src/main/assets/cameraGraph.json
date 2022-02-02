@@ -1,4 +1,10 @@
 {
+  "services": [
+    {
+      "service": "GLContext",
+      "name": "GLContext"
+    }
+  ],
   "executors": [
     {
       "options": {

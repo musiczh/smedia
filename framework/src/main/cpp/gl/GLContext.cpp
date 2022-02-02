@@ -73,5 +73,23 @@ namespace smedia {
         LOG_DEBUG << "create gl context";
     }
 
+    bool GLContext::init(OptionMap options) {
+        Data data;
+        if (options.find("EGLSharedContext") != options.end()) {
+            data = options["EGLSharedContext"];
+        }
+        EGLContext eglContext;
+        long eglContextHandle;
+        if (data.isEmpty() || !data.getData(eglContextHandle)) {
+            init(nullptr);
+        } else {
+            eglContext = reinterpret_cast<EGLContext>(eglContextHandle);
+            init(eglContext);
+        }
+        return true;
+    }
+
+    REGISTER_SERVICE(GLContext)
+
 }
 

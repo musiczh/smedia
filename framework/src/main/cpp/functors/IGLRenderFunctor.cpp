@@ -7,7 +7,7 @@ namespace smedia {
 
     bool IGLRenderFunctor::initialize(FunctorContext *context) {
         mFunctorContext = context;
-        if (!mFunctorContext->getGlobalService("GLContext").getData(mGLContext)) {
+        if ((mGLContext = mFunctorContext->getService<GLContext>("GLContext")) == nullptr) {
             LOG_ERROR << "mGLContext in functorContext is null";
             return false;
         }
@@ -41,6 +41,9 @@ namespace smedia {
 
     bool IGLRenderFunctor::execute(FunctorContext *context) {
         // 渲染需要放到渲染线程中去执行
+        if (mGLContext == nullptr) {
+            return false;
+        }
         return mGLContext->runInRenderThread([this,context]()->bool {
             return mInputHandler.runExecuteHandler(context);
         });

@@ -8,7 +8,8 @@
 namespace smedia {
 
     FunctorContext::FunctorContext(std::vector<std::string> &inputEdges, std::vector<std::string> &outputEdges,
-                                   EdgeMap &edgeMap,OptionMap& globalService,Node* node) {
+                                   GlobalServiceManager& serviceManager,EdgeMap &edgeMap,Node* node)
+                                   : mNode(node),mServiceManager(serviceManager){
         // 解析输入输出边，并绑定DataStream
         for (auto& edgeName : inputEdges) {
             if (edgeMap.find(edgeName) != edgeMap.end()) {
@@ -24,10 +25,6 @@ namespace smedia {
                                               edge->inputPort->tag,
                                               edge->inputPort->index, false);}
         }
-        for (auto& item : globalService) {
-            mGlobalService[item.first] = item.second;
-        }
-        mNode = node;
     }
 
     Data FunctorContext::getInput(const std::string &tag, int index) {
@@ -72,13 +69,6 @@ namespace smedia {
         m_executeConnectNodeHandler();
     }
 
-    Data FunctorContext::getGlobalService(const std::string &name) {
-        if (mGlobalService.find(name) != mGlobalService.end()) {
-            return mGlobalService[name];
-        }
-        return Data{};
-    }
-
     std::unique_ptr<std::set<std::string>> FunctorContext::getInputTags() {
         return m_inputManager.getTags();
     }
@@ -90,6 +80,7 @@ namespace smedia {
     std::string FunctorContext::getNodeName() {
         return mNode->getName();
     }
+
 
 
 }

@@ -22,7 +22,7 @@ namespace smedia {
          * @param viewPort 视口，必须为一个长度为4的int数组
          * @return
          */
-        static std::unique_ptr<GLBufferFrame> Create(GLContextRef glContext,const int *viewPort);
+        static std::unique_ptr<GLBufferFrame> Create(GLContext* glContext,const int *viewPort);
 
     public:
         unsigned int getFBOId() const;
@@ -58,13 +58,13 @@ namespace smedia {
 
     private:
         // 构造器私有，通过静态方法来创建，方便后续提供更多的构造器
-        GLBufferFrame(GLContextRef glContext,const int *viewPort);
+        GLBufferFrame(GLContext* glContext,const int *viewPort);
 
 
     private:
         unsigned int mFBO{0};
         GLTextureRef mGLTexture;
-        GLContextRef mGLContext;
+        GLContext* mGLContext;
         int mViewPort[4]{0,0,0,0};
     };
 

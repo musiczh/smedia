@@ -33,7 +33,7 @@ namespace smedia {
                                                   "}";
 
 
-    Render::Render(GLContextRef glContext):mGLContext(std::move(glContext)) {
+    Render::Render(GLContext* glContext):mGLContext(glContext) {
         // 构建render
         mState = RENDER_CREATE;
     }
@@ -48,9 +48,9 @@ namespace smedia {
     }
 
     std::unique_ptr<Render>
-    Render::CreateWithShaderCode(GLContextRef glContext, const std::string &fShaderCode,
+    Render::CreateWithShaderCode(GLContext* glContext, const std::string &fShaderCode,
                                  const std::string &vShaderCode) {
-        auto render = std::unique_ptr<Render>(new Render(std::move(glContext)));
+        auto render = std::unique_ptr<Render>(new Render(glContext));
         if (render->initWithShaderCode(fShaderCode,vShaderCode)) {
             return render;
         }

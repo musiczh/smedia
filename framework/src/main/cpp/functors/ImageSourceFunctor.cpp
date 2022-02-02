@@ -12,7 +12,7 @@ namespace smedia {
 
     bool ImageSourceFunctor::initialize(FunctorContext *context) {
         mFunctorContext = context;
-        if (!mFunctorContext->getGlobalService("GLContext").getData(mGLContext)) {
+        if ((mGLContext = mFunctorContext->getService<GLContext>("GLContext")) == nullptr) {
             LOG_ERROR << "mGLContext in functorContext is null";
             return false;
         }

@@ -8,6 +8,7 @@
 #include "ExecuteManager.h"
 #include "Logger.h"
 #include "Data.h"
+#include "GlobalServiceManager.h"
 #include <mutex>
 #include <map>
 #include <vector>
@@ -33,23 +34,22 @@ public:
     bool run();
     bool stop();
     bool release();
-
     void setOption(const std::string &nodeName,const OptionMap options);
 
 private:
     NodeMap m_nodesMap; // 节点映射
     EdgeMap m_edgesMap; // 全局边映射
-    OptionMap mGlobalService; // 全局服务，目前只有egl环境
+    std::unique_ptr<GlobalServiceManager> mGlobalServiceManager; // 全局节点服务对象
     std::vector<std::map<std::string,OptionMap>> m_optionsSave; // 缓存用户设置的option
     std::unique_ptr<ExecuteManager> m_executeManger; // 负责调度节点
+
     std::mutex m_mutex; // 操作队列的时候需要加锁
     volatile State m_state; // graph状态
 
 private:
     bool initializeExecutor(GraphConfig& config);
     bool initializeNode(GraphConfig& config);
-    void initGlobalService(GraphConfig& config,const OptionMap& options);
-    void initGLService(GraphConfig& config);
+    bool initService(GraphConfig& config,const OptionMap& options);
     bool validateEdges();
     bool parseNodeTag(const NodeConfig& config,bool isInput);
 

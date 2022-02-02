@@ -26,11 +26,11 @@ namespace smedia {
         // 使用友元类来屏蔽一些对外接口
         friend class Render;
     public:
-        Program(std::shared_ptr<GLContext> glContext);
+        Program(GLContext* glContext);
         ~Program();
 
     protected:
-        static std::unique_ptr<Program> CreateWithShaderSource(std::shared_ptr<GLContext> glContext,
+        static std::unique_ptr<Program> CreateWithShaderSource(GLContext* glContext,
                                                                const std::string& vShader,
                                                                const std::string& fShader);
 
@@ -69,9 +69,9 @@ namespace smedia {
         // 缓存属性设置，在bind的时候一次性设置给管线
         std::vector<std::shared_ptr<GLParameter>> mUniformCache;
         std::mutex mUniformCacheLock;
-        std::shared_ptr<GLContext> mGLContext;
+        GLContext* mGLContext;
         unsigned int mProgram;
-        char info[512];
+        char info[512]{};
     };
 
 

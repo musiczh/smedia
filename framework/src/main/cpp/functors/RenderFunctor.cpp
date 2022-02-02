@@ -23,7 +23,7 @@ namespace smedia {
 
     bool RenderFunctor::initialize(FunctorContext *context) {
         mFunctorContext = context;
-        if (!mFunctorContext->getGlobalService("GLContext").getData(mGLContext)) {
+        if ((mGLContext = mFunctorContext->getService<GLContext>("GLContext")) == nullptr) {
             LOG_ERROR << "mGLContext in functorContext is null";
             return false;
         }
@@ -36,6 +36,9 @@ namespace smedia {
     }
 
     bool RenderFunctor::execute(FunctorContext *context) {
+        if (mGLContext == nullptr) {
+            return false;
+        }
         Data inputData = mFunctorContext->popInput("video");
         GLFrame frame{};
         if (inputData.isEmpty() || !inputData.getData(frame)) {
@@ -84,12 +87,6 @@ namespace smedia {
     }
 
     void RenderFunctor::setOption(FunctorContext *context, const std::string &key, Data value) {
-        GLContextRef glContext;
-        Data contextData = mFunctorContext->getGlobalService(GL_CONTEXT);
-        if (!contextData.getData(glContext)) {
-            LOG_ERROR << "mGLContext is not init";
-            return;
-        }
         if (key == NATIVE_WINDOW) {
             // 设置系统窗口
             JNIObject object;
@@ -99,8 +96,8 @@ namespace smedia {
             }
             ANativeWindow* nativeWindow = ANativeWindow_fromSurface(JNIService::getEnv(),object.getJObject());
             auto nativeWindowType = reinterpret_cast<EGLNativeWindowType>(nativeWindow);
-            EGLCore* eglCore = glContext->getEglCore();
-            glContext->runInRenderThread([eglCore,nativeWindowType]()->bool{
+            EGLCore* eglCore = mGLContext->getEglCore();
+            mGLContext->runInRenderThread([eglCore,nativeWindowType]()->bool{
                 EGLSurface surface = eglCore->createWindowSurface(nativeWindowType);
                 eglCore->makeCurrentContext(surface);
                 return true;

@@ -5,7 +5,8 @@
 #include "NodeContext.h"
 
 namespace smedia {
-    NodeContext::NodeContext(smedia::EdgeMap &edgesMap, smedia::OptionMap &globalService,
-                                     smedia::NodeConfig &nodeConfig)
-                                     : edgesMap(edgesMap), globalService(globalService), nodeConfig(nodeConfig){}
+    NodeContext::NodeContext(smedia::EdgeMap &edgesMap,
+                                     smedia::NodeConfig &nodeConfig,GlobalServiceManager& globalServiceManager)
+                                     : edgesMap(edgesMap),
+                                     nodeConfig(nodeConfig),globalServiceManager(globalServiceManager){}
 }
