@@ -10,11 +10,11 @@ namespace smedia {
     } \
 
 
-    using Register = FunctionRegister<std::unique_ptr<Service>>;
+    using Register = FunctionRegister<std::unique_ptr<IService>>;
     bool hasRegisterService = false;
     void lazyRegisterAllService();
 
-    void registerService(const std::string& name,std::function<std::unique_ptr<Service>()> function){
+    void registerService(const std::string& name,std::function<std::unique_ptr<IService>()> function){
         Register::registerFunction(name,std::move(function));
     }
 
@@ -26,7 +26,7 @@ namespace smedia {
         return Register::isRegister(name);
     }
 
-    std::unique_ptr<Service> CreateServiceByName(const std::string& name) {
+    std::unique_ptr<IService> CreateServiceByName(const std::string& name) {
         if (!hasRegisterService) {
             lazyRegisterAllService();
             hasRegisterService = true;

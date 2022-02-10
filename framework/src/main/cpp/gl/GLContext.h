@@ -21,7 +21,7 @@
 namespace smedia {
     class GLTexturePool;
 
-    class GLContext : public Service{
+    class GLContext : public IService{
     public:
         GLContext();
         ~GLContext();

@@ -6,12 +6,12 @@
 #define SMEDIA_SERVICEREGISTER_H
 #include <string>
 #include "FunctionRegister.h"
-#include "Service.h"
+#include "IService.h"
 #include "internal.h"
 
 namespace smedia {
-    void registerService(const std::string& name,std::function<std::unique_ptr<Service>()> function);
-    std::unique_ptr<Service> CreateServiceByName(const std::string& name);
+    void registerService(const std::string& name,std::function<std::unique_ptr<IService>()> function);
+    std::unique_ptr<IService> CreateServiceByName(const std::string& name);
     bool IsRegisterService(const std::string& name);
 
     // Service实现类声明此宏来定义注册方法

@@ -5,7 +5,7 @@
 #ifndef SMEDIA_SERVICEMANAGER_H
 #define SMEDIA_SERVICEMANAGER_H
 #include "ServiceRegister.h"
-#include "Service.h"
+#include "IService.h"
 #include "GraphConfig.h"
 namespace smedia {
     /**
@@ -29,11 +29,11 @@ namespace smedia {
          * @param name
          * @return 返回service指针，这里不返回引用的原因是外部还需要二次处理，引用还需要再做转指针处理
          */
-        Service* getService(const std::string& name);
+        IService* getService(const std::string& name);
 
     private:
         // 这里使用共享指针的好处是清空map自动释放service
-        std::map<std::string,std::shared_ptr<Service>> mServiceMap;
+        std::map<std::string,std::shared_ptr<IService>> mServiceMap;
     };
 }
 

@@ -23,13 +23,13 @@ namespace smedia {
                 optionConfig.insert({i.first,i.second});
             }
             service->init(optionConfig);
-            mServiceMap.insert({item.name,std::shared_ptr<Service>(service.release())});
+            mServiceMap.insert({item.name,std::shared_ptr<IService>(service.release())});
         }
         LOG_DEBUG << "init ServiceManager success";
         return true;
     }
 
-    Service* ServiceManager::getService(const std::string& name) {
+    IService* ServiceManager::getService(const std::string& name) {
         if (mServiceMap.find(name) == mServiceMap.end()) {
             return nullptr;
         }
