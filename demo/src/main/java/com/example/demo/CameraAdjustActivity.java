@@ -211,6 +211,9 @@ public class CameraAdjustActivity extends AppCompatActivity {
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (mMap.get(mSelect) == null) {
+                    return;
+                }
                 mMap.get(mSelect).process = progress;
                 float value = progress/100.f;
                 switch (mSelect) {

@@ -13,13 +13,6 @@ namespace smedia {
     class Service {
     public:
         virtual bool init(OptionMap options) = 0;
-
-        // 转换为具体的类对象
-        template<class T>
-        T& convert() {
-            T* value = dynamic_cast<T*>(this);
-            return *value;
-        };
     };
 }
 
