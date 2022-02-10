@@ -6,15 +6,15 @@
 #define SMEDIA_NODECONTEXT_H
 #include "typeDef.h"
 #include "GraphConfig.h"
-#include "GlobalServiceManager.h"
+#include "ServiceManager.h"
 
 namespace smedia {
 class NodeContext {
 public:
-    NodeContext(EdgeMap& edgesMap,NodeConfig& globalService,GlobalServiceManager& globalServiceManager);
+    NodeContext(EdgeMap& edgesMap, NodeConfig& globalService, ServiceManager& globalServiceManager);
     EdgeMap& edgesMap;
     NodeConfig nodeConfig;
-    GlobalServiceManager& globalServiceManager;
+    ServiceManager& globalServiceManager;
 };
 
 }

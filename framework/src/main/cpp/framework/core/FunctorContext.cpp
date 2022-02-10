@@ -8,7 +8,7 @@
 namespace smedia {
 
     FunctorContext::FunctorContext(std::vector<std::string> &inputEdges, std::vector<std::string> &outputEdges,
-                                   GlobalServiceManager& serviceManager,EdgeMap &edgeMap,Node* node)
+                                   ServiceManager& serviceManager, EdgeMap &edgeMap, Node* node)
                                    : mNode(node),mServiceManager(serviceManager){
         // 解析输入输出边，并绑定DataStream
         for (auto& edgeName : inputEdges) {

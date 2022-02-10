@@ -6,7 +6,7 @@
 #define SMEDIA_FUNCTORCONTEXT_H
 #include "Data.h"
 #include "Edge.h"
-#include "GlobalServiceManager.h"
+#include "ServiceManager.h"
 #include "DataStreamManager.h"
 #include "typeDef.h"
 #include <set>
@@ -16,7 +16,7 @@ namespace smedia {
     public:
         FunctorContext(std::vector<std::string>& inputEdges,
                        std::vector<std::string>& outputEdges,
-                       GlobalServiceManager& serviceManager,
+                       ServiceManager& serviceManager,
                        EdgeMap& edgeMap,
                        Node* node);
         Data getInput(const std::string& tag,int index = 0);
@@ -63,7 +63,7 @@ namespace smedia {
         std::function<void()> m_executeSelfHandler;
         std::function<void()> m_executeConnectNodeHandler;
 
-        GlobalServiceManager& mServiceManager;
+        ServiceManager& mServiceManager;
         Node* mNode;
     };
 

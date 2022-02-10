@@ -8,7 +8,7 @@
 #include "ExecuteManager.h"
 #include "Logger.h"
 #include "Data.h"
-#include "GlobalServiceManager.h"
+#include "ServiceManager.h"
 #include <mutex>
 #include <map>
 #include <vector>
@@ -39,7 +39,7 @@ public:
 private:
     NodeMap m_nodesMap; // 节点映射
     EdgeMap m_edgesMap; // 全局边映射
-    std::unique_ptr<GlobalServiceManager> mGlobalServiceManager; // 全局节点服务对象
+    std::unique_ptr<ServiceManager> mGlobalServiceManager; // 全局节点服务对象
     std::vector<std::map<std::string,OptionMap>> m_optionsSave; // 缓存用户设置的option
     std::unique_ptr<ExecuteManager> m_executeManger; // 负责调度节点
 

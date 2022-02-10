@@ -2,11 +2,11 @@
 // Created by wansu on 2022/1/28.
 //
 
-#include "GlobalServiceManager.h"
+#include "ServiceManager.h"
 #include "GLContext.h"
 namespace smedia {
 
-    bool GlobalServiceManager::init(GraphConfig &graphConfig,const OptionMap& options) {
+    bool ServiceManager::init(GraphConfig &graphConfig, const OptionMap& options) {
         if (graphConfig.services.empty()) {
             LOG_DEBUG << "no service";
             return true;
@@ -25,18 +25,18 @@ namespace smedia {
             service->init(optionConfig);
             mServiceMap.insert({item.name,std::shared_ptr<Service>(service.release())});
         }
-        LOG_DEBUG << "init GlobalServiceManager success";
+        LOG_DEBUG << "init ServiceManager success";
         return true;
     }
 
-    Service* GlobalServiceManager::getService(const std::string& name) {
+    Service* ServiceManager::getService(const std::string& name) {
         if (mServiceMap.find(name) == mServiceMap.end()) {
             return nullptr;
         }
         return mServiceMap[name].get();
     }
 
-    GlobalServiceManager::~GlobalServiceManager() {
+    ServiceManager::~ServiceManager() {
         mServiceMap.clear();
     }
 }

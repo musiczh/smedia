@@ -2,8 +2,8 @@
 // Created by wansu on 2022/1/28.
 //
 
-#ifndef SMEDIA_GLOBALSERVICEMANAGER_H
-#define SMEDIA_GLOBALSERVICEMANAGER_H
+#ifndef SMEDIA_SERVICEMANAGER_H
+#define SMEDIA_SERVICEMANAGER_H
 #include "ServiceRegister.h"
 #include "Service.h"
 #include "GraphConfig.h"
@@ -12,10 +12,10 @@ namespace smedia {
      * 管理全局functor需要的service。这里的service指的是全局functor共享的类对象，需要继承service接口
      * 在json中进行配置
      */
-    class GlobalServiceManager {
+    class ServiceManager {
     public:
-        GlobalServiceManager() = default;
-        ~GlobalServiceManager();
+        ServiceManager() = default;
+        ~ServiceManager();
         /**
          * 根据json中的配置来初始化service
          * @param graphConfig 图的json配置
@@ -39,4 +39,4 @@ namespace smedia {
 
 
 
-#endif //SMEDIA_GLOBALSERVICEMANAGER_H
+#endif //SMEDIA_SERVICEMANAGER_H

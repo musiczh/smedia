@@ -6,7 +6,7 @@
 
 namespace smedia {
     NodeContext::NodeContext(smedia::EdgeMap &edgesMap,
-                                     smedia::NodeConfig &nodeConfig,GlobalServiceManager& globalServiceManager)
+                             smedia::NodeConfig &nodeConfig, ServiceManager& globalServiceManager)
                                      : edgesMap(edgesMap),
                                      nodeConfig(nodeConfig),globalServiceManager(globalServiceManager){}
 }
