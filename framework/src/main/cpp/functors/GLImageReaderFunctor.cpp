@@ -3,9 +3,8 @@
 //
 
 #include "GLImageReaderFunctor.h"
-#include "FunctorRegister.h"
+#include "ObjectRegister.h"
 #include "ImageFrame.h"
-#include "FunctorRegister.h"
 namespace smedia {
 
     const static std::string fv = CODE_STRING_SHADER(
@@ -64,5 +63,5 @@ namespace smedia {
         return true;
     }
 
-    REGISTER_FUNCTOR(GLImageReaderFunctor)
+    REGISTER_CLASS(GLImageReaderFunctor)
 }

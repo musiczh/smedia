@@ -7,7 +7,8 @@
 #include "android/bitmap.h"
 #include "ImageFrame.h"
 #include "GLFrame.h"
-#include "FunctorRegister.h"
+#include "ObjectRegister.h"
+
 namespace smedia {
 
     bool ImageSourceFunctor::initialize(FunctorContext *context) {
@@ -116,6 +117,5 @@ namespace smedia {
         mInputHandler.runOptionsHandler(context,key,value);
     }
 
-
-    REGISTER_FUNCTOR(ImageSourceFunctor)
+    REGISTER_CLASS(ImageSourceFunctor)
 }

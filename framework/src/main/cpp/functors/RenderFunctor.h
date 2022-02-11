@@ -8,7 +8,7 @@
 #include "Program.h"
 #include "GLFrame.h"
 #include "GLHelper.h"
-#include "FunctorRegister.h"
+#include "ObjectRegister.h"
 #include "JNIBridge.h"
 #include "android/native_window_jni.h"
 #include "MatrixUtil.h"

@@ -4,6 +4,8 @@
 
 #include "Graph.h"
 #include "GLTexturePool.h"
+#include "ObjectRegister.h"
+#include "Executor.h"
 
 namespace smedia {
     Graph::Graph() {
@@ -93,7 +95,7 @@ namespace smedia {
         bool newExecutor = false;
         for (auto &executorConfig : executors) {
             auto executorName = executorConfig.executor;
-            auto executor = createExecutorByName(executorName);
+            auto executor = CreateObjectByName<Executor>(executorName);
             if (executor == nullptr) {
                 LOG_INFO << "Executor:" << executorName << " create fail";
                 continue;
@@ -108,7 +110,7 @@ namespace smedia {
 
         // 如果用户没有定义executor则创建一个默认的executor
         if (!newExecutor) {
-            auto defaultExecutor = createExecutorByName("ThreadPoolExecutor");
+            auto defaultExecutor = CreateObjectByName<Executor>("ThreadPoolExecutor");
             if (defaultExecutor == nullptr) {
                 LOG_ERROR << "no executor,init default executor error";
                 return false;

@@ -1,31 +1,24 @@
 //
-// Created by wansu on 2022/1/7.
+// Created by wansu on 2022/2/11.
 //
 
 #ifndef SMEDIA_DYNAMICOBJECT_H
 #define SMEDIA_DYNAMICOBJECT_H
+#include <string>
 #include "FunctionRegister.h"
+#include "DynamicObject.h"
 #include "internal.h"
-class IFunctor;
-
+#include <cxxabi.h>
 namespace smedia {
-    template<typename T>
+    /**
+    * 所有需求通过类名创建对象的类的基类
+    */
     class DynamicObject {
-        using Register = FunctionRegister<std::unique_ptr<IFunctor>>;
 
-        struct InnerStruct {
-            InnerStruct() {
-                //Register::registerFunction(typeid(T).name(),make_unique<T>());
-            }
-        };
-
-        static InnerStruct innerStruct;
+    public:
+        virtual ~DynamicObject() = default;
     };
 
-    template<typename T>
-    typename DynamicObject<T>::InnerStruct DynamicObject<T>::innerStruct{};
+
 }
-
-
-
 #endif //SMEDIA_DYNAMICOBJECT_H

@@ -3,6 +3,7 @@
 //
 
 #include "Node.h"
+#include "ObjectRegister.h"
 
 namespace smedia {
 
@@ -23,7 +24,8 @@ namespace smedia {
         }
 
         // 把node边的所有DataStream添加到functorContext中，让functorContext去进行管理
-        std::unique_ptr<IFunctor> functor = createFunctorByName(m_nodeContext->nodeConfig.functor);
+        std::unique_ptr<IFunctor> functor = CreateObjectByName<IFunctor>(
+                m_nodeContext->nodeConfig.functor);
         if (functor == nullptr) {
             LOG_ERROR << "[functor:" << m_nodeContext->nodeConfig.functor << "] create failed";
             return false;

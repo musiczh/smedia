@@ -27,6 +27,6 @@ namespace smedia{
         LOG_INFO << "thread pool destruct";
     }
 
-    REGISTER_EXECUTOR(ThreadPoolExecutor)
+    REGISTER_CLASS(ThreadPoolExecutor)
 }
 

@@ -13,7 +13,6 @@
 #include <map>
 #include <vector>
 #include <memory>
-#include "ExecutorRegister.h"
 #include "GLHelper.h"
 #include "GLContext.h"
 

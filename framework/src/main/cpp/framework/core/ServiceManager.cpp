@@ -3,6 +3,7 @@
 //
 
 #include "ServiceManager.h"
+#include "ObjectRegister.h"
 #include "GLContext.h"
 namespace smedia {
 
@@ -12,7 +13,7 @@ namespace smedia {
             return true;
         }
         for (auto& item : graphConfig.services) {
-            auto service = CreateServiceByName(item.service);
+            auto service = CreateObjectByName<IService>(item.service);
             if (service == nullptr) {
                 LOG_ERROR << "create " << item.service << " service fail";
                 return false;

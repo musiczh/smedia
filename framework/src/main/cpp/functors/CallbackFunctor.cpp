@@ -3,7 +3,8 @@
 //
 
 #include "CallbackFunctor.h"
-#include "FunctorRegister.h"
+#include "ObjectRegister.h"
+
 namespace smedia {
 
     bool CallbackFunctor::initialize(FunctorContext *context) {
@@ -41,6 +42,5 @@ namespace smedia {
     void CallbackFunctor::setOption(FunctorContext *context, const std::string &key, Data value) {
         mInputHandler.runOptionsHandler(context,key,value);
     }
-
-    REGISTER_FUNCTOR(CallbackFunctor)
+    REGISTER_CLASS(CallbackFunctor)
 }

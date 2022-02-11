@@ -4,7 +4,7 @@
 
 #include "ImageLoader.h"
 #include "ImageFrame.h"
-#include "FunctorRegister.h"
+#include "ObjectRegister.h"
 namespace smedia {
 
     bool ImageLoader::initialize(FunctorContext *context) {
@@ -67,5 +67,5 @@ namespace smedia {
         mInputHandler.runOptionsHandler(context,key,value);
     }
 
-    REGISTER_FUNCTOR(ImageLoader)
+    REGISTER_CLASS(ImageLoader)
 }

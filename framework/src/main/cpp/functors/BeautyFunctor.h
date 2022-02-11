@@ -7,7 +7,7 @@
 #include <ostream>
 #include <Program.h>
 #include "IFunctor.h"
-#include "FunctorRegister.h"
+#include "ObjectRegister.h"
 #include "GLContext.h"
 #include "GLFrame.h"
 #include "IGLRenderFunctor.h"

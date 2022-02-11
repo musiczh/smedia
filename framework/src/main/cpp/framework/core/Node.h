@@ -8,7 +8,6 @@
 #include "FunctorContext.h"
 #include "IFunctor.h"
 #include "Edge.h"
-#include "FunctorRegister.h"
 #include <map>
 #include <memory>
 namespace smedia{

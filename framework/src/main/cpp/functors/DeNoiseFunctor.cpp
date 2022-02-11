@@ -117,5 +117,5 @@ namespace smedia {
         return IGLRenderFunctor::getFragmentCode();
     }
 
-    REGISTER_FUNCTOR(DeNoiseFunctor)
+    REGISTER_CLASS(DeNoiseFunctor)
 }

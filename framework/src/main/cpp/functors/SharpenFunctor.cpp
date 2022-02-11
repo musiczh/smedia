@@ -74,5 +74,5 @@ namespace smedia {
         return fv;
     }
 
-    REGISTER_FUNCTOR(SharpenFunctor)
+    REGISTER_CLASS(SharpenFunctor)
 }

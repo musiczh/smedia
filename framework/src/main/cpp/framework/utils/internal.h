@@ -63,6 +63,8 @@ namespace smedia
         static std::hash<T> _hash = std::hash<T>();
         return _hash(t);
     }
+
+    std::string getTypeName(std::string typeName);
 }
 
 

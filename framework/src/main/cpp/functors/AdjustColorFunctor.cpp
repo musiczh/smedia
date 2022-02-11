@@ -123,5 +123,5 @@ namespace smedia {
         return fragmentShader;
     }
 
-    REGISTER_FUNCTOR(AdjustColorFunctor)
+    REGISTER_CLASS(AdjustColorFunctor)
 }

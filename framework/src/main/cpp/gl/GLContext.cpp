@@ -4,6 +4,7 @@
 
 #include "GLContext.h"
 #include "GLTexturePool.h"
+#include "ObjectRegister.h"
 
 namespace smedia {
     void GLContext::init(Data data) {
@@ -89,7 +90,7 @@ namespace smedia {
         return true;
     }
 
-    REGISTER_SERVICE(GLContext)
+    REGISTER_CLASS(GLContext)
 
 }
 

@@ -114,5 +114,5 @@ namespace smedia {
     }
 
 
-    REGISTER_FUNCTOR(RenderFunctor)
+    REGISTER_CLASS(RenderFunctor)
 }

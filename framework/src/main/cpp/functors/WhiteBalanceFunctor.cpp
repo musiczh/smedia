@@ -75,5 +75,5 @@ namespace smedia {
 		return true;
 	}
 
-	REGISTER_FUNCTOR(WhiteBalanceFunctor)
+	REGISTER_CLASS(WhiteBalanceFunctor)
 }

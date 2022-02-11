@@ -168,5 +168,5 @@ namespace smedia {
         return fragmentShader;
     }
 
-    REGISTER_FUNCTOR(BeautyFunctor)
+    REGISTER_CLASS(BeautyFunctor)
 }

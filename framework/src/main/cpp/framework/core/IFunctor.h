@@ -5,8 +5,9 @@
 #ifndef SMEDIA_IFUNCTOR_H
 #define SMEDIA_IFUNCTOR_H
 #include "FunctorContext.h"
+#include "DynamicObject.h"
 namespace smedia {
-    class IFunctor {
+    class IFunctor : public DynamicObject{
     public:
         virtual bool initialize(FunctorContext* context) = 0;
         virtual void unInitialize(FunctorContext* context) = 0;

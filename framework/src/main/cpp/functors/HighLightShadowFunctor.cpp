@@ -72,5 +72,5 @@ namespace smedia {
         return true;
     }
 
-    REGISTER_FUNCTOR(HighLightShadowFunctor)
+    REGISTER_CLASS(HighLightShadowFunctor)
 }

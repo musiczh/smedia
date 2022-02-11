@@ -8,7 +8,7 @@
 
 #ifndef SMEDIA_EXECUTEMANAGER_H
 #define SMEDIA_EXECUTEMANAGER_H
-#include "../framework/data/typeDef.h"
+#include "typeDef.h"
 #include "ExecuteQueue.h"
 #include "Logger.h"
 namespace smedia {

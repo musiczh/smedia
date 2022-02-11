@@ -8,7 +8,7 @@
 #include <GLES3/gl3.h>
 #include <GLES3/gl3ext.h>
 #include <memory>
-#include "ServiceRegister.h"
+#include "IService.h"
 #include "EGLCore.h"
 #include "GLThread.h"
 #include "Data.h"
@@ -47,8 +47,8 @@ namespace smedia {
         std::unique_ptr<GLTexturePool> mGLTexturePool;
     };
 
-    // 全局采用share指针，防止glContext提前被释放
-    using GLContextRef = std::shared_ptr<GLContext>;
+
+
 }
 
 

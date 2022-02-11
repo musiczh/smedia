@@ -47,7 +47,6 @@ add_library(framework SHARED
         ${SOURCE_GL}
         ${SOURCE_JNI}
         ${SOURCE_UTIL}
-        framework/core/ServiceManager.cpp
 )
 
 target_link_libraries(framework android EGL GLESv3 jnigraphics ${log-lib})

@@ -93,6 +93,6 @@ namespace smedia {
         }
     }
 
-    REGISTER_FUNCTOR(OESTexReaderFunctor)
+    REGISTER_CLASS(OESTexReaderFunctor)
 }
 

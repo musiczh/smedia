@@ -4,7 +4,7 @@
 
 #ifndef SMEDIA_SERVICEMANAGER_H
 #define SMEDIA_SERVICEMANAGER_H
-#include "ServiceRegister.h"
+
 #include "IService.h"
 #include "GraphConfig.h"
 namespace smedia {

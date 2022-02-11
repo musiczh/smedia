@@ -3,7 +3,7 @@
 //
 
 #include "DispatchFunctor.h"
-#include "FunctorRegister.h"
+#include "ObjectRegister.h"
 #include "IFrame.h"
 namespace smedia {
 
@@ -75,5 +75,5 @@ namespace smedia {
     }
 
 
-    REGISTER_FUNCTOR(DispatchFunctor)
+    REGISTER_CLASS(DispatchFunctor)
 }

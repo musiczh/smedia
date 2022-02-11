@@ -10,7 +10,7 @@
 #include "GLBufferFrame.h"
 #include "GLFrame.h"
 #include "Render.h"
-#include "FunctorRegister.h"
+#include "ObjectRegister.h"
 
 // 帮助拼接字符串
 #ifndef GL_DEFINE

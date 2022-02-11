@@ -4,7 +4,7 @@
 
 #ifndef SMEDIA_OESTEXREADERFUNCTOR_H
 #define SMEDIA_OESTEXREADERFUNCTOR_H
-#include "FunctorRegister.h"
+#include "ObjectRegister.h"
 #include "IFunctor.h"
 #include "Program.h"
 #include "GLFrame.h"

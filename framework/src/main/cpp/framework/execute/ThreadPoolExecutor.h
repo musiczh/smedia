@@ -7,8 +7,8 @@
 #include "Executor.h"
 #include "ThreadPool.h"
 #include "internal.h"
-#include "../framework/data/Data.h"
-#include "ExecutorRegister.h"
+#include "Data.h"
+#include "ObjectRegister.h"
 namespace smedia {
     #define OPTION_THREAD_NUM "threadNum"
     class ThreadPoolExecutor: public Executor{

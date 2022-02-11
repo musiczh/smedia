@@ -6,10 +6,11 @@
 #define SMEDIA_EXECUTOR_H
 #include "GraphConfig.h"
 #include "TaskQueue.h"
+#include "DynamicObject.h"
 
 
 namespace smedia {
-    class Executor {
+    class Executor : public DynamicObject {
     public:
         virtual bool initialize(ExecutorConfig& config) = 0;
         virtual ~Executor()= default;
