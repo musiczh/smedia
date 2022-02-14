@@ -32,8 +32,8 @@ namespace smedia {
     }
 
     /**
-     * 这里采用
-     * @tparam T
+     * 这里采用静态对象的初始化来对类型进行注册
+     * @tparam T 需要被注册的类型
      */
     template<class T>
     struct _ObjectRegisterTask {
