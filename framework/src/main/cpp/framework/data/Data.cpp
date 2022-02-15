@@ -41,5 +41,9 @@ namespace smedia {
         return mTimeStamp;
     }
 
+    long Data::getTypeId() {
+        return m_dataHolderPtr->getTypeId();
+    }
+
 
 }
