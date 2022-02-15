@@ -13,10 +13,10 @@
 namespace smedia {
 
     /**
-     * SignatureParam是一个结构体，使用模板特例化对每个类型进行定义，包含两个静态方法：
-     * value() : 获取属性签名
+     * SignatureParam是一个结构体，使用模板特例化对每个类型进行定义，包含三个静态方法：
+     * value() : 获取属性签名，顶层采用可变模板参数，可以接收多个参数转化为属性签名字符串
      * convert() : 从c++属性转化为java的属性，返回java数据
-     * 顶层采用可变模板参数，可以接收多个参数转化为属性签名字符串
+     * convertToC() : 从java属性转化为c++属性，返回c++数据
      */
     // todo 目前仅支持基础数据类型和字符串
     template<typename ...T>
@@ -44,6 +44,9 @@ namespace smedia {
         static jfloat convert(float value) {
             return value;
         }
+        static float convertToC(jfloat value) {
+            return value;
+        }
     };
     template<> struct SignatureParam<int> {
         static std::string value() {
@@ -52,12 +55,13 @@ namespace smedia {
         static jint convert(int value) {
             return value;
         }
+        static int convertToC(jint value) {
+            return value;
+        }
     };
     template<> struct SignatureParam<void> {
         static std::string value() {
             return "V";
-        }
-        static void convert() {
         }
     };
     template<> struct SignatureParam<double> {
@@ -65,6 +69,9 @@ namespace smedia {
             return "D";
         }
         static jdouble convert(double value) {
+            return value;
+        }
+        static double convertToC(jdouble value) {
             return value;
         }
     };
@@ -75,12 +82,18 @@ namespace smedia {
         static jchar convert(char value) {
             return (jchar)value;
         }
+        static char convertToC(jchar value) {
+            return value;
+        }
     };
     template<> struct SignatureParam<long> {
         static std::string value() {
             return "J";
         }
         static jlong convert(long value) {
+            return value;
+        }
+        static long convertToC(jlong value) {
             return value;
         }
     };
@@ -91,6 +104,9 @@ namespace smedia {
         static jshort convert(short value) {
             return value;
         }
+        static short convertToC(jshort value) {
+            return value;
+        }
     };
     template<> struct SignatureParam<bool> {
         static std::string value() {
@@ -99,6 +115,9 @@ namespace smedia {
         static jboolean convert(bool value) {
             return value;
         }
+        static bool convertToC(jboolean value) {
+            return value != 0;
+        }
     };
     template<> struct SignatureParam<std::string> {
         static std::string value() {
@@ -106,6 +125,20 @@ namespace smedia {
         }
         static jstring convert(std::string value) {
             return JNIService::getEnv()->NewStringUTF(value.c_str());
+        }
+        static std::string convertToC(jstring value) {
+            if (!value) {
+                return std::string();
+            }
+            JNIEnv* env = JNIService::getEnv();
+            jboolean isCopy;
+            const char* chars = env->GetStringUTFChars(value, &isCopy);
+            std::string s;
+            if (chars) {
+                s = chars;
+                env->ReleaseStringUTFChars(value, chars);
+            }
+            return s;
         }
     };
     template<> struct SignatureParam<JNIObject> {
