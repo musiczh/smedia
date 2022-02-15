@@ -27,10 +27,10 @@ namespace smedia {
          */
         static Data jObjectToData(jobject object);
 
+        static JNIObjectRef DataToJNIObject(Data data);
+
         // 把jString转化为c++的string
         static std::string jStringToCString(jstring object);
-
-        static jstring GetJNIString(const std::string& s);
 
         static std::vector<float> jFloatArrayToVector(jfloatArray floatArray);
 
@@ -71,7 +71,7 @@ namespace smedia {
      *
      * todo 这里的模板方法并不支持所有数据类型，在调用的时候非基本数据类型需要确定一下是否支持
      * 默认的返回值是JNIObject，特例化了几个常用基本数据类型:int、float、long、string、void、bool、JNIObject、double
-     * @tparam Args 函数参数模板，第一个泛型指定为返回值类型，若指定的类型不在特例化范围内，则默认返回值类型为JNIObject
+     * @tparam Args 函数参数模板，第一个泛型指定为返回值类型
      */
     template<typename ...Args>
     struct JNIInvoker {};
@@ -329,6 +329,134 @@ namespace smedia {
             return res;
         }
     };
+
+
+    // ------------------JNICreate-------------------------
+    // 从类名来创建java对象
+    template <typename ...Args>
+    JNIObjectRef JNICreateInstance(const std::string& name,Args&&... args) {
+        jclass cls = JClassManager::getJavaClass(name);
+        jmethodID methodId = JNISignature::getMethodId<void,Args...>(cls,"<init>");
+        jobject res = JNIService::getEnv()->NewObject(cls,methodId,std::forward<Args>(args)...);
+        // todo 后续写demo测试这里是否返回null
+        if (res == nullptr) {
+            return nullptr;
+        }
+        auto* jniObject = new JNIObject(res);
+        return JNIObjectRef(jniObject);
+    }
+
+
+    // -----------------TypeUtil---------------------------
+    /**
+     * 对类型进行分类处理，适用于各种数据转换等
+     */
+     template<typename T>
+     struct TypeUtil {};
+
+    template<>
+    struct TypeUtil<float> {
+        static JNIObjectRef convertToJNIObject(float value) {
+            return JNICreateInstance(JClassManager::getJClassName(Float),value);
+        }
+        static float convertToC(jfloat value) {
+            return value;
+        }
+    };
+
+    template<>
+    struct TypeUtil<int> {
+        static JNIObjectRef convertToJNIObject(int value) {
+            return JNICreateInstance(JClassManager::getJClassName(Integer),value);
+        }
+        static int convertToC(jint value) {
+            return value;
+        }
+    };
+
+    template<>
+    struct TypeUtil<double> {
+        static JNIObjectRef convertToJNIObject(double value) {
+            return JNICreateInstance(JClassManager::getJClassName(Double),value);
+        }
+        static double convertToC(jdouble value) {
+            return value;
+        }
+    };
+
+    template<>
+    struct TypeUtil<char> {
+        static JNIObjectRef convertToJNIObject(char value) {
+            return JNICreateInstance(JClassManager::getJClassName(Char),value);
+        }
+        static char convertToC(jchar value) {
+            return value;
+        }
+    };
+
+    template<>
+    struct TypeUtil<long> {
+        static JNIObjectRef convertToJNIObject(long value) {
+            return JNICreateInstance(JClassManager::getJClassName(Long),value);
+        }
+        static long convertToC(jlong value) {
+            return value;
+        }
+    };
+
+    template<>
+    struct TypeUtil<short> {
+        static JNIObjectRef convertToJNIObject(short value) {
+            return JNICreateInstance(JClassManager::getJClassName(Short),value);
+        }
+        static short convertToC(jshort value) {
+            return value;
+        }
+    };
+
+    template<>
+    struct TypeUtil<bool> {
+        static JNIObjectRef convertToJNIObject(bool value) {
+            return JNICreateInstance(JClassManager::getJClassName(Boolean),value);
+        }
+        static bool convertToC(jboolean value) {
+            return value != 0;
+        }
+    };
+
+    template<>
+    struct TypeUtil<std::string> {
+        static JNIObjectRef convertToJNIObject(const std::string& value) {
+            jstring res = JNIService::getEnv()->NewStringUTF(value.c_str());
+            return JNIObjectRef(new JNIObject(res));
+        }
+        static std::string convertToC(jstring value) {
+            if (!value) {
+                return std::string();
+            }
+            JNIEnv* env = JNIService::getEnv();
+            jboolean isCopy;
+            const char* chars = env->GetStringUTFChars(value, &isCopy);
+            std::string s;
+            if (chars) {
+                s = chars;
+                env->ReleaseStringUTFChars(value, chars);
+            }
+            return s;
+        }
+    };
+
+    template<>
+    struct TypeUtil<JNIObjectRef> {
+        static JNIObjectRef convertToJNIObject(JNIObjectRef value) {
+            return value;
+        }
+        static JNIObjectRef convertToC(JNIObjectRef value) {
+            return value;
+        }
+    };
+
+
 
 }
 

@@ -44,18 +44,12 @@ namespace smedia {
         static jfloat convert(float value) {
             return value;
         }
-        static float convertToC(jfloat value) {
-            return value;
-        }
     };
     template<> struct SignatureParam<int> {
         static std::string value() {
             return "I";
         }
         static jint convert(int value) {
-            return value;
-        }
-        static int convertToC(jint value) {
             return value;
         }
     };
@@ -71,9 +65,6 @@ namespace smedia {
         static jdouble convert(double value) {
             return value;
         }
-        static double convertToC(jdouble value) {
-            return value;
-        }
     };
     template<> struct SignatureParam<char> {
         static std::string value() {
@@ -82,18 +73,12 @@ namespace smedia {
         static jchar convert(char value) {
             return (jchar)value;
         }
-        static char convertToC(jchar value) {
-            return value;
-        }
     };
     template<> struct SignatureParam<long> {
         static std::string value() {
             return "J";
         }
         static jlong convert(long value) {
-            return value;
-        }
-        static long convertToC(jlong value) {
             return value;
         }
     };
@@ -104,9 +89,6 @@ namespace smedia {
         static jshort convert(short value) {
             return value;
         }
-        static short convertToC(jshort value) {
-            return value;
-        }
     };
     template<> struct SignatureParam<bool> {
         static std::string value() {
@@ -115,9 +97,6 @@ namespace smedia {
         static jboolean convert(bool value) {
             return value;
         }
-        static bool convertToC(jboolean value) {
-            return value != 0;
-        }
     };
     template<> struct SignatureParam<std::string> {
         static std::string value() {
@@ -125,20 +104,6 @@ namespace smedia {
         }
         static jstring convert(std::string value) {
             return JNIService::getEnv()->NewStringUTF(value.c_str());
-        }
-        static std::string convertToC(jstring value) {
-            if (!value) {
-                return std::string();
-            }
-            JNIEnv* env = JNIService::getEnv();
-            jboolean isCopy;
-            const char* chars = env->GetStringUTFChars(value, &isCopy);
-            std::string s;
-            if (chars) {
-                s = chars;
-                env->ReleaseStringUTFChars(value, chars);
-            }
-            return s;
         }
     };
     template<> struct SignatureParam<JNIObject> {
