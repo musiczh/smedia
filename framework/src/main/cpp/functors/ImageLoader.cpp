@@ -18,7 +18,7 @@ namespace smedia {
                     LOG_ERROR << "ImageLoader load pixel error";
                     return false;
                 }
-                Data res = Data::create(new JNIObject(object));
+                Data res = Data::create(new JNIObjectRef(new JNIObject(object)));
                 mFunctorContext->setOutput(res,"data");
                 return true;
             }

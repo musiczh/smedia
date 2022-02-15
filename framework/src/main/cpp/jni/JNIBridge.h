@@ -30,6 +30,7 @@ namespace smedia {
         static JNIObjectRef DataToJNIObject(Data data);
 
         // 把jString转化为c++的string
+        // todo 后续这些数据转换类的方法都抽离到JNIDataUtil中
         static std::string jStringToCString(jstring object);
 
         static std::vector<float> jFloatArrayToVector(jfloatArray floatArray);
@@ -71,7 +72,7 @@ namespace smedia {
      *
      * todo 这里的模板方法并不支持所有数据类型，在调用的时候非基本数据类型需要确定一下是否支持
      * 默认的返回值是JNIObject，特例化了几个常用基本数据类型:int、float、long、string、void、bool、JNIObject、double
-     * @tparam Args 函数参数模板，第一个泛型指定为返回值类型
+     * @tparam Args 函数参数模板，第一个泛型指定为返回值类型,其他的为函数的参数类型。这里所有类型都是采用c++的数据类型，包括JNIObjectRef
      */
     template<typename ...Args>
     struct JNIInvoker {};
@@ -347,15 +348,15 @@ namespace smedia {
     }
 
 
-    // -----------------TypeUtil---------------------------
+    // -----------------JNIDataUtil---------------------------
     /**
      * 对类型进行分类处理，适用于各种数据转换等
      */
      template<typename T>
-     struct TypeUtil {};
+     struct JNIDataUtil {};
 
     template<>
-    struct TypeUtil<float> {
+    struct JNIDataUtil<float> {
         static JNIObjectRef convertToJNIObject(float value) {
             return JNICreateInstance(JClassManager::getJClassName(Float),value);
         }
@@ -365,7 +366,7 @@ namespace smedia {
     };
 
     template<>
-    struct TypeUtil<int> {
+    struct JNIDataUtil<int> {
         static JNIObjectRef convertToJNIObject(int value) {
             return JNICreateInstance(JClassManager::getJClassName(Integer),value);
         }
@@ -375,7 +376,7 @@ namespace smedia {
     };
 
     template<>
-    struct TypeUtil<double> {
+    struct JNIDataUtil<double> {
         static JNIObjectRef convertToJNIObject(double value) {
             return JNICreateInstance(JClassManager::getJClassName(Double),value);
         }
@@ -385,7 +386,7 @@ namespace smedia {
     };
 
     template<>
-    struct TypeUtil<char> {
+    struct JNIDataUtil<char> {
         static JNIObjectRef convertToJNIObject(char value) {
             return JNICreateInstance(JClassManager::getJClassName(Char),value);
         }
@@ -395,7 +396,7 @@ namespace smedia {
     };
 
     template<>
-    struct TypeUtil<long> {
+    struct JNIDataUtil<long> {
         static JNIObjectRef convertToJNIObject(long value) {
             return JNICreateInstance(JClassManager::getJClassName(Long),value);
         }
@@ -405,7 +406,7 @@ namespace smedia {
     };
 
     template<>
-    struct TypeUtil<short> {
+    struct JNIDataUtil<short> {
         static JNIObjectRef convertToJNIObject(short value) {
             return JNICreateInstance(JClassManager::getJClassName(Short),value);
         }
@@ -415,7 +416,7 @@ namespace smedia {
     };
 
     template<>
-    struct TypeUtil<bool> {
+    struct JNIDataUtil<bool> {
         static JNIObjectRef convertToJNIObject(bool value) {
             return JNICreateInstance(JClassManager::getJClassName(Boolean),value);
         }
@@ -425,7 +426,7 @@ namespace smedia {
     };
 
     template<>
-    struct TypeUtil<std::string> {
+    struct JNIDataUtil<std::string> {
         static JNIObjectRef convertToJNIObject(const std::string& value) {
             jstring res = JNIService::getEnv()->NewStringUTF(value.c_str());
             return JNIObjectRef(new JNIObject(res));
@@ -447,7 +448,7 @@ namespace smedia {
     };
 
     template<>
-    struct TypeUtil<JNIObjectRef> {
+    struct JNIDataUtil<JNIObjectRef> {
         static JNIObjectRef convertToJNIObject(JNIObjectRef value) {
             return value;
         }

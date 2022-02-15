@@ -52,7 +52,7 @@ namespace smedia {
             res = JNIGetImageFrame(object);
         }else {
             auto * value = new JNIObject(object);
-            res = Data::create(value);
+            res = Data::create(new JNIObjectRef(value));
         }
         return res;
     }
@@ -65,23 +65,23 @@ namespace smedia {
         // 如果把这块逻辑放到Data中会造成代码耦合，所以采用此方法
         long typeId = data.getTypeId();
         if (typeId == typeid(float).hash_code()) {
-            return TypeUtil<float>::convertToJNIObject(*data.getData<float>());
+            return JNIDataUtil<float>::convertToJNIObject(*data.getData<float>());
         } else if (typeId == typeid(int).hash_code()) {
-            return TypeUtil<int>::convertToJNIObject(*data.getData<int>());
+            return JNIDataUtil<int>::convertToJNIObject(*data.getData<int>());
         } else if (typeId == typeid(double).hash_code()) {
-            return TypeUtil<double>::convertToJNIObject(*data.getData<double>());
+            return JNIDataUtil<double>::convertToJNIObject(*data.getData<double>());
         } else if (typeId == typeid(long).hash_code()) {
-            return TypeUtil<long>::convertToJNIObject(*data.getData<long>());
+            return JNIDataUtil<long>::convertToJNIObject(*data.getData<long>());
         } else if (typeId == typeid(short).hash_code()) {
-            return TypeUtil<short>::convertToJNIObject(*data.getData<short>());
+            return JNIDataUtil<short>::convertToJNIObject(*data.getData<short>());
         } else if (typeId == typeid(char).hash_code()) {
-            return TypeUtil<char>::convertToJNIObject(*data.getData<char>());
+            return JNIDataUtil<char>::convertToJNIObject(*data.getData<char>());
         } else if (typeId == typeid(bool).hash_code()) {
-            return TypeUtil<bool>::convertToJNIObject(*data.getData<bool>());
+            return JNIDataUtil<bool>::convertToJNIObject(*data.getData<bool>());
         } else if (typeId == typeid(std::string).hash_code()) {
-            return TypeUtil<std::string>::convertToJNIObject(*data.getData<std::string>());
+            return JNIDataUtil<std::string>::convertToJNIObject(*data.getData<std::string>());
         } else if (typeId == typeid(JNIObjectRef).hash_code()) {
-            return TypeUtil<JNIObjectRef>::convertToJNIObject(*data.getData<JNIObjectRef>());
+            return JNIDataUtil<JNIObjectRef>::convertToJNIObject(*data.getData<JNIObjectRef>());
         } else {
             LOG_ERROR << "DataToJNIObject is not support type";
             return nullptr;

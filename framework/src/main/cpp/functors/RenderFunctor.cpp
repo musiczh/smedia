@@ -89,12 +89,12 @@ namespace smedia {
     void RenderFunctor::setOption(FunctorContext *context, const std::string &key, Data value) {
         if (key == NATIVE_WINDOW) {
             // 设置系统窗口
-            JNIObject object;
+            JNIObjectRef object;
             if (!value.getData(object)) {
                 LOG_ERROR << "native window getData error";
                 return;
             }
-            ANativeWindow* nativeWindow = ANativeWindow_fromSurface(JNIService::getEnv(),object.getJObject());
+            ANativeWindow* nativeWindow = ANativeWindow_fromSurface(JNIService::getEnv(),object->getJObject());
             auto nativeWindowType = reinterpret_cast<EGLNativeWindowType>(nativeWindow);
             EGLCore* eglCore = mGLContext->getEglCore();
             mGLContext->runInRenderThread([eglCore,nativeWindowType]()->bool{

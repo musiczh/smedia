@@ -49,12 +49,12 @@ namespace smedia {
     }
 
     bool ImageSourceFunctor::execute(FunctorContext *context) {
-        JNIObject object;
+        JNIObjectRef object;
         if (!inputData.getData(object)) {
             LOG_ERROR << "ImageSourceFunctor get data error";
             return false;
         }
-        jobject bitmapObject = object.getJObject();
+        jobject bitmapObject = object->getJObject();
         AndroidBitmapInfo info;
         int status = AndroidBitmap_getInfo(JNIService::getEnv(),bitmapObject,&info);
         if (status != ANDROID_BITMAP_RESULT_SUCCESS) {
