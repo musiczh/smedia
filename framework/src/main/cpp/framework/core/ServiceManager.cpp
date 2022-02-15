@@ -24,7 +24,7 @@ namespace smedia {
                 optionConfig.insert({i.first,i.second});
             }
             service->init(optionConfig);
-            mServiceMap.insert({item.name,std::shared_ptr<IService>(service.release())});
+            mServiceMap.insert({item.name,std::unique_ptr<IService>(service.release())});
         }
         LOG_DEBUG << "init ServiceManager success";
         return true;

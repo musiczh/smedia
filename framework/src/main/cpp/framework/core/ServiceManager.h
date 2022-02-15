@@ -33,7 +33,7 @@ namespace smedia {
 
     private:
         // 这里使用共享指针的好处是清空map自动释放service
-        std::map<std::string,std::shared_ptr<IService>> mServiceMap;
+        std::map<std::string,std::unique_ptr<IService>> mServiceMap;
     };
 }
 
