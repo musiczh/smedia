@@ -14,10 +14,15 @@ namespace smedia {
 
     /**
      * 需要从类名创建对象的类要在源文件中声明此宏，并继承DynamicObject基类
+     * 这里采用静态对象的初始化来对类型进行注册
      */
 #ifndef REGISTER_CLASS
 #define REGISTER_CLASS(Type)\
-    _ObjectRegisterTask<Type> _register_task_##Type{}; // NOLINT
+struct _ObjectRegisterTask##Type { \
+    _ObjectRegisterTask##Type() { \
+        _ObjectRegister::registerFunction(#Type, make_unique<Type>); \
+    }; \
+} _task##Type; // NOLINT
 #endif
 
     /**
@@ -29,27 +34,6 @@ namespace smedia {
     template<typename T>
     inline std::unique_ptr<T> CreateObjectByName(const std::string& name) {
         return std::unique_ptr<T>(dynamic_cast<T*>(_ObjectRegister::invokeFunction(name).release()));
-    }
-
-    /**
-     * 这里采用静态对象的初始化来对类型进行注册
-     * @tparam T 需要被注册的类型
-     */
-    template<class T>
-    struct _ObjectRegisterTask {
-        _ObjectRegisterTask();
-    };
-
-    template<typename T>
-    _ObjectRegisterTask<T>::_ObjectRegisterTask() {
-        // 获取类型的全限定名称，如smedia::Functor
-        std::string typeName = getTypeName(abi::__cxa_demangle(typeid(T).name(),
-                                                               nullptr,
-                                                               nullptr,
-                                                               nullptr));
-        if (!typeName.empty()) {
-            _ObjectRegister::registerFunction(typeName, make_unique<T>);
-        }
     }
 
 }
