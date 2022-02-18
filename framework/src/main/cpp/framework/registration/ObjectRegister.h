@@ -18,12 +18,14 @@ namespace smedia {
      */
 #ifndef REGISTER_CLASS
 #define REGISTER_CLASS(Type)\
-struct _ObjectRegisterTask##Type { \
-    _ObjectRegisterTask##Type() { \
-        _ObjectRegister::registerFunction(#Type, make_unique<Type>); \
-    }; \
-} _task##Type; // NOLINT
+static __Register_Task_ _##Type##_task(__Register_Task_::__register_func_(#Type,make_unique<Type>)); // NOLINT
 #endif
+
+    struct __Register_Task_ {
+        __Register_Task_(int);
+        static int __register_func_(const std::string& name,
+                                    std::function<std::unique_ptr<DynamicObject>()> func);
+    };
 
     /**
      * 调用此方法通过类名来创建对象，并自动转化为指定的类型
