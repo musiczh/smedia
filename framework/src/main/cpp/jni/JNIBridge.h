@@ -335,10 +335,10 @@ namespace smedia {
     // ------------------JNICreate-------------------------
     // 从类名来创建java对象
     template <typename ...Args>
-    JNIObjectRef JNICreateInstance(const std::string& name,Args&&... args) {
+    JNIObjectRef JNICreateInstance(const std::string& name,Args... args) {
         jclass cls = JClassManager::getJavaClass(name);
         jmethodID methodId = JNISignature::getMethodId<void,Args...>(cls,"<init>");
-        jobject res = JNIService::getEnv()->NewObject(cls,methodId,std::forward<Args>(args)...);
+        jobject res = JNIService::getEnv()->NewObject(cls,methodId,SignatureParam<Args>::convert(args)...);
         // todo 后续写demo测试这里是否返回null
         if (res == nullptr) {
             return nullptr;
@@ -454,6 +454,36 @@ namespace smedia {
         }
         static JNIObjectRef convertToC(JNIObjectRef value) {
             return value;
+        }
+    };
+
+    // todo 这里关于JNIDataUtil和Signature的划分再区分一下
+    //      这里没有做其他的数组类型的适配
+    template<>
+    struct JNIDataUtil<std::vector<float>> {
+        static std::vector<float> convertToC(jfloatArray value) {
+            if (!value) {
+                return std::vector<float>();
+            }
+            JNIEnv* jniEnv = JNIService::getEnv();
+            jsize size = jniEnv->GetArrayLength(value);
+            std::vector<float> result(size);
+            jniEnv->GetFloatArrayRegion(value, 0, size, (jfloat*)&result[0]);
+            return result;
+        }
+    };
+
+    template<>
+    struct JNIDataUtil<std::vector<int>> {
+        static std::vector<int> convertToC(jintArray value) {
+            if (!value) {
+                return std::vector<int>();
+            }
+            JNIEnv* jniEnv = JNIService::getEnv();
+            jsize size = jniEnv->GetArrayLength(value);
+            std::vector<int> result(size);
+            jniEnv->GetIntArrayRegion(value, 0, size, (int32_t *)&result[0]);
+            return result;
         }
     };
 

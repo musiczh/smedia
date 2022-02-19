@@ -6,7 +6,9 @@
 #define SMEDIA_JNISIGNATURE_H
 #include <jni.h>
 #include <iostream>
+#include <vector>
 #include "JNIObject.h"
+#include "JClassManager.h"
 /**
  * 获取方法和属性的签名，使用模板统一做映射
  */
@@ -111,7 +113,7 @@ namespace smedia {
             return "Ljava/lang/Object;";
         }
         static jobject convert(JNIObject value) {
-            return value.getJObject();
+            return value.obtainNewLocalRef();
         }
     };
     template<> struct SignatureParam<JNIObjectRef> {
@@ -119,7 +121,105 @@ namespace smedia {
             return "Ljava/lang/Object;";
         }
         static jobject convert(JNIObjectRef value) {
-            return value->getJObject();
+            return value->obtainNewLocalRef();
+        }
+    };
+    template<> struct SignatureParam<std::vector<float>> {
+        static std::string value() {
+            return "[F";
+        }
+        static jfloatArray convert(const std::vector<float>& value) {
+            auto* env = JNIService::getEnv();
+            jfloatArray array = env->NewFloatArray(value.size());
+            env->SetFloatArrayRegion(array,0,value.size(),(const float*)&value[0]);
+            return array;
+        }
+    };
+    template<> struct SignatureParam<std::vector<int>> {
+        static std::string value() {
+            return "[I";
+        }
+        static jintArray convert(const std::vector<int>& value) {
+            auto* env = JNIService::getEnv();
+            jintArray array = env->NewIntArray(value.size());
+            env->SetIntArrayRegion(array,0,value.size(),(const int32_t *)&value[0]);
+            return array;
+        }
+    };
+    template<> struct SignatureParam<std::vector<double>> {
+        static std::string value() {
+            return "[D";
+        }
+        static jdoubleArray convert(const std::vector<double>& value) {
+            auto* env = JNIService::getEnv();
+            jdoubleArray array = env->NewDoubleArray(value.size());
+            env->SetDoubleArrayRegion(array,0,value.size(),(const double*)&value[0]);
+            return array;
+        }
+    };
+    template<> struct SignatureParam<std::vector<char>> {
+        static std::string value() {
+            return "[C";
+        }
+        static jcharArray convert(const std::vector<char>& value) {
+            auto* env = JNIService::getEnv();
+            jcharArray array = env->NewCharArray(value.size());
+            env->SetCharArrayRegion(array,0,value.size(),(const uint16_t *)&value[0]);
+            return array;
+        }
+    };
+    template<> struct SignatureParam<std::vector<long>> {
+        static std::string value() {
+            return "[J";
+        }
+        static jlongArray convert(const std::vector<long>& value) {
+            auto* env = JNIService::getEnv();
+            jlongArray array = env->NewLongArray(value.size());
+            env->SetLongArrayRegion(array,0,value.size(),(const int64_t *)&value[0]);
+            return array;
+        }
+    };
+    template<> struct SignatureParam<std::vector<short>> {
+        static std::string value() {
+            return "[S";
+        }
+        static jshortArray convert(const std::vector<short>& value) {
+            auto* env = JNIService::getEnv();
+            jshortArray array = env->NewShortArray(value.size());
+            env->SetShortArrayRegion(array,0,value.size(),(const int16_t *)&value[0]);
+            return array;
+        }
+    };
+    template<> struct SignatureParam<std::vector<bool>> {
+        static std::string value() {
+            return "[Z";
+        }
+        static jbooleanArray convert(const std::vector<bool>& value) {
+            auto* env = JNIService::getEnv();
+            jbooleanArray array = env->NewBooleanArray(value.size());
+            uint8_t boolArray[value.size()];
+            for (int i = 0; i < value.size(); ++i) {
+                boolArray[i] = value[i];
+            }
+            env->SetBooleanArrayRegion(array,0,value.size(),(const uint8_t *)&boolArray[0]);
+            return array;
+        }
+    };
+    // todo 这里暂时不支持普通的ObjectArray
+    template<> struct SignatureParam<std::vector<std::string>> {
+        static std::string value() {
+            return "[Ljava/lang/String;";
+        }
+        static jobjectArray convert(const std::vector<std::string> &value) {
+            jobjectArray res = JNIService::getEnv()->NewObjectArray(
+                    value.size(),
+                    JClassManager::getJavaClass(JClassManager::getJClassName(String)),
+                    nullptr);
+            for (int i = 0; i < value.size(); ++i) {
+                JNIService::getEnv()->SetObjectArrayElement(
+                        res,i,SignatureParam<std::string>::convert(value[i]));
+            }
+            return res;
         }
     };
 
