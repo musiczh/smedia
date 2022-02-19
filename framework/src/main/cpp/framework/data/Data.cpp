@@ -42,6 +42,9 @@ namespace smedia {
     }
 
     long Data::getTypeId() {
+        if (m_dataHolderPtr == nullptr) {
+            return 0;
+        }
         return m_dataHolderPtr->getTypeId();
     }
 
