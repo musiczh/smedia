@@ -105,6 +105,7 @@ namespace smedia {
             LOG_DEBUG << "init vertex array success";
         }
         GL_CODE(glBindVertexArray(mVAO))
+        GL_CODE(glViewport(mViewPort[0],mViewPort[1],mViewPort[2],mViewPort[3]))
         mProgram->bind();
         mState = RENDER_BIND;
     }
@@ -134,6 +135,16 @@ namespace smedia {
 
     Program *Render::getProgram() {
         return mProgram.get();
+    }
+
+    void Render::setViewPort(const int* viewPort) {
+        if (viewPort == nullptr) {
+            return ;
+        }
+        mViewPort[0] = viewPort[0];
+        mViewPort[1] = viewPort[1];
+        mViewPort[2] = viewPort[2];
+        mViewPort[3] = viewPort[3];
     }
 
 

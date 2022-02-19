@@ -22,6 +22,8 @@ namespace smedia {
         // 静态方法构建GLTexture
         static GLTextureRef Create(GLContext* glContext,int width,int height,
                                    TextureType type, int textureId = 0);
+        // 静态方法构建GLTexture,主要用于构建已经存在的纹理，默认不自动释放和回收
+        static GLTextureRef Create(GLContext* glContext,TextureType type, int textureId);
 
     public:
         GLTexture(GLContext* glContext,int width,int height,TextureType type, int textureId);

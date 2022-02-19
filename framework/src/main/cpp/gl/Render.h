@@ -27,6 +27,7 @@ namespace smedia {
 
     public:
         Program* getProgram();
+        void setViewPort(const int* viewPort);
         void draw();
 
     private:
@@ -46,6 +47,7 @@ namespace smedia {
         GLContext* mGLContext;
         // todo 后续有需求可以把顶点数据操作抽离到一个单独类去处理，（顶点类型、解析等）这里纹理渲染只需要矩形，暂时不需要
         unsigned int mVAO{0};
+        int mViewPort[4]{};
 
         volatile RenderState mState{RENDER_DEFAULT};
     };

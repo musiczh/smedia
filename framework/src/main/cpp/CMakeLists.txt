@@ -5,14 +5,16 @@ set(CMAKE_CXX_STANDARD 11)
 
 # framework
 include_directories(framework/core framework/data framework/execute framework/json
-        framework/registration framework/utils)
+        framework/registration framework/utils framework/functor)
 file(GLOB_RECURSE FILE_CORE framework/core/*.cpp)
 file(GLOB_RECURSE FILE_DATA framework/data/*.cpp)
 file(GLOB_RECURSE FILE_EXECUTE framework/execute/*.cpp)
 file(GLOB_RECURSE FILE_JSON framework/json/*.cpp)
 file(GLOB_RECURSE FILE_REGIS framework/registration/*.cpp)
 file(GLOB_RECURSE FILE_UTILS framework/utils/*.cpp)
-set(SOURCE_FRAMEWORK ${FILE_CORE} ${FILE_DATA} ${FILE_EXECUTE} ${FILE_JSON} ${FILE_REGIS} ${FILE_UTILS})
+file(GLOB_RECURSE FILE_FUNCTOR framework/functor/*.cpp)
+set(SOURCE_FRAMEWORK ${FILE_CORE} ${FILE_DATA} ${FILE_EXECUTE} ${FILE_JSON} ${FILE_REGIS}
+        ${FILE_UTILS} ${FILE_FUNCTOR})
 
 
 # functors
@@ -38,7 +40,10 @@ set(SOURCE_JNI ${FILE_JNI})
 # android log
 find_library(log-lib log)
 
-
+#biz
+include_directories(biz)
+file(GLOB_RECURSE FILE_BIZ biz/*.cpp)
+set(SOURCE_BIZ ${FILE_BIZ})
 
 
 add_library(framework SHARED
@@ -47,6 +52,8 @@ add_library(framework SHARED
         ${SOURCE_GL}
         ${SOURCE_JNI}
         ${SOURCE_UTIL}
+        ${SOURCE_BIZ}
+        functors/BufferLoader.cpp
 )
 
 target_link_libraries(framework android EGL GLESv3 jnigraphics ${log-lib})

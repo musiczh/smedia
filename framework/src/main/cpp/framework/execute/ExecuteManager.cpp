@@ -77,9 +77,9 @@ namespace smedia {
             }else {
                 LOG_ERROR << "node:" << node->getName() << " can not execute";
             }
-            return;
+        } else {
+            LOG_ERROR << "can not find node";
         }
-        LOG_INFO << "node:" <<node->getName() << " has not assign to executor";
     }
 
     void ExecuteManager::setQueueState(bool state) {

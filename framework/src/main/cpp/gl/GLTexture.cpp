@@ -39,6 +39,12 @@ namespace smedia {
         return std::make_shared<GLTexture>(glContext,width,height,type,textureId);
     }
 
+    GLTextureRef GLTexture::Create(GLContext* glContext,TextureType type, int textureId) {
+        auto* glTexture = new GLTexture(glContext,0,0,type,textureId);
+        glTexture->setAutoOption(false, false);
+        return GLTextureRef (glTexture);
+    }
+
     void GLTexture::bind() {
         mGLContext->runInRenderThreadV([this](){
            mTexture->bind();
@@ -53,7 +59,7 @@ namespace smedia {
 
     void GLTexture::setAutoOption(bool autoRelease, bool autoReuse) {
         mTexture->setAutoRelease(autoRelease);
-        mAutoReuse = autoRelease;
+        mAutoReuse = autoReuse;
     }
 
 }

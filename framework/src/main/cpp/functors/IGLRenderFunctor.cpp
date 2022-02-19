@@ -12,7 +12,7 @@ namespace smedia {
             return false;
         }
         // 初始化fbo
-        mGLBufferFrame = GLBufferFrame::Create(mGLContext, nullptr);
+        mGLBufferFrame = GLBufferFrame::Create(mGLContext,0,0);
         mRender = Render::CreateWithShaderCode(mGLContext,getFragmentCode());
         if (mRender == nullptr) {
             LOG_ERROR << "create render fail";
@@ -28,8 +28,8 @@ namespace smedia {
             }
             GLFrame frame = *ptr;
             int viewPort[] = {0,0,frame.width,frame.height};
-
-            mGLBufferFrame->setViewPort(viewPort);
+            mRender->setViewPort(viewPort);
+            mGLBufferFrame->setSize(frame.width,frame.height);
             // 最后调用draw方法
             return mGLContext->runInRenderThread([this,&frame]()->bool{
                 return onDraw(mGLBufferFrame.get(),mRender.get(),frame);

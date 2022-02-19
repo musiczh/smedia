@@ -81,7 +81,7 @@ namespace smedia {
         parameter->name = name;
         addGLParameter(parameter);
     }
-
+// todo zheli 的 value 要复制
     void Program::setMat4(const std::string &name,const float *value) {
         auto* parameter = new GLParameter;
         parameter->value_type = GLParameter::MATRIX4;

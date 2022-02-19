@@ -24,8 +24,12 @@ namespace smedia {
         }
 
         // 把node边的所有DataStream添加到functorContext中，让functorContext去进行管理
-        std::unique_ptr<IFunctor> functor = CreateObjectByName<IFunctor>(
-                m_nodeContext->nodeConfig.functor);
+        auto& functorName = m_nodeContext->nodeConfig.functor;
+        std::unique_ptr<IFunctor> functor = CreateObjectByName<IFunctor>(functorName);
+        // 如果没有c++的functor，则会调用expander的方法来创建拓展的平台层functor
+        if (functor == nullptr && m_nodeContext->expander != nullptr) {
+            functor = m_nodeContext->expander->createExpandFunctor(functorName);
+        }
         if (functor == nullptr) {
             LOG_ERROR << "[functor:" << m_nodeContext->nodeConfig.functor << "] create failed";
             return false;
@@ -121,7 +125,7 @@ namespace smedia {
     }
 
     void Node::execute() {
-        //LOG_DEBUG << name <<" execute------------";
+        LOG_DEBUG << name <<" execute------------";
         if (m_state != RUNNING) {
             LOG_INFO << "node is not running";
             return ;

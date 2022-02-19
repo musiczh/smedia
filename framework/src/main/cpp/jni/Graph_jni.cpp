@@ -7,6 +7,7 @@
 #include "GLFrame.h"
 #include "Logger.h"
 #include "JNIBridge.h"
+#include "MyExpander.h"
 using namespace smedia;
 
 // 调用java层的日志打印
@@ -66,7 +67,8 @@ Java_com_example_frameword_framework_Graph_initNativeGraph(JNIEnv *env, jobject 
         Data data = JNIData::jObjectToData(JNIService::getEnv()->GetObjectArrayElement(values,i));
         options[JNIData::jStringToCString(key)] = data;
     }
-    graph->initialize(*jsonLoader->getGraphConfig(),options);
+    graph->initialize(*jsonLoader->getGraphConfig(),options,
+                      std::unique_ptr<Expander>(new MyExpander));
     return reinterpret_cast<int64_t>(graph);
 }
 extern "C"

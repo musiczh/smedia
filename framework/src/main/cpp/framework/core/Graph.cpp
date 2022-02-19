@@ -16,6 +16,7 @@ namespace smedia {
     bool Graph::initialize(GraphConfig &config,const OptionMap& options,
                            std::unique_ptr<Expander> expander) {
         std::unique_lock<std::mutex> lock(m_mutex);
+        mExpander = std::move(expander);
         if (m_state != CREATED) {
             LOG_INFO << "graph has init";
             return false;
@@ -55,7 +56,7 @@ namespace smedia {
             }
             m_executeManger->assignNodeToExecutor(newNode,nodeConfig.executor);
             m_nodesMap[nodeConfig.name] = std::unique_ptr<Node>(newNode);
-            LOG_INFO << "add node:" << nodeConfig.name;
+            LOG_DEBUG << "add node:" << nodeConfig.name;
         }
 
         // 初始化完成node之后，需要把前面还没传递给node的option设置给node
