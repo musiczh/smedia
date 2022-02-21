@@ -6,7 +6,7 @@ public class Logger {
 
     private String TAG;
     private Logger(String tag) {
-        TAG = "[" + tag +"] ";
+        TAG = "[" + "huan-" + tag +"] ";
     }
     public static Logger create(String tag) {
         return new Logger(tag);

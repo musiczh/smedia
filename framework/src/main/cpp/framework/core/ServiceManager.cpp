@@ -38,6 +38,7 @@ namespace smedia {
     }
 
     ServiceManager::~ServiceManager() {
+        LOG_DEBUG << "serviceManager destruct";
         mServiceMap.clear();
     }
 }

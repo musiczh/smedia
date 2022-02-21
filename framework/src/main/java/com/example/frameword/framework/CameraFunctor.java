@@ -15,6 +15,7 @@ import com.example.camera.CameraService;
 import com.example.camera.api.CameraCapture;
 import com.example.camera.api.CameraConfig;
 import com.example.camera.api.CameraListener;
+import com.example.util.Logger;
 import com.example.util.PictureCache;
 
 import java.util.Deque;
@@ -30,8 +31,8 @@ public class CameraFunctor extends Functor implements SurfaceTexture.OnFrameAvai
     private int orientation;
     private int mTextureId;
     private Handler mInputTexHandler;
+    private Logger mLogger = Logger.create("CameraFunctor");
     private AtomicBoolean mIsExit = new AtomicBoolean(false);
-    private Handler mMainHandler = new Handler(Looper.getMainLooper());
     private final CameraCapture mCameraCapture = CameraService.obtainCamera();
 
     @Override
@@ -48,7 +49,8 @@ public class CameraFunctor extends Functor implements SurfaceTexture.OnFrameAvai
         mCameraCapture.release();
         mInputTexHandler.removeCallbacksAndMessages(null);
         mBufferQueue.clear();
-        mInputTexHandler.getLooper().quitSafely();
+        mInputTexHandler.getLooper().quit();
+
     }
 
     @Override
@@ -127,20 +129,20 @@ public class CameraFunctor extends Functor implements SurfaceTexture.OnFrameAvai
 
     @Override
     public void onFrameAvailable(SurfaceTexture surfaceTexture) {
+        mLogger.d("frame available");
         if (mIsExit.get()) {
             return;
         }
-        mMainHandler.post(()->{
-            runInGLThread(surfaceTexture::updateTexImage);
-            NativeGLFrame frame = new NativeGLFrame();
-            frame.orientation = orientation;
-            frame.width = frameWidth;
-            frame.height = frameHeight;
-            frame.textureId = mTextureId;
-            frame.isOES = true;
-            surfaceTexture.getTransformMatrix(frame.matrix);
-            mBufferQueue.offerLast(frame);
-            executeSelf();
-        });
+        runInGLThread(surfaceTexture::updateTexImage);
+        NativeGLFrame frame = new NativeGLFrame();
+        frame.orientation = orientation;
+        frame.width = frameWidth;
+        frame.height = frameHeight;
+        frame.textureId = mTextureId;
+        frame.isOES = true;
+        surfaceTexture.getTransformMatrix(frame.matrix);
+        mBufferQueue.offerLast(frame);
+        executeSelf();
+        mLogger.d("frame available finish");
     }
 }

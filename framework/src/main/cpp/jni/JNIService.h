@@ -11,11 +11,9 @@
 #include <android/log.h>
 #include "Data.h"
 /**
- * 提供一些基础的jni服务
+ * 统一管理全局JNIEnv的获取
  */
 namespace smedia {
-
-
     class JNIService {
     public:
         // 初始化保存javaVM
