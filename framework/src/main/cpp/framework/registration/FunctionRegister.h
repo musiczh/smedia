@@ -25,7 +25,8 @@ public:
     static void registerFunction(const std::string& name,Function function){
         std::unique_lock<std::mutex> lock(mainLock);
         if (!functionMap.insert(std::make_pair(name,function)).second) {
-            LOG_INFO << name << " function has register";
+            // todo 这里在静态属性初始化时调用，如果创建对象会出现类还没加载的情况导致闪退
+            //LOG_INFO << name << " function has register";
         }
     }
 
