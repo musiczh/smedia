@@ -4,6 +4,10 @@
 
 #include "Data.h"
 namespace smedia {
+    Data Data::CreateEmptyData() {
+        return Data();
+    }
+
     bool Data::isEmpty() {
         return m_dataHolderPtr == nullptr;
     }

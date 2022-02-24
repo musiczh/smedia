@@ -43,23 +43,14 @@ namespace smedia {
         }
         auto& jsonExecutors = jsonObject["executors"];
         for (auto& executorJson : jsonExecutors) {
-            // 默认配置
-            ExecutorConfig executorConfig {"ThreadPoolExecutor",
-                                           "default"};
+            ExecutorConfig executorConfig ;
             if (executorJson.contains("name")) {
                 executorConfig.name = executorJson["name"].get<std::string>();
             }
             if (executorJson.contains("executor")) {
                 executorConfig.executor = executorJson["executor"].get<std::string>();
             }
-            if (executorJson.contains("options")) {
-                auto executorOptionJson = executorJson["options"];
-                int threadNum = 1;
-                if (executorOptionJson.contains("threadNum")) {
-                    threadNum = executorOptionJson["threadNum"].get<int>();
-                }
-                executorConfig.options["threadNum"] = Data::create(new int(threadNum));
-            }
+            parseOptions(executorJson,executorConfig.options);
             graphBuilder.addExecutor(executorConfig);
         }
     }
@@ -72,7 +63,6 @@ namespace smedia {
         auto& jsonNodes = jsonObject["nodes"];
         for (auto& nodeJson : jsonNodes) {
             NodeConfig nodeConfig{};
-            nodeConfig.executor = "default";
             nodeConfig.functor = nodeJson["functor"].get<std::string>();
             if (nodeJson.contains("name")) {
                 nodeConfig.name = nodeJson["name"].get<std::string>();
@@ -135,18 +125,21 @@ namespace smedia {
             std::string _tag;
             std::string name;
             switch (splitStrings.size()) {
-                case 1: {
-                    _tag = splitStrings[0];
-                    break;
-                }
                 case 2: {
                     _tag = splitStrings[0];
                     name = splitStrings[1];
+                    index = 0;
                     break;
                 }
                 case 3: {
                     _tag = splitStrings[0];
-                    index = std::stoi(splitStrings[1]);
+                    try {
+                        index = std::stoi(splitStrings[1]);
+                    }catch (std::invalid_argument&) {
+                        LOG_ERROR << "json port index illegal,invalid argument";
+                    }catch (std::out_of_range&) {
+                        LOG_ERROR << "json port index illegal,out of range";
+                    }
                     name = splitStrings[2];
                 }
             }

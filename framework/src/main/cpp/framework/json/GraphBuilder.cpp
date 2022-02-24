@@ -10,7 +10,9 @@ namespace smedia {
         if (graphConfig == nullptr) {
             return;
         }
-
+        if (nodeConfig.executor.empty()) {
+            nodeConfig.executor = "default";
+        }
         if (nodeConfig.name.empty()) {
             // 加上前后缀，防止重名
             std::string unique_name = "__"+nodeConfig.functor + std::to_string(0);
@@ -20,12 +22,12 @@ namespace smedia {
             nodeConfig.name = unique_name;
         } else {
             if (nodeNameSet.find(nodeConfig.name) != nodeNameSet.end()) {
-                LOG_ERROR << "can not set the same name to node";
+                onBuildError("can not set the same name to node");
                 return;
             }
             nodeNameSet.insert(nodeConfig.name);
         }
-
+        checkNodePort(nodeConfig);
         if (graphConfig != nullptr) {
             graphConfig->nodes.push_back(nodeConfig);
         }
@@ -49,10 +51,19 @@ namespace smedia {
         if (graphConfig == nullptr) {
             return;
         }
+        // 若没有指定采用默认执行器ThreadPoolExecutor
+        if (executorConfig.executor.empty()) {
+            executorConfig.executor = "ThreadPoolExecutor";
+        }
+        // 若没有指定采用默认executor
+        if (executorConfig.name.empty()) {
+            executorConfig.name = "default";
+        }
 
+        // executor不会做去重名处理，没有名字的executor名字会被定义为"default"，表示默认执行器
+        // node默认都是使用默认executor，而如果一个executor创建了之后没有名字是不会被使用的
         if (executorNameSet.find(executorConfig.name) != executorNameSet.end()) {
-            LOG_ERROR << "can not set the same executor name";
-            graphConfig.reset();
+            onBuildError("can not set the same executor name");
             return ;
         } else {
             executorNameSet.insert(executorConfig.name);
@@ -68,20 +79,39 @@ namespace smedia {
             return ;
         }
         if (serviceConfig.service.empty()) {
-            LOG_ERROR << "service is null,json parse fail";
-            graphConfig.reset();
+            onBuildError("service is null,json parse fail");
             return;
         }
-
         // 若没有字段，采用和service类名一致的名称
         // 存在相同名称解析失败，因为后续需要通过名称来获取service，此处强制不能有相同名称的service
         std::string name = serviceConfig.name.empty() ? serviceConfig.service : serviceConfig.name;
         if (serviceNameSet.find(name) != serviceNameSet.end()) {
-            LOG_ERROR << "service has the same name,json parse fail";
-            graphConfig.reset();
+            onBuildError("service has the same name,json parse fail");
             return;
         }
-
         graphConfig->services.push_back(serviceConfig);
     }
+
+    void GraphBuilder::onBuildError(const std::string& msg) {
+        LOG_ERROR << msg;
+        graphConfig.reset();
+    }
+
+    void GraphBuilder::checkNodePort(NodeConfig& nodeConfig) {
+        for (auto& port : nodeConfig.inputs) {
+            if (port.tag.empty() || port.name.empty() || port.index < 0) {
+                LOG_ERROR << "node:" << nodeConfig.name << "input port invalid";
+                onBuildError("input loader error");
+                return;
+            }
+        }
+        for (auto& port : nodeConfig.outputs) {
+            if (port.tag.empty() || port.name.empty() || port.index < 0) {
+                LOG_ERROR << "node:" << nodeConfig.name << " output port invalid";
+                onBuildError("output loader error");
+                return;
+            }
+        }
+    }
+
 }

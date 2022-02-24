@@ -21,17 +21,13 @@ namespace smedia {
                        Node* node);
         Data getInput(const std::string& tag,int index = 0);
         Data popInput(const std::string& tag,int index = 0);
+        Data getFrontInout(const std::string& tag,int& index,bool pop);
+        // 默认输出到同tag的所有index端口
         void setOutput(Data data, const std::string& tag,int index = -1);
         int getInputTagCount(const std::string& tag);
         int getOutputTagCount(const std::string& tag);
         std::unique_ptr<std::set<std::string>> getInputTags();
         std::unique_ptr<std::set<std::string>> getOutputTags();
-         /**
-         * 获取当前节点输入数据队列中最前的一个数据key
-         * 若当前队列为空则返回{"emptyStreamKey",-2}
-         * @return 对应的边的streamKey
-         */
-        DataStreamManager::StreamKey getFrontStreamKey() ;
 
         void setExecuteSelfHandler(std::function<void()> function);
         void setExecuteConnectNodeHandler(std::function<void()> function);

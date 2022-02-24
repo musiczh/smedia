@@ -13,6 +13,9 @@
 #include "json.hpp"
 
 namespace smedia {
+    /**
+     * 从json中解析出数据并交给GraphBuilder进行构建图配置
+     */
     class JsonGraphLoader {
     public:
         void parseJson(const std::string& jsonGraph);
