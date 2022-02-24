@@ -33,9 +33,7 @@ public class BeautyActivity extends AppCompatActivity {
     private Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
     private Logger mLogger = Logger.create("huan_BeautyActivity");
 
-    private int frameWidth;
-    private int frameHeight;
-    private int orientation;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +63,12 @@ public class BeautyActivity extends AppCompatActivity {
             public void onStartTrackingTouch(SeekBar seekBar) {}
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) { }
+        });
+        findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mGraph.setOption("cameraNode","switch",0);
+            }
         });
     }
 
