@@ -31,6 +31,9 @@ namespace smedia {
         void setOption(FunctorContext *context,const std::string &key, Data value) override;
 
     private:
+        Data getInputGLFrame();
+
+    private:
         FunctorContext* mFunctorContext;
         std::deque<Data> mOptionQueue;
         std::mutex mQueueLock;

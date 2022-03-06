@@ -70,9 +70,9 @@ namespace smedia {
         }
         MultiplyMM(mCropMatrix,frame.UVMatrix,res);
 
-        mGLContext->runInRenderThreadV([this,frame](){
-            glViewport(0,0,mWindowWidth,mWindowHeight);
-        });
+
+        int viewPort[4] = {0,0,mWindowWidth,mWindowHeight};
+        mRender->setViewPort(viewPort);
         mRender->getProgram()->setTexture("tex",frame.glTextureRef);
         mRender->getProgram()->setMat4("model",res);
         // todo 系统相机出来的UVMatrix对openGL坐标和纹理坐标的Y轴倒置问题已经解决，而普通的照片显示需要进行Y轴倒置
@@ -89,12 +89,12 @@ namespace smedia {
     void RenderFunctor::setOption(FunctorContext *context, const std::string &key, Data value) {
         if (key == NATIVE_WINDOW) {
             // 设置系统窗口
-            JNIObject object;
+            JNIObjectRef object;
             if (!value.getData(object)) {
                 LOG_ERROR << "native window getData error";
                 return;
             }
-            ANativeWindow* nativeWindow = ANativeWindow_fromSurface(JNIService::getEnv(),object.getJObject());
+            ANativeWindow* nativeWindow = ANativeWindow_fromSurface(JNIService::getEnv(),object->getJObject());
             auto nativeWindowType = reinterpret_cast<EGLNativeWindowType>(nativeWindow);
             EGLCore* eglCore = mGLContext->getEglCore();
             mGLContext->runInRenderThread([eglCore,nativeWindowType]()->bool{

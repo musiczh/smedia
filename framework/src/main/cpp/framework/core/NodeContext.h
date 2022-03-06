@@ -7,16 +7,20 @@
 #include "typeDef.h"
 #include "GraphConfig.h"
 #include "ServiceManager.h"
+#include "Expander.h"
 
 namespace smedia {
 class NodeContext {
-public:
-    NodeContext(EdgeMap& edgesMap, NodeConfig& globalService, ServiceManager& globalServiceManager);
-    EdgeMap& edgesMap;
-    NodeConfig nodeConfig;
-    ServiceManager& globalServiceManager;
-};
-
+    public:
+        NodeContext(EdgeMap& edgesMap,
+                    NodeConfig& globalService,
+                    ServiceManager& globalServiceManager,
+                    Expander* expander);
+        EdgeMap& edgesMap;
+        NodeConfig nodeConfig;
+        ServiceManager& globalServiceManager;
+        Expander* expander;
+    };
 }
 
 

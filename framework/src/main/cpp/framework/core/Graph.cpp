@@ -13,8 +13,10 @@ namespace smedia {
         m_executeManger = std::unique_ptr<ExecuteManager>(new ExecuteManager);
     }
 
-    bool Graph::initialize(GraphConfig &config,const OptionMap& options) {
+    bool Graph::initialize(GraphConfig &config,const OptionMap& options,
+                           std::unique_ptr<Expander> expander) {
         std::unique_lock<std::mutex> lock(m_mutex);
+        mExpander = std::move(expander);
         if (m_state != CREATED) {
             LOG_INFO << "graph has init";
             return false;
@@ -46,14 +48,15 @@ namespace smedia {
         for (NodeConfig& nodeConfig : nodes) {
             parseNodeTag(nodeConfig, true);
             parseNodeTag(nodeConfig, false);
-            Node *newNode = new Node(new NodeContext(m_edgesMap, nodeConfig ,*mGlobalServiceManager));
+            Node *newNode = new Node(new NodeContext(m_edgesMap, nodeConfig ,
+                                                     *mGlobalServiceManager,mExpander.get()));
             if (!newNode -> initialize()){
                 LOG_ERROR << "functor:" << nodeConfig.functor << " name:" << nodeConfig.name << " init fail";
                 return false;
             }
             m_executeManger->assignNodeToExecutor(newNode,nodeConfig.executor);
             m_nodesMap[nodeConfig.name] = std::unique_ptr<Node>(newNode);
-            LOG_INFO << "add node:" << nodeConfig.name;
+            LOG_DEBUG << "add node:" << nodeConfig.name;
         }
 
         // 初始化完成node之后，需要把前面还没传递给node的option设置给node
@@ -136,6 +139,9 @@ namespace smedia {
     Graph::~Graph() {
         // 资源统一使用智能指针，各持有资源的对象自己负责释放内存，因此这里不需要进行内存释放
         LOG_DEBUG << "graph destroy";
+        // 这里对于node和service的先后顺序有严格的要求，如果service先被析构则会导致node无法被正常析构，从而导致闪退
+        // 我们可以通过提前Graph中NodeMap的顺序，让其最后被析构，但是这样并无法完全保证先后顺序，所以这里手动对node进行析构
+        m_nodesMap.clear();
     }
 
     bool Graph::run() {
@@ -219,8 +225,6 @@ namespace smedia {
     }
 
     bool Graph::release() {
-        // 由于析构的先后顺序，当graph析构函数被调用时，其他的对象已经被析构，因此这里开辟一个release方法
-        // todo 后续需要开辟一个全局服务模块，并负责全局服务的初始化析构等操作
         return true;
     }
 

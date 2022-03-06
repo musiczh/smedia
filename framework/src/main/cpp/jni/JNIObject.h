@@ -18,7 +18,8 @@ namespace smedia {
         JNIObject(const jobject object);
         JNIObject(const JNIObject&);
         JNIObject& operator=(const JNIObject&);
-        jobject getJObject();
+        jobject getJObject() const;
+        jobject obtainNewLocalRef();
     private:
         std::shared_ptr<_jobject> objectPtr;
     };

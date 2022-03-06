@@ -33,18 +33,7 @@ import java.util.HashMap;
 
 public class CameraDemoActivity extends AppCompatActivity {
     private Graph mGraph;
-    private CameraCapture mCameraCapture = CameraService.obtainCamera();
-    private ViewRender mRender = new ViewRender();
-    private Handler mInputTexHandler;
-    private HandlerThread mInputThread;
-    // todo 这里必须在主线程操作c++,因为如果在子线程，当activity退出杀了子线程时，内部
-    // 会找不到env从而报错。这里后续需要优化JNIService来避免这个问题
-    private Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
-    private Logger mLogger = Logger.create("huan_CameraDemoActivity");
-
-    private int frameWidth;
-    private int frameHeight;
-    private int orientation;
+    private final Logger mLogger = Logger.create("huan_CameraDemoActivity");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,82 +42,23 @@ public class CameraDemoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_camera_demo);
 
         mGraph = new Graph();
-        mRender.makeCurrentContext();
-        HashMap<String,Object> options = new HashMap<>();
-        options.put("EGLSharedContext",mRender.getEGLContext().getNativeHandle());
-        mGraph.init(Util.getJson("cameraGraph.json",this),options);
+        mGraph.init(Util.getJson("cameraGraph.json",this),null);
         mGraph.run();
+
+        FrameLayout mainLayout = findViewById(R.id.mainLayout);
+        mGraph.setOption("renderNode","viewGroup",mainLayout);
+        mGraph.setOption("cameraNode","open",this);
 
         initView();
         mLogger.d("cameraActivity onCreate finish");
     }
 
     private void initView() {
-        FrameLayout mainLayout = findViewById(R.id.mainLayout);
-
-
-        mInputThread = new HandlerThread("setOnFrameAvailableListener");
-        mInputThread.start();
-        mInputTexHandler = new Handler(mInputThread.getLooper());
-
-        TextureView textureView = new TextureView(this);
-        textureView.setSurfaceTextureListener(new SamplerSurfaceTextureListener(){
-            @Override
-            public void onSurfaceTextureAvailable(@NonNull SurfaceTexture surface, int width, int height) {
-                Surface windowSurface = new Surface(surface);
-                mLogger.e("set option window to graph");
-                mGraph.setOption("renderNode","nativeWindow",windowSurface);
-                mGraph.setOption("renderNode","mWindowWidth",width);
-                mGraph.setOption("renderNode","mWindowHeight",height);
-
-                SurfaceTexture cameraTexture = mRender.createInputTexture();
-
-                cameraTexture.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
-                    @Override
-                    public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-                        // todo 切到主线程，但这里会有一点卡顿，因为消息执行需要先走完前面的消息内容
-                        mMainThreadHandler.post(() -> {
-                            mRender.updateTex();
-                            NativeGLFrame frame = new NativeGLFrame();
-                            frame.orientation = orientation;
-                            frame.width = frameWidth;
-                            frame.height = frameHeight;
-                            frame.textureId = mRender.getTexId();
-                            surfaceTexture.getTransformMatrix(frame.matrix);
-                            mGraph.setOption("oesNode", "DATA", frame);
-                        });
-                    }
-                },mInputTexHandler);
-                CameraConfig config = CameraConfig.createBuilder()
-                        .facing(CameraConfig.FACING_BACKGROUND)
-                        .setCameraListener(new CameraListener(){
-                            @Override
-                            public void onPreviewStart(PreviewInfo info) {
-                                frameHeight = info.height;
-                                frameWidth = info.width;
-                                orientation = info.orientation;
-                            }
-
-                            @Override
-                            public void onPictureTaken(PictureData result) {
-                                Bitmap bitmap = BitmapFactory.decodeByteArray(result.data,0,result.data.length);
-                                String path = PictureCache.saveBitmapExternal(bitmap,"smedia/pictureDemo.jpg");
-                                Toast.makeText(CameraDemoActivity.this, "save to "+path,
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        })
-                        .setSurfaceTexture(cameraTexture)
-                        .build();
-                mCameraCapture.openCamera(CameraDemoActivity.this,config);
-            }
-        });
-        mainLayout.addView(textureView, FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
-
         Button switchButton = findViewById(R.id.switchButton);
         switchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mCameraCapture.switchCamera();
+                mGraph.setOption("cameraNode","switch",0);
             }
         });
 
@@ -136,7 +66,7 @@ public class CameraDemoActivity extends AppCompatActivity {
         flashButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mCameraCapture.toggleFlash();
+                mGraph.setOption("cameraNode","toggleFlash",0);
             }
         });
 
@@ -144,24 +74,20 @@ public class CameraDemoActivity extends AppCompatActivity {
         takeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mCameraCapture.takePicture(null);
+                mGraph.setOption("cameraNode","takePicture",0);
             }
         });
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
-        mCameraCapture.release();
-        // 必须要在render之前释放，否则相机还没完全停止，会继续发送帧，导致发送消息到一个dead线程，
-        // todo 此处需要增强syncHandler的健壮性
-        mInputTexHandler.getLooper().quit();
-        mInputThread.quit();
-        // 删除所有消息
-        mInputTexHandler.removeCallbacksAndMessages(null);
-        mMainThreadHandler.removeCallbacksAndMessages(null);
         mGraph.release();
-        mRender.release();
         mLogger.d("onStop finish");
     }
 }

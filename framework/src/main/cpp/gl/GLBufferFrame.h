@@ -22,16 +22,12 @@ namespace smedia {
          * @param viewPort 视口，必须为一个长度为4的int数组
          * @return
          */
-        static std::unique_ptr<GLBufferFrame> Create(GLContext* glContext,const int *viewPort);
+        static std::unique_ptr<GLBufferFrame> Create(GLContext* glContext,int width,int height);
 
     public:
         unsigned int getFBOId() const;
-
-        // 设置viewPort和纹理
-        void setViewPort(const int *viewPort);
-        const int* getViewPort();
-
         void setTexture(GLTextureRef glTexture);
+        void setSize(int width,int height);
         GLTextureRef getTexture();
 
         /**
@@ -50,7 +46,7 @@ namespace smedia {
 
         // 读取当前渲染缓冲中的RGB数据
         // 如果没有输入宽度和高度则采用viewPort的尺寸来进行读取
-        unsigned char* readRGBAPixelData(int width = -1,int height = -1);
+        unsigned char* readRGBAPixelData(int width = -1,int height = -1) const;
 
     private:
         void createTexInner(int width,int height);
@@ -58,14 +54,15 @@ namespace smedia {
 
     private:
         // 构造器私有，通过静态方法来创建，方便后续提供更多的构造器
-        GLBufferFrame(GLContext* glContext,const int *viewPort);
+        GLBufferFrame(GLContext* glContext,int width,int height);
 
 
     private:
         unsigned int mFBO{0};
         GLTextureRef mGLTexture;
         GLContext* mGLContext;
-        int mViewPort[4]{0,0,0,0};
+        int mWidth;
+        int mHeight;
     };
 
 

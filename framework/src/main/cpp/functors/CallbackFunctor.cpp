@@ -10,19 +10,19 @@ namespace smedia {
     bool CallbackFunctor::initialize(FunctorContext *context) {
         mFunctorContext = context;
         mInputHandler.registerHandler("callback",[this](InputData inputData)->bool {
-            JNIObject callbackObject;
+            JNIObjectRef callbackObject;
             if (inputData.data.getData(callbackObject)) {
-                mJniCallbackMap[inputData.tag] = callbackObject;
+                mJniCallbackMap[inputData.tag] = *callbackObject.get();
                 return true;
             }
             LOG_ERROR << "CallbackFunctor get callback fail";
             return false;
         });
         mInputHandler.registerHandler("data",[this](InputData inputData)->bool {
-            JNIObject value;
+            JNIObjectRef value;
             if (inputData.data.getData(value) && mJniCallbackMap.find("callback")!=mJniCallbackMap.end()) {
                 JNIObject callback = mJniCallbackMap["callback"];
-                JNIInvoker<bool,std::string,std::string,JNIObject>::InvokeObjectMethod(
+                JNIInvoker<bool,std::string,std::string,JNIObjectRef>::InvokeObjectMethod(
                         callback.getJObject(),"onNativeCallback",
                         "callback","callback",value);
             }

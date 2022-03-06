@@ -14,20 +14,31 @@
   ],
   "nodes": [
     {
+      "functor": "CameraFunctor",
+      "name": "cameraNode",
+      "outputs": [
+        "video:v01",
+        "image:image1"
+      ]
+    },
+    {
       "functor": "OESTexReaderFunctor",
       "name": "oesNode",
+      "inputs": [
+        "video:v01"
+      ],
       "outputs": [
         "video:v1"
       ]
     },
     {
-      "functor": "ImageSourceFunctor",
-      "name": "imageSourceNode",
-      "options": {
-        "glEnable": true
-      },
+      "functor": "BufferLoader",
+      "name": "bufferLoader",
+      "inputs": [
+        "buffer:image1"
+      ],
       "outputs": [
-        "video:video1",
+        "video:video_image",
         "video:video_dispatch"
       ]
     },
@@ -36,7 +47,7 @@
       "name": "adjustNode",
       "inputs": [
         "video:v1",
-        "video:video1"
+        "video:video_image"
       ],
       "outputs": [
         "video:v2"
@@ -95,7 +106,7 @@
       ]
     },
     {
-      "functor": "RenderFunctor",
+      "functor": "GLViewFunctor",
       "name": "renderNode",
       "inputs": [
         "video:m"

@@ -192,7 +192,7 @@ namespace smedia {
         }
 
         CHECK_GL_ERROR(createWindowSurface)
-        LOG_INFO << "create window surface success,mWidth=" << width << ",mHeight=" << height;
+        LOG_DEBUG << "create window surface success,mWidth=" << width << ",mHeight=" << height;
         return makeCurrentContext(eglSurface);
     }
 

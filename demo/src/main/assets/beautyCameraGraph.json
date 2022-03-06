@@ -14,8 +14,18 @@
   ],
   "nodes": [
     {
+      "functor" : "CameraFunctor",
+      "name" : "cameraNode",
+      "outputs" : [
+        "video:v0"
+      ]
+    },
+    {
       "functor": "OESTexReaderFunctor",
       "name": "oesNode",
+      "inputs" : [
+        "video:v0"
+      ],
       "outputs": [
         "video:v1"
       ]
@@ -31,12 +41,11 @@
       ]
     },
     {
-      "functor": "RenderFunctor",
+      "functor": "GLViewFunctor",
       "name": "renderNode",
       "inputs": [
         "video:v2"
       ]
-
     }
   ]
 }

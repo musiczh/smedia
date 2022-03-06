@@ -19,4 +19,14 @@ public class JNIUtil {
         return bitmap;
     }
 
+    public static Object onNativeCreateObject(String className) {
+        try {
+            Class cls = Class.forName(className);
+            return cls.newInstance();
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }

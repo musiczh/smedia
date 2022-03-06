@@ -16,7 +16,7 @@
 namespace smedia {
     // 枚举java基本数据类型和数组类型
     enum JClassType {
-        Boolean,Short,Float,Integer,Double,Long,Byte,String,
+        Boolean,Short,Float,Integer,Double,Long,Byte,String,Char,
         StringArray,IntArray,FloatArray,DoubleArray,LongArray,ByteArray,ShortArray,
         Object,NativeGLFrame,NativeImageFrame
     };

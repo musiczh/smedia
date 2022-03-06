@@ -84,6 +84,7 @@ namespace smedia {
             case Long:name = "java/lang/Long";break;
             case Byte:name = "java/lang/Byte";break;
             case String:name = "java/lang/String";break;
+            case Char:name = "java/lang/Character";break;
             case Object:name = "java/lang/Object";break;
             case StringArray:name = "[java/lang/String";break;
             case IntArray:name = "[T";break;

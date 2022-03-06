@@ -30,6 +30,7 @@ namespace smedia {
         template<class T> bool getData(T& t);
         template<class T> bool isTypeOf();
         template<class T> T* getData();
+        long getTypeId();
         bool isEmpty();
         void setTime(double timeStamp);
         double getTime();

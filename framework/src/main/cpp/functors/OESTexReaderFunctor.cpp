@@ -22,7 +22,7 @@ namespace smedia {
             LOG_ERROR << "mGLContext in functorContext is null";
             return false;
         }
-        mGLBufferFrame = GLBufferFrame::Create(mGLContext, nullptr);
+        mGLBufferFrame = GLBufferFrame::Create(mGLContext, 0,0);
         mRender = Render::CreateWithShaderCode(mGLContext,fragmentShader);
         if (mRender == nullptr) {
             LOG_ERROR << "create render error";
@@ -42,23 +42,21 @@ namespace smedia {
             // 这里不打印错误日志，原因是上面会打印可以定位错误；且execute是每帧调用会大量产生日志
             return false;
         }
-        Data data;
-        GLFrame frame{};
-        {
-            std::unique_lock<std::mutex> lock(mQueueLock);
-            if (!mOptionQueue.empty()) {
-                data = mOptionQueue.front();
-                mOptionQueue.pop_front();
-            }
-        }
-        if (data.isEmpty() || !data.getData(frame)) {
-            LOG_ERROR << "getData empty";
+        Data data = getInputGLFrame();
+        if (data.isEmpty()) {
             return false;
         }
+        auto frame = *data.getData<GLFrame>();
+        frame.glTextureRef = GLTexture::Create(mGLContext,frame.width,frame.height,
+                                                frame.format == FORMAT_TEXTURE_2D? TEXTURE_TYPE_2D : TEXTURE_TYPE_OES,
+                                                frame.textureId);
+        // 外部oes纹理不能回收和复用
+        frame.glTextureRef->setAutoOption(false, false);
 
         int viewPort[4] = {0,0,frame.width,frame.height};
-        mGLBufferFrame->setViewPort(viewPort);
+        mGLBufferFrame->setSize(frame.width,frame.height);
         mGLBufferFrame->bind();
+        mRender->setViewPort(viewPort);
         mRender->getProgram()->setTexture("boxTexture",frame.glTextureRef);
         mRender->draw();
         GLTextureRef glTexture = mGLBufferFrame->unBind();
@@ -76,21 +74,27 @@ namespace smedia {
             if (mGLContext == nullptr) {
                 return;
             }
-
-            GLFrame* frame;
-            if (!value.isTypeOf<GLFrame>() || value.isEmpty() || !(frame = value.getData<GLFrame>())) {
-                LOG_ERROR << "get data fail";
-                return;
-            }
-            frame->glTextureRef = GLTexture::Create(mGLContext,frame->width,frame->height,
-                                                    frame->format == FORMAT_TEXTURE_2D? TEXTURE_TYPE_2D : TEXTURE_TYPE_OES,
-                                                    frame->textureId);
-            // 外部oes纹理不能回收和复用
-            frame->glTextureRef->setAutoOption(false, false);
             std::unique_lock<std::mutex> lock(mQueueLock);
             mOptionQueue.push_back(value);
             mFunctorContext->executeSelf();
         }
+    }
+
+    Data OESTexReaderFunctor::getInputGLFrame() {
+        Data data;
+        {
+            std::unique_lock<std::mutex> lock(mQueueLock);
+            if (!mOptionQueue.empty()) {
+                data = mOptionQueue.front();
+                mOptionQueue.pop_front();
+            }
+        }
+        if (!data.isEmpty()) {
+            return data;
+        }
+
+        data = mFunctorContext->popInput("video");
+        return data;
     }
 
     REGISTER_CLASS(OESTexReaderFunctor)
