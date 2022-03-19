@@ -211,7 +211,7 @@ namespace smedia {
 
     bool Graph::initService(GraphConfig& config,const OptionMap& options) {
         mGlobalServiceManager = std::unique_ptr<ServiceManager>(new ServiceManager);
-        if (!mGlobalServiceManager->init(config,options)) {
+        if (!mGlobalServiceManager->init(config,options,mExpander.get())) {
             return false;
         }
         LOG_DEBUG << "init global service success";

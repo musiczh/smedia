@@ -15,4 +15,8 @@ namespace smedia {
         return std::unique_ptr<IFunctor>(androidFunctor);
     }
 
+    std::unique_ptr<IService> MyExpander::createExpandService(const std::string &name) {
+        return nullptr;
+    }
+
 }

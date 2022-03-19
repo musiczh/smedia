@@ -7,6 +7,7 @@
 
 #include "IService.h"
 #include "GraphConfig.h"
+#include "Expander.h"
 namespace smedia {
     /**
      * 管理全局functor需要的service。这里的service指的是全局functor共享的类对象，需要继承service接口
@@ -22,7 +23,7 @@ namespace smedia {
          * @param options 这里的options来自两个地方，json和init Graph的时候传入的map
          * @return 是否初始化成功
          */
-        bool init(GraphConfig& graphConfig,const OptionMap& options);
+        bool init(GraphConfig& graphConfig,const OptionMap& options,Expander* expander);
 
         /**
          * 根据名称获取一个service对象

@@ -7,13 +7,16 @@
 #include "GLContext.h"
 namespace smedia {
 
-    bool ServiceManager::init(GraphConfig &graphConfig, const OptionMap& options) {
+    bool ServiceManager::init(GraphConfig &graphConfig, const OptionMap& options,Expander* expander) {
         if (graphConfig.services.empty()) {
             LOG_DEBUG << "no service";
             return true;
         }
         for (auto& item : graphConfig.services) {
             auto service = CreateObjectByName<IService>(item.service);
+            if (service == nullptr && expander != nullptr) {
+                service = expander->createExpandService(item.service);
+            }
             if (service == nullptr) {
                 LOG_ERROR << "create " << item.service << " service fail";
                 return false;

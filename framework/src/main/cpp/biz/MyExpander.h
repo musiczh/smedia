@@ -12,7 +12,7 @@ namespace smedia {
     class MyExpander : public Expander{
     public:
         std::unique_ptr<IFunctor> createExpandFunctor(const std::string& name) override;
-
+        std::unique_ptr<IService> createExpandService(const std::string &name) override;
     };
 }
 
