@@ -3,6 +3,7 @@
 //
 
 #include "GraphBuilder.h"
+#include <set>
 
 namespace smedia {
 
@@ -97,20 +98,27 @@ namespace smedia {
         graphConfig.reset();
     }
 
+    // 主要是检测tag、name不为空，而且输出或者输入中不会存在相同name的边
     void GraphBuilder::checkNodePort(NodeConfig& nodeConfig) {
+        std::set<std::string> _set;
         for (auto& port : nodeConfig.inputs) {
-            if (port.tag.empty() || port.name.empty() || port.index < 0) {
+            if (port.tag.empty() || port.name.empty() || port.index < 0 ||
+                    _set.find(port.name)!= _set.end()) {
                 LOG_ERROR << "node:" << nodeConfig.name << "input port invalid";
                 onBuildError("input loader error");
                 return;
             }
+            _set.insert(port.name);
         }
+        _set.clear();
         for (auto& port : nodeConfig.outputs) {
-            if (port.tag.empty() || port.name.empty() || port.index < 0) {
+            if (port.tag.empty() || port.name.empty() || port.index < 0 ||
+                    _set.find(port.name)!= _set.end()) {
                 LOG_ERROR << "node:" << nodeConfig.name << " output port invalid";
                 onBuildError("output loader error");
                 return;
             }
+            _set.insert(port.name);
         }
     }
 

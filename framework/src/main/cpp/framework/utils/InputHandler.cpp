@@ -3,10 +3,17 @@
 //
 
 #include "InputHandler.h"
+
+#include <utility>
 namespace smedia {
 
     void InputHandler::registerHandler(const std::string &key, Handler handler) {
-        mHandlerMap[key] = std::move(handler);
+        registerHandler(key,0,std::move(handler));
+    }
+
+    void InputHandler::registerHandler(const std::string &key, int index,Handler handler) {
+        PortKey portKey{key,index};
+        mHandlerMap.insert({portKey,std::move(handler)});
     }
 
     void InputHandler::registerDefaultHandler(Handler defaultHandler) {
@@ -15,8 +22,9 @@ namespace smedia {
 
 
     bool InputHandler::handle(InputData inputData) {
-        if (mHandlerMap.find(inputData.tag) != mHandlerMap.end()) {
-            return mHandlerMap[inputData.tag](inputData);
+        PortKey portKey{inputData.tag,inputData.index};
+        if (mHandlerMap.find(portKey) != mHandlerMap.end()) {
+            return mHandlerMap[portKey](inputData);
         }
         if (mDefaultHandler != nullptr) {
             return mDefaultHandler(std::move(inputData));
@@ -27,17 +35,14 @@ namespace smedia {
     }
 
     bool InputHandler::runExecuteHandler(FunctorContext * functorContext) {
-        auto key = functorContext->getFrontStreamKey();
-        if (key.tag == "emptyStreamKey") {
-            LOG_DEBUG << "inputs is empty";
-            return false;
-        }
-        Data data = functorContext->popInput(key.tag,key.index);
+        std::string tag;
+        int index;
+        auto data = functorContext->getInputFront(tag,index, true);
         if (data.isEmpty()) {
             LOG_DEBUG << "handle input data is null";
             return false;
         }
-        return handle({functorContext->getNodeName(),data,key.tag,key.index,functorContext});
+        return handle({functorContext->getNodeName(),data,tag,index,functorContext});
     }
 
     bool InputHandler::runOptionsHandler(FunctorContext *functorContext, const std::string &key, Data data) {
@@ -45,8 +50,9 @@ namespace smedia {
             LOG_DEBUG << "run handle data is empty";
             return false;
         }
-        return handle({functorContext->getNodeName(),data,key,-1,functorContext});
+        return handle({functorContext->getNodeName(),data,key,0,functorContext});
     }
+
 }
 
 

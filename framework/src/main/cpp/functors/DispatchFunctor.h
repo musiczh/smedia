@@ -9,8 +9,22 @@
 #include <map>
 #include <deque>
 /**
- * 分流器,从主干流中分出一帧来读取bitmap
+ * 分流器,从主干流中分出来。
  * 输入主干为Data，其他的输入tag由图来自定义
+ * 如    {
+      "functor": "DispatchFunctor",
+      "name": "dispatchNode",
+      "inputs": [
+        "master:v6",
+        "image:video_dispatch"
+      ],
+      "outputs": [
+        "master:m",
+        "image:image_dispatch"
+      ]
+    }
+    从video_dispatch的输入会记录时间戳，当master的输入时间相同，则会把该输入转发到同端口名的输出，
+    即image_dispatch
  */
 namespace smedia {
     class DispatchFunctor : public IFunctor{
@@ -26,17 +40,12 @@ namespace smedia {
         ~DispatchFunctor() override = default;
 
     private:
-        void registerInputHandler();
         bool parseGraphTag();
 
     public:
         FunctorContext* mFunctorContext;
         InputHandler mInputHandler;
-
-        std::deque<std::string> mTagList;
-        std::map<double,std::string> mDispatchMap;
-
-        volatile bool mImageSignal;
+        std::map<double,PortKey> mDispatchMap;
     };
 }
 

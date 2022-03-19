@@ -9,39 +9,30 @@ namespace smedia {
 
     FunctorContext::FunctorContext(std::vector<std::string> &inputEdges, std::vector<std::string> &outputEdges,
                                    ServiceManager& serviceManager, EdgeMap &edgeMap, Node* node)
-                                   : mNode(node),mServiceManager(serviceManager),
-                                   m_outputManager(false),m_inputManager(true){
-        // 解析输入输出边，并绑定DataStream
+                                   : mNode(node),mServiceManager(serviceManager){
+        // 解析输入输出边，并将Edge指针交给DataStreamManager处理
         for (auto& edgeName : inputEdges) {
             if (edgeMap.find(edgeName) != edgeMap.end()) {
-                Edge* edge = edgeMap[edgeName].get();
-                m_inputManager.setDataStream(edge->dataStream.get(),
-                                             edge->outputPort->tag,
-                                             edge->outputPort->index);}
+                mDataStreamManager.addEdge(edgeMap[edgeName].get(),true);
+            }
         }
         for (auto& edgeName : outputEdges) {
             if (edgeMap.find(edgeName) != edgeMap.end()) {
-                Edge* edge = edgeMap[edgeName].get();
-                m_outputManager.setDataStream(edge->dataStream.get(),
-                                              edge->inputPort->tag,
-                                              edge->inputPort->index);}
+                mDataStreamManager.addEdge(edgeMap[edgeName].get(),false);
+            }
         }
     }
 
     Data FunctorContext::getInput(const std::string &tag, int index) {
-        return m_inputManager.getInputData(tag,index, false);
+        return mDataStreamManager.getInput(tag,index,false);
     }
 
     Data FunctorContext::popInput(const std::string &tag, int index) {
-        return m_inputManager.getInputData(tag,index, true);
+        return mDataStreamManager.getInput(tag,index, true);
     }
 
     void FunctorContext::setOutput(Data data,const std::string &tag, int index) {
-        m_outputManager.pushOutputData(data,tag,index);
-    }
-
-    int FunctorContext::getInputTagCount(const std::string &tag) {
-        return m_inputManager.getTagCount(tag);
+        mDataStreamManager.pushOutput(data,tag,index);
     }
 
     void FunctorContext::setExecuteSelfHandler(std::function<void()> function) {
@@ -54,10 +45,6 @@ namespace smedia {
         }
     }
 
-    int FunctorContext::getOutputTagCount(const std::string &tag) {
-        return m_outputManager.getTagCount(tag);
-    }
-
     void FunctorContext::setExecuteConnectNodeHandler(std::function<void()> function) {
         m_executeConnectNodeHandler = std::move(function);
     }
@@ -66,21 +53,17 @@ namespace smedia {
         m_executeConnectNodeHandler();
     }
 
-    std::unique_ptr<std::set<std::string>> FunctorContext::getInputTags() {
-        return m_inputManager.getTags();
-    }
-
-    std::unique_ptr<std::set<std::string>> FunctorContext::getOutputTags() {
-        return m_outputManager.getTags();
-    }
-
     std::string FunctorContext::getNodeName() {
         return mNode->getName();
     }
 
-    Data FunctorContext::getFrontInout(const std::string &tag, int &index, bool pop) {
-
+    std::set<PortKey> FunctorContext::getPortInfo(bool isInput) const {
+        return mDataStreamManager.getPortInfo(isInput);
     }
+
+    Data FunctorContext::getInputFront(std::string& tag,int& index,bool pop) {
+        return mDataStreamManager.getFront(tag,index,pop);
+    };
 
 
 }

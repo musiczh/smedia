@@ -7,38 +7,44 @@
 
 namespace smedia {
 
-    Node::Node(NodeContext *context) {
-        name = context->nodeConfig.name;
-        m_nodeContext.reset(context);
+    Node::Node(EdgeMap &edgesMap,
+               NodeConfig &nodeConfig,
+               ServiceManager& globalServiceManager,
+               Expander* expander):
+            mEdgesMap(edgesMap), mNodeConfig(nodeConfig),
+            mGlobalServiceManager(globalServiceManager),
+            mExpander(expander) {
+        name = nodeConfig.name;
         m_state = CREATED;
     }
 
     bool Node::initialize() {
         std::unique_lock<std::mutex> lock(m_lock);
-        NodeConfig& config = m_nodeContext->nodeConfig;
-        for (auto& input : config.inputs) {
+
+        for (auto& input : mNodeConfig.inputs) {
             m_inputEdges.emplace_back(input.name);
         }
-        for (auto& output : config.outputs) {
+        for (auto& output : mNodeConfig.outputs) {
             m_outputEdges.emplace_back(output.name);
         }
 
-        // 把node边的所有DataStream添加到functorContext中，让functorContext去进行管理
-        auto& functorName = m_nodeContext->nodeConfig.functor;
+        auto& functorName = mNodeConfig.functor;
         std::unique_ptr<IFunctor> functor = CreateObjectByName<IFunctor>(functorName);
         // 如果没有c++的functor，则会调用expander的方法来创建拓展的平台层functor
-        if (functor == nullptr && m_nodeContext->expander != nullptr) {
-            functor = m_nodeContext->expander->createExpandFunctor(functorName);
+        if (functor == nullptr && mExpander != nullptr) {
+            functor = mExpander->createExpandFunctor(functorName);
         }
         if (functor == nullptr) {
-            LOG_ERROR << "[functor:" << m_nodeContext->nodeConfig.functor << "] create failed";
+            LOG_ERROR << "[functor:" << mNodeConfig.functor << "] create failed";
             return false;
         }
-        auto functorContext = make_unique<FunctorContext>(m_inputEdges,m_outputEdges,
-                                                          m_nodeContext->globalServiceManager,
-                                                          m_nodeContext->edgesMap,this);
+
+        // 把node边的所有DataStream添加到functorContext中，让functorContext去进行管理
+        auto functorContext = make_unique<FunctorContext>(m_inputEdges, m_outputEdges,
+                                                          mGlobalServiceManager,
+                                                          mEdgesMap, this);
         // 在json中配置的option存储起来，在functor init完成之后会设置给对应的functor
-        for (auto& ptr : config.options) {
+        for (auto& ptr : mNodeConfig.options) {
             m_runtimeOptions[ptr.first] = ptr.second;
         }
 

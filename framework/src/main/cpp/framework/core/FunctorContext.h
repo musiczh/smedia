@@ -13,24 +13,31 @@
 namespace smedia {
     class Node;
     class FunctorContext {
+        friend class Node;
     public:
         FunctorContext(std::vector<std::string>& inputEdges,
                        std::vector<std::string>& outputEdges,
                        ServiceManager& serviceManager,
                        EdgeMap& edgeMap,
                        Node* node);
-        Data getInput(const std::string& tag,int index = 0);
-        Data popInput(const std::string& tag,int index = 0);
-        Data getFrontInout(const std::string& tag,int& index,bool pop);
-        // 默认输出到同tag的所有index端口
-        void setOutput(Data data, const std::string& tag,int index = -1);
-        int getInputTagCount(const std::string& tag);
-        int getOutputTagCount(const std::string& tag);
-        std::unique_ptr<std::set<std::string>> getInputTags();
-        std::unique_ptr<std::set<std::string>> getOutputTags();
 
+    private:
+        // 设置执行handler，节点可以请求调度自身、或者调度所连接的节点，
         void setExecuteSelfHandler(std::function<void()> function);
         void setExecuteConnectNodeHandler(std::function<void()> function);
+
+        // 下面是对functor开放的的接口
+    public:
+        // 输入端口的tag+index获取端口的输入，若不输入端口号则默认为0
+        // 有关输入输出的操作全部交给DataStreamManager，这里只做参数透传
+        Data getInput(const std::string& tag,int index = 0);
+        Data getInputFront(std::string& tag,int& index,bool pop);
+        Data popInput(const std::string& tag,int index = 0);
+        // 默认输出到同tag的第一个端口
+        void setOutput(Data data, const std::string& tag,int index = 0);
+        // 获取端口信息，key是tag，value是index集合
+        std::set<PortKey> getPortInfo(bool isInput) const;
+
         /**
          * 调度自身
          */
@@ -53,9 +60,9 @@ namespace smedia {
         std::string getNodeName();
 
     private:
-        DataStreamManager m_inputManager;
-        DataStreamManager m_outputManager;
+        DataStreamManager mDataStreamManager{};
 
+        // 保存的两个调度handle，可以回调到graph来调度节点
         std::function<void()> m_executeSelfHandler;
         std::function<void()> m_executeConnectNodeHandler;
 
