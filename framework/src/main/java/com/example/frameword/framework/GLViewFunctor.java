@@ -10,11 +10,7 @@ import android.os.Looper;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
-
-import com.example.frameword.framework.gles.EGLCore;
-import com.example.frameword.framework.util.LogUtil;
 
 public class GLViewFunctor extends Functor{
     private TextureView mTextureView;

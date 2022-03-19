@@ -20,6 +20,7 @@ namespace smedia {
     class Data {
     public:
         template<class U> static Data create(U* data,double timeStamp = 0);
+        static Data CreateEmptyData();
         Data() = default;
         Data(const Data& data);
         Data(Data&& data) noexcept;

@@ -53,7 +53,6 @@ add_library(framework SHARED
         ${SOURCE_JNI}
         ${SOURCE_UTIL}
         ${SOURCE_BIZ}
-        functors/BufferLoader.cpp
 )
 
 target_link_libraries(framework android EGL GLESv3 jnigraphics ${log-lib})

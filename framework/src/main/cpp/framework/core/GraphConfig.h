@@ -5,7 +5,7 @@
 
 #ifndef SMEDIA_GRAPHCONFIG_H
 #define SMEDIA_GRAPHCONFIG_H
-#include "../data/typeDef.h"
+#include "typeDef.h"
 
 namespace smedia {
     struct PortTag {

@@ -59,7 +59,7 @@ public:
         if (functionMap.find(name) != functionMap.end()) {
             return (functionMap[name])(std::forward<Args>(args) ...);
         }
-        LOG_ERROR << "function:" << name << " has not register,can not invoke";
+        LOG_DEBUG << "function:" << name << " has not register,can not invoke";
         // todo 这里返回nullptr意味着只对指针类型的返回值数据有效，后续版本再考虑支持值类型的返回值类型函数
         return nullptr;
     }

@@ -12,6 +12,8 @@
  * 处理functor的输入调用单参数runHandler，setOption调用多参数
  */
 namespace smedia {
+    // 讲setOption和节点的输入一起封装到inputData中
+    // option没有index，所以默认为0
     struct InputData {
         std::string nodeName;
         Data data;
@@ -24,6 +26,7 @@ namespace smedia {
     class InputHandler {
     public:
         void registerHandler(const std::string& key, Handler handler);
+        void registerHandler(const std::string& key,int index,Handler handler);
         void registerDefaultHandler(Handler defaultHandler);
 
         // 给execute用，内部popInput
@@ -35,7 +38,7 @@ namespace smedia {
         bool handle(InputData);
 
     private:
-        std::map<std::string,Handler> mHandlerMap;
+        std::map<PortKey,Handler> mHandlerMap;
         Handler mDefaultHandler;
     };
 }

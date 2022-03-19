@@ -27,8 +27,12 @@ public class PictureCache {
             mLogger.e("saveBitmapExternal mkdirs fail");
             return null;
         }
+        if (!file.exists() && !file.mkdir()) {
+            mLogger.e("create file error");
+            return null;
+        }
         try {
-            ((Bitmap) bitmap).compress(Bitmap.CompressFormat.JPEG, 100, new FileOutputStream(file));
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, new FileOutputStream(file));
             return file.getAbsolutePath();
         } catch (FileNotFoundException e) {
             e.printStackTrace();

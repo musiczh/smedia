@@ -7,6 +7,10 @@
 #include "GraphConfig.h"
 #include <unordered_set>
 namespace smedia {
+    /**
+     * 从json解析出来的数据构建一个GraphConfig。
+     * 主要负责做一些名字重名检测、默认值等
+     */
     class GraphBuilder {
     public:
         void addNode(NodeConfig& nodeConfig);
@@ -18,6 +22,12 @@ namespace smedia {
         // 重写解析前需要调用此方法重置
         // 因为build完成之后、或者build过程中出现了错误，内部graphConfig均会被置空
         void reset();
+        void onBuildError(const std::string& msg);
+
+    private:
+        // 检查输入输出配置是否正确
+        void checkNodePort(NodeConfig& nodeConfig);
+
     private:
         std::unordered_set<std::string> nodeNameSet;
         std::unordered_set<std::string> executorNameSet;

@@ -59,7 +59,7 @@ public class CameraFunctor extends Functor implements SurfaceTexture.OnFrameAvai
             return false;
         }
         NativeGLFrame frame = mBufferQueue.pollFirst();
-        setOutputGLFrame(frame,"video",-1);
+        setOutputGLFrame(frame,"video",0);
         return true;
     }
 
@@ -111,7 +111,7 @@ public class CameraFunctor extends Functor implements SurfaceTexture.OnFrameAvai
                         Matrix matrix = new Matrix();
                         matrix.setRotate(result.orientation);
                         Bitmap newBitmap = Bitmap.createBitmap(bitmap,0,0,bitmap.getWidth(),bitmap.getHeight(),matrix,false);
-                        setOutputBitmap(newBitmap,"image",-1);
+                        setOutputBitmap(newBitmap,"image",0);
                     }
                 })
                 .setSurfaceTexture(cameraTexture)

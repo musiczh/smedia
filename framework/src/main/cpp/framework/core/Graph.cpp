@@ -48,8 +48,8 @@ namespace smedia {
         for (NodeConfig& nodeConfig : nodes) {
             parseNodeTag(nodeConfig, true);
             parseNodeTag(nodeConfig, false);
-            Node *newNode = new Node(new NodeContext(m_edgesMap, nodeConfig ,
-                                                     *mGlobalServiceManager,mExpander.get()));
+            Node *newNode = new Node(m_edgesMap, nodeConfig ,
+                                     *mGlobalServiceManager,mExpander.get());
             if (!newNode -> initialize()){
                 LOG_ERROR << "functor:" << nodeConfig.functor << " name:" << nodeConfig.name << " init fail";
                 return false;
@@ -72,23 +72,17 @@ namespace smedia {
         std::string nodeName = config.name;
         auto& target = isInput ? config.inputs : config.outputs;
 
-        std::map<std::string,int> tagNum;
         for (auto& tagIndexName : target) {
             int index = tagIndexName.index;
-            if (index == -1) {
-                // 这里对未标注index的输出port增加index进行区分，否则相同的index和tag在DataStreamManager中会被认为是同一个输出
-                index = tagNum[tagIndexName.tag];
-                tagNum[tagIndexName.tag]++;
-            }
-            auto* newPort = new Edge::Port{tagIndexName.tag,nodeName,index};
+            auto* newPort = new Port{{tagIndexName.tag,index},nodeName};
             if (m_edgesMap.find(tagIndexName.name) == m_edgesMap.end()) {
                 Edge* edge = new Edge;
                 edge->name = tagIndexName.name;
-                edge->dataStream = make_unique<DataStream>();
                 m_edgesMap[edge->name] = std::unique_ptr<Edge>(edge);
             }
-            std::unique_ptr<Edge>& edge = m_edgesMap[tagIndexName.name];
-            (isInput ? edge->outputPort : edge->inputPort) = std::unique_ptr<Edge::Port>(newPort);
+            auto& edge = m_edgesMap[tagIndexName.name];
+            // 这里需要反过来，节点的输入端口，是边的输出端口
+            (isInput ? edge->outputPort : edge->inputPort) = std::unique_ptr<Port>(newPort);
         }
         return true;
     }
@@ -171,7 +165,7 @@ namespace smedia {
                 continue;
             }
             std::unique_ptr<Edge>& edge = m_edgesMap[edgeName];
-            if (edge->dataStream->empty()) {
+            if (edge->empty()) {
                 // 没有数据的边不需要运行下一个节点
                 continue;
             }

@@ -46,6 +46,7 @@ public class BeautyActivity extends AppCompatActivity {
         mGraph.run();
 
         mGraph.setOption("cameraNode","open",this);
+        mGraph.setOption("cameraNode","switch",0);
         mGraph.setOption("renderNode","viewGroup",findViewById(R.id.mainLayout));
         initView();
     }

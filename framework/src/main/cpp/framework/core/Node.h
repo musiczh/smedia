@@ -17,7 +17,10 @@ namespace smedia{
             CREATED,RUNNING,TERMINATED
         };
     public:
-        explicit Node(NodeContext* context);
+        Node(EdgeMap &edgesMap,
+              NodeConfig &nodeConfig,
+              ServiceManager& globalServiceManager,
+              Expander* expander);
         ~Node();
         bool initialize();
         bool run();
@@ -35,9 +38,9 @@ namespace smedia{
 
     private:
         std::string name;
+        // 这个锁的作用是保证状态的正确判断与变化
         std::mutex m_lock;
         volatile State m_state;
-        std::unique_ptr<NodeContext> m_nodeContext;
         std::unique_ptr<FunctorContext> m_functorContext;
         std::unique_ptr<IFunctor> m_Functor;
 
@@ -47,6 +50,11 @@ namespace smedia{
         OptionMap m_runtimeOptions;
         std::function<void()> m_executeSelfHandler;
         std::function<void()> m_executeConnectHandler;
+
+        EdgeMap& mEdgesMap;
+        NodeConfig mNodeConfig;
+        ServiceManager& mGlobalServiceManager;
+        Expander* mExpander;
 
     };
 }
